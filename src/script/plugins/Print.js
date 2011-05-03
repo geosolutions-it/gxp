@@ -121,7 +121,7 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                 menuText: this.menuText,
                 tooltip: this.tooltip,
                 iconCls: "gxp-icon-print",
-                disabled: true,
+                disabled: false,
                 handler: function() {
                     var supported = getSupportedLayers();
                     if (supported.length > 0) {
