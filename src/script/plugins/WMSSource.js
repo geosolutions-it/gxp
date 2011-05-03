@@ -99,6 +99,8 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
      */
     baseParams: null,
 
+    layerBaseParams: null,
+    
     /** private: property[format]
      *  ``OpenLayers.Format`` Optional custom format to use on the 
      *  WMSCapabilitiesStore store instead of the default.
@@ -245,12 +247,15 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
                 maxExtent = undefined;
             }
             
-            // use all params from original
+            // use all params from sources layerBaseParams option
             var params = Ext.applyIf({
                 STYLES: config.styles,
                 FORMAT: config.format,
                 TRANSPARENT: config.transparent
-            }, layer.params);
+            }, this.layerBaseParams);
+            
+            // use all params from original
+            params = Ext.applyIf(params, layer.params);
 
             layer = new OpenLayers.Layer.WMS(
                 config.title || layer.name, 
