@@ -58,8 +58,8 @@ gxp.plugins.ZoomToExtent = Ext.extend(gxp.plugins.Tool, {
      *  ``Boolean`` Find the zoom level that most closely fits the specified
      *  extent. Note that this may result in a zoom that does not exactly
      *  contain the entire extent.  Default is true.
-     */
-    closest: true,
+     
+    closest: true,*/
     
     /** private: property[iconCls]
      */
