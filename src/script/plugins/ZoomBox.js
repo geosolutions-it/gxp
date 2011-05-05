@@ -12,7 +12,7 @@
 
 /** api: (define)
  *  module = gxp.plugins
- *  class = Zoom
+ *  class = ZoomBox
  */
 
 /** api: (extends)
@@ -27,8 +27,8 @@ Ext.namespace("gxp.plugins");
  */
 gxp.plugins.ZoomBox = Ext.extend(gxp.plugins.Tool, {
     
-    /** api: ptype = gxp_zoom */
-    ptype: "gxp_zoom_box",
+    /** api: ptype = gxp_zoombox */
+    ptype: "gxp_zoombox",
     
     /** api: config[zoomInMenuText]
      *  ``String``
