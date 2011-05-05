@@ -66,6 +66,7 @@
         "plugins/Styler.js",
         "plugins/NavigationHistory.js",
         "plugins/Zoom.js",
+        "plugins/ZoomBox.js",
         "plugins/ZoomToExtent.js",
         "plugins/ZoomToDataExtent.js",
         "plugins/ZoomToLayerExtent.js",

@@ -205,6 +205,12 @@
 .x-btn .gxp-icon-zoom-out, .x-tree-node .gxp-icon-zoom-out {
     background-image: url(img/silk/magnifier_zoom_out.png);
 }
+.x-btn .gxp-icon-zoombox-in, .x-tree-node .gxp-icon-zoombox-out {
+    background-image: url(img/silk/shape_square_green.png);
+}
+.x-btn .gxp-icon-zoombox-out, .x-tree-node .gxp-icon-zoombox-out {
+    background-image: url(img/silk/shape_square_red.png);
+}
 
 /* gxp_measure */
 .x-btn .gxp-icon-measure-length, .x-menu-item .gxp-icon-measure-length, .x-tree-node .gxp-icon-measure-length {
