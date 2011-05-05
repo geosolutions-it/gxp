@@ -60,6 +60,7 @@
         "plugins/LayerTree.js",
         "plugins/AddLayers.js",
         "plugins/RemoveLayer.js",
+        "plugins/RemoveOverlays.js",
         "plugins/SelectedFeatureActions.js",
         "plugins/SnappingAgent.js",
         "plugins/Styler.js",
