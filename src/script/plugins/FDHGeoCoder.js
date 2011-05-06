@@ -34,6 +34,12 @@ gxp.plugins.FDHGeoCoder = Ext.extend(gxp.plugins.Tool, {
     /** api: config[buttonText]
      *  ``String`` Text to show next to the zoom button
      */
+
+    /** api: config[initialText]
+     *  ``String``
+     *  Initial text for combo box (i18n).
+     */
+    initialText: "Select an area",
      
     /** api: config[menuText]
      *  ``String``
@@ -71,12 +77,15 @@ gxp.plugins.FDHGeoCoder = Ext.extend(gxp.plugins.Tool, {
             mode: 'local',
             forceSelection: true,
             triggerAction: 'all',
-            emptyText:'Select an area',
+            emptyText: this.initialText,
             selectOnFocus:true,
             editable: false,
             listeners: {
                 select: function(cb, record, index) {
                     var bbox = new OpenLayers.Bounds.fromString(record.get('geometry'));
+                    bbox = bbox.transform(
+                        new OpenLayers.Projection("EPSG:4326"),
+                        new OpenLayers.Projection(map.projection));
                     map.zoomToExtent(bbox);
                 }
             }
