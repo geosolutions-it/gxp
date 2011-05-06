@@ -76,10 +76,11 @@ gxp.plugins.ZoomBox = Ext.extend(gxp.plugins.Tool, {
             tooltip: this.zoomInTooltip,
             enableToggle: true,
             allowDepress: true,
+            toggleGroup: this.toggleGroup,
             listeners: {
                 toggle: function(button, pressed) {
                     if(pressed){
-                        zoomOutButton.toggle(false);
+                        //zoomOutButton.toggle(false);
                         zoomBoxOut.deactivate();
                         zoomBoxIn.activate();  
                     }else{
@@ -96,10 +97,11 @@ gxp.plugins.ZoomBox = Ext.extend(gxp.plugins.Tool, {
             tooltip: this.zoomOutTooltip,
             enableToggle: true,
             allowDepress: true,
+            toggleGroup: this.toggleGroup,
             listeners: {
                 toggle: function(button, pressed) {
                     if(pressed){
-                        zoomInButton.toggle(false);
+                        //zoomInButton.toggle(false);
                         zoomBoxIn.deactivate();
                         zoomBoxOut.activate();
                     }else{
