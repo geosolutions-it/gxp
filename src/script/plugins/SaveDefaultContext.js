@@ -130,7 +130,8 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
 								  var config = Ext.util.JSON.decode(json_str);
 								  
 								  if(config && config.success && config.success===true){	
-									app = new GeoExplorer.Composer(config);
+									//app = new GeoExplorer.Composer(config);
+									app.loadUserConfig(json_str);
 								  }
 								}
 							},
@@ -146,7 +147,7 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
 			}
 		});
 		
-        var actions = gxp.plugins.SaveDefaultContext.superclass.addActions.apply(this, [ loadContext]);        
+        var actions = gxp.plugins.SaveDefaultContext.superclass.addActions.apply(this, [ saveContext ]);        
         
         return actions;
     }
