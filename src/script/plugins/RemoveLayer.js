@@ -63,9 +63,9 @@ gxp.plugins.RemoveLayer = Ext.extend(gxp.plugins.Tool, {
         var removeLayerAction = actions[0];
 
         this.target.on("layerselectionchange", function(record) {
-            selectedLayer = record;
+            selectedLayer = record.get('group') === 'background' ? null : record;
             removeLayerAction.setDisabled(
-                this.target.mapPanel.layers.getCount() <= 1 || !record
+                 !selectedLayer || this.target.mapPanel.layers.getCount() <= 1 || !record
             );
         }, this);
         var enforceOne = function(store) {
@@ -75,7 +75,9 @@ gxp.plugins.RemoveLayer = Ext.extend(gxp.plugins.Tool, {
         }
         this.target.mapPanel.layers.on({
             "add": enforceOne,
-            "remove": enforceOne
+            "remove": function(store){
+                removeLayerAction.setDisabled(true);
+            }
         });
         
         return actions;

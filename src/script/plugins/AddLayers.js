@@ -61,6 +61,18 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
      */
     addButtonText: "Add layers",
     
+    /** api: config[removeFilterText]
+     *  ``String``
+     *  Text for clearing layer filter (i18n).
+     */
+    removeFilterText: "Clear filter", 
+
+    /** api: config[filterEmptyText]
+     *  ``String``
+     *  Text to show up when no filter is specified (i18n).
+     */
+    filterEmptyText: "Filter",     
+
     /** api: config[untitledText]
      *  ``String``
      *  Text for an untitled layer (i18n).
@@ -274,11 +286,15 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
             listeners: {
                 select: function(combo, record, index) {
                     var source = this.target.layerSources[record.get("id")];
+                    
+                    capGridPanel.store.clearFilter();                    
                     capGridPanel.reconfigure(source.store, capGridPanel.getColumnModel());
                     // TODO: remove the following when this Ext issue is addressed
                     // http://www.extjs.com/forum/showthread.php?100345-GridPanel-reconfigure-should-refocus-view-to-correct-scroller-height&p=471843
                     capGridPanel.getView().focusRow(0);
                     this.setSelectedSource(source);
+                    
+                    filterText.reset();
                 },
                 scope: this
             }
@@ -336,7 +352,7 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
         var items = {
             xtype: "container",
             region: "center",
-            layout: "vbox",
+            layout: "fit",
             items: [capGridPanel]
         };
         if (this.instructionsText) {
@@ -352,7 +368,41 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
             });
         }
         
+        var filterText =  new Ext.form.TextField({
+            emptyText : this.filterEmptyText,
+            width : 60,
+            enableKeyEvents : true,
+            listeners : {
+                keyup : function(form){
+                    var val = form.getRawValue().trim().toLowerCase();
+                    if(val){
+                        this.store.filterBy(function(rec, recId){
+                            var title = rec.get("title").trim().toLowerCase();
+                            if(title.indexOf(val) > -1){
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        });                   
+                    } else {
+                        this.store.clearFilter();
+                    }
+                },
+                scope : capGridPanel
+            }
+        });
+        
         var bbarItems = [
+            filterText,
+            new Ext.Button({
+                text: this.removeFilterText,
+                handler : function(button){
+                    this.store.clearFilter();
+                    filterText.reset();
+                },
+                iconCls: "gxp-icon-removefilter",
+                scope : capGridPanel
+            }),            
             "->",
             new Ext.Button({
                 text: this.addButtonText,
@@ -380,7 +430,7 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
             closeAction: "hide",
             layout: "border",
             height: 300,
-            width: 450,
+            width: 500,
             modal: true,
             items: items,
             tbar: capGridToolbar,

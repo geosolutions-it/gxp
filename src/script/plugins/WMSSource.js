@@ -152,6 +152,10 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
             baseParams: baseParams,
             format: this.format,
             autoLoad: true,
+            sortInfo : {
+                field : 'title',
+                direction : 'ASC'
+            },
             listeners: {
                 load: function() {
                     // The load event is fired even if a bogus capabilities doc 

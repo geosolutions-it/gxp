@@ -42,7 +42,7 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
      *  on the server side that require additional parameters.
      */
     customParams: null,
-
+    legendPanelId : null,
     /** api: config[menuText]
      *  ``String``
      *  Text for print menu item (i18n).
@@ -67,6 +67,8 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
      */
     nonePrintableText: "None of your current map layers can be printed",
 
+    notPrintableLayersText: "Following layers are not supported for print:",
+    
     /** api: config[previewText]
      *  ``String``
      *  Text for print preview text (i18n).
@@ -123,10 +125,22 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                 iconCls: "gxp-icon-print",
                 disabled: false,
                 handler: function() {
-                    var supported = getSupportedLayers();
+                    var layers = getSupportedLayers();
+                    var supported = layers.supported;
+                    var notSupported = layers.notSupported;
+                    
                     if (supported.length > 0) {
+
+                        if(notSupported.length > 0){
+                            Ext.Msg.alert(
+                                this.notAllNotPrintableText,
+                                this.notPrintableLayersText + '<br />' + notSupported.join(',')
+                            );
+                        }
+                        
                         createPrintWindow.call(this);
                         showPrintWindow.call(this);
+
                     } else {
                         // no layers supported
                         Ext.Msg.alert(
@@ -164,20 +178,25 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
 
             var mapPanel = this.target.mapPanel;
             function getSupportedLayers() {
-                var supported = [];
+                var supported = [], notSupported = [];
                 mapPanel.layers.each(function(record) {
                     var layer = record.getLayer();
                     if (isSupported(layer)) {
                         supported.push(layer);
+                    } else {
+                        if(layer.getVisibility()){
+                            notSupported.push(layer.name);
+                        }
                     }
                 });
-                return supported;
+                return  { 'supported' : supported, 'notSupported' : notSupported };
             }
 
             function isSupported(layer) {
                 return (
                     layer instanceof OpenLayers.Layer.WMS ||
-                    layer instanceof OpenLayers.Layer.OSM
+                    layer instanceof OpenLayers.Layer.OSM 
+                    //|| layer instanceof OpenLayers.Layer.Google
                 );
             }
 
@@ -187,7 +206,7 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                     modal: true,
                     border: false,
                     resizable: false,
-                    width: 360,
+                    //width: 360,
                     items: [
                         new GeoExt.ux.PrintPreview({
                             autoHeight: true,
@@ -215,7 +234,8 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                                 }]
                             },
                             printProvider: printProvider,
-                            includeLegend: false,
+                            legend : Ext.getCmp(this.legendPanelId),
+                            includeLegend: true,
                             sourceMap: mapPanel
                         })
                     ],
@@ -227,7 +247,7 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
 
             function showPrintWindow() {
                 printWindow.show();
-
+                /*
                 // measure the window content width by it's toolbar
                 printWindow.setWidth(0);
                 var tb = printWindow.items.get(0).items.get(0);
@@ -241,6 +261,11 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                     Math.max(printWindow.items.get(0).printMapPanel.getWidth(),
                     w + 20)
                 );
+                */
+                printWindow.setWidth(
+                    printWindow.items.get(0).printMapPanel.getWidth()+30
+                );                
+                
                 printWindow.center();
             }
 

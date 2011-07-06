@@ -53,7 +53,7 @@ gxp.plugins.Navigation = Ext.extend(gxp.plugins.Tool, {
      */
     addActions: function() {
         this.controlOptions = this.controlOptions || {};
-        Ext.applyIf(this.controlOptions, {zoomWheelEnabled: false});
+        Ext.applyIf(this.controlOptions, {zoomWheelEnabled: true});
         var actions = [new GeoExt.Action({
             tooltip: this.tooltip,
             menuText: this.menuText,

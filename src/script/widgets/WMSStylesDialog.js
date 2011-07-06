@@ -1093,7 +1093,8 @@ gxp.WMSStylesDialog.createGeoServerStylerConfig = function(layerRecord, url) {
         }],
         listeners: {
             "styleselected": function(cmp, style) {
-                cmp.modified && layer.mergeNewParams({
+                //cmp.modified && 
+				layer.mergeNewParams({
                     styles: style
                 });
             },

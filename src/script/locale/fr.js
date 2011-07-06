@@ -121,7 +121,7 @@ GeoExt.Lang.add("fr", {
     },
 
     "gxp.plugins.WMSGetFeatureInfo.prototype": {
-        infoActionTip: "Get Feature Info",
+        infoActionTip: "Get Featuree Info",
         popupTitle: "entité Info"
     },
 

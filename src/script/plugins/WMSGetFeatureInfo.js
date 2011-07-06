@@ -150,8 +150,11 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
                 layout: "accordion",
                 location: evt.xy,
                 map: this.target.mapPanel,
-                width: 470,
+                width: 490,
                 height: 320,
+                /*anchored: true,
+                unpinnable : true,*/
+                draggable: true,
                 listeners: {
                     close: (function(key) {
                         return function(panel){

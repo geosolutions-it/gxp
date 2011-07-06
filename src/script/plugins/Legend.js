@@ -41,7 +41,7 @@ gxp.plugins.Legend = Ext.extend(gxp.plugins.Tool, {
      *  Text for legend action tooltip (i18n).
      */
     tooltip: "Show Legend",
-
+    legendConfig : null,
     /** api: config[actionTarget]
      *  ``Object`` or ``String`` or ``Array`` Where to place the tool's actions
      *  (e.g. buttons or menus)? Use null as the default since our tool has both 
@@ -56,8 +56,8 @@ gxp.plugins.Legend = Ext.extend(gxp.plugins.Tool, {
         
         if (!this.outputConfig) {
             this.outputConfig = {
-                width: 300,
-                height: 400
+                width: 260,
+                height: 300
             };
         }
         Ext.applyIf(this.outputConfig, {title: this.menuText});
@@ -81,14 +81,15 @@ gxp.plugins.Legend = Ext.extend(gxp.plugins.Tool, {
     /** private: method[addOutput]
      *  :arg config: ``Object``
      */
-    addOutput: function(config) {
-        return gxp.plugins.Legend.superclass.addOutput.call(this, Ext.apply({
+    addOutput: function() {
+        return gxp.plugins.Legend.superclass.addOutput.call(this, {
             xtype: 'gx_legendpanel',
+            id : this.legendConfig.legendPanelId,
             ascending: false,
             border: false,
             layerStore: this.target.mapPanel.layers,
-            defaults: {cls: 'gxp-legend-item'}
-        }, config));
+            defaults: Ext.apply({cls: 'gxp-legend-item'}, this.legendConfig.defaults)
+        });
     }
 
 });
