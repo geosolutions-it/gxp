@@ -39,6 +39,16 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
      *  ``String``
      */
     saveDefaultContextActionTip: "Save current context as default one",
+	
+    /** api: config[contextSaveSuccessString]
+     *  ``String``
+     */
+    contextSaveSuccessString: "Context saved sauccesfully",
+    	
+    /** api: config[contextSaveSuccessString]
+     *  ``String``
+     */
+    contextSaveSuccessString: "Context saved sauccesfully",
     
     /** api: method[addActions]
      */
@@ -65,7 +75,7 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
 						  callback: function(request) {
 							  if(request.status == 201){
 								  Ext.Msg.show({
-									 title:'Context upload successful',
+									 title: this.contextSaveSuccessString,
 									 msg: request.statusText,
 									 buttons: Ext.Msg.OK,
 									 icon: Ext.MessageBox.OK
