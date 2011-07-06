@@ -43,12 +43,12 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
     /** api: config[contextSaveSuccessString]
      *  ``String``
      */
-    contextSaveSuccessString: "Context saved sauccesfully",
+    contextSaveSuccessString: "Context saved succesfully",
     	
-    /** api: config[contextSaveSuccessString]
+    /** api: config[contextSaveFailString]
      *  ``String``
      */
-    contextSaveSuccessString: "Context saved sauccesfully",
+    contextSaveFailString: "Context not saved succesfully",
     
     /** api: method[addActions]
      */
@@ -66,23 +66,23 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
 				    if (request.status == 200) {
 						var xmlContext = request.responseText;
 						
-						OpenLayers.Request.PUT({
+					  OpenLayers.Request.PUT({
 						  url: 'http://admin:1geosol2@demo1.geo-solutions.it/exist/rest/mapadmin/context.xml',
 						  data: xmlContext,
 						  //user: 'admin',
 						  //password: '1geosol2',
 						  //proxy: '',
 						  callback: function(request) {
-							  if(request.status == 201){
+							  if (request.status == 201){
 								  Ext.Msg.show({
 									 title: this.contextSaveSuccessString,
 									 msg: request.statusText,
 									 buttons: Ext.Msg.OK,
 									 icon: Ext.MessageBox.OK
 								  });
-							  }else{
+							  } else {
 								  Ext.Msg.show({
-									 title:'Context upload not successful',
+									 title:this.contextSaveFailString,
 									 msg: request.statusText,
 									 buttons: Ext.Msg.OK,
 									 icon: Ext.MessageBox.ERROR
