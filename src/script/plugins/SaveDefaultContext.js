@@ -53,7 +53,6 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
     /** api: method[addActions]
      */
     addActions: function() {
-        var selectedLayer;
 		
 		var saveContext = new Ext.Button({
             menuText: this.saveDefaultContextMenuText,
@@ -62,10 +61,9 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
             tooltip: this.saveDefaultContextActionTip,
             handler: function() {
 			
-				var handleSave = function(request){
-				    if (request.status == 200) {
-						var xmlContext = request.responseText;
-						
+				var xmlContext;
+				var handleSave = function(){
+					  var xmlContext = this.xmlContext;
 					  OpenLayers.Request.PUT({
 						  url: 'http://admin:1geosol2@demo1.geo-solutions.it/exist/rest/mapadmin/context.xml',
 						  data: xmlContext,
@@ -78,23 +76,22 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
 									 title: this.contextSaveSuccessString,
 									 msg: request.statusText,
 									 buttons: Ext.Msg.OK,
-									 icon: Ext.MessageBox.OK
+									 icon: Ext.MessageBox.OK,
+									 scope: this
 								  });
 							  } else {
 								  Ext.Msg.show({
 									 title:this.contextSaveFailString,
 									 msg: request.statusText,
 									 buttons: Ext.Msg.OK,
-									 icon: Ext.MessageBox.ERROR
+									 icon: Ext.MessageBox.ERROR,
+									 scope: this
 								  });
 							  }
 						  },
 						  scope: this
 					  });
-					  
-					} else {
-						throw /*this.saveErrorText + */request.responseText;
-					}
+
 				};
 				
 				var configStr = Ext.util.JSON.encode(app.getState());  
@@ -105,7 +102,12 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
 					url: url,
 					data: configStr,
 					callback: function(request) {
-						handleSave(request);
+						if (request.status == 200) {
+							this.xmlContext = request.responseText;
+							handleSave.call(this);
+						} else {
+							throw /*this.saveErrorText + */request.responseText;
+						}						
 					},
 					scope: this
 				});					
@@ -113,49 +115,6 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
             },
             scope: this
         });
-		
-		var loadContext = new Ext.Button({
-			menuText: this.saveDefaultContextMenuText,
-			iconCls: "gxp-icon-savedefaultcontext",
-			disabled: false,
-			tooltip: this.saveDefaultContextActionTip,
-			handler: function() {
-			  OpenLayers.Request.issue({
-				method: 'GET',
-				url: 'http://demo1.geo-solutions.it/exist/rest/mapadmin/context.xml',
-				callback: function(request) {
-					if (request.status == 200) {
-						var xmlContext = request.responseText;
-						var url = app.xmlJsonTranslateService + "HTTPWebGISXmlUpload";
-						
-						OpenLayers.Request.issue({
-							method: 'POST',
-							url: url,
-							data: xmlContext,
-							callback: function(request) {
-								if (request.status == 200) {										  	
-								  var json_str = unescape(request.responseText);
-								  json_str = json_str.replace(/\+/g, ' ');
-								  
-								  var config = Ext.util.JSON.decode(json_str);
-								  
-								  if(config && config.success && config.success===true){	
-									//app = new GeoExplorer.Composer(config);
-									app.loadUserConfig(json_str);
-								  }
-								}
-							},
-							scope: this
-						});
-						
-					} else {
-						throw /*this.saveErrorText + */request.responseText;
-					}
-				},
-				scope: this
-			  });
-			}
-		});
 		
         var actions = gxp.plugins.SaveDefaultContext.superclass.addActions.apply(this, [ saveContext ]);        
         
