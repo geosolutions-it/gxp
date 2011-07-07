@@ -55,9 +55,10 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
     addActions: function() {
 		
 		var saveContext = new Ext.Button({
+			needsAuthorization: true,
             menuText: this.saveDefaultContextMenuText,
             iconCls: "gxp-icon-savedefaultcontext",
-            disabled: false,
+            disabled: true,
             tooltip: this.saveDefaultContextActionTip,
             handler: function() {
 			
@@ -67,8 +68,8 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
 					  OpenLayers.Request.PUT({
 						  url: 'http://admin:1geosol2@demo1.geo-solutions.it/exist/rest/mapadmin/context.xml',
 						  data: xmlContext,
-						  //user: 'admin',
-						  //password: '1geosol2',
+						  user: 'admin',
+						  password: '1geosol2',
 						  //proxy: '',
 						  callback: function(request) {
 							  if (request.status == 201){
