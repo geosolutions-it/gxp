@@ -164,6 +164,11 @@
     background-image: url(img/silk/wrench.png);
 }
 
+/* gxp_groupproperties */
+.x-btn .gxp-icon-groupproperties, .x-menu-item .gxp-icon-groupproperties, .x-tree-node .gxp-icon-groupproperties {
+    background-image: url(img/silk/wrench.png);
+}
+
 /* gxp_removelayer */
 .x-btn .gxp-icon-removelayers, .x-menu-item .gxp-icon-removelayers, .x-tree-node .gxp-icon-removelayers {
     background-image: url(img/silk/delete.png);
@@ -172,6 +177,26 @@
 /* gxp_removeoverlays */
 .x-btn .gxp-icon-removeoverlays, .x-menu-item .gxp-icon-removeoverlays, .x-tree-node .gxp-icon-removeoverlays {
     background-image: url(img/geosilk/layers_delete.png);
+}
+
+/* gxp_addgroup */
+.x-btn .gxp-icon-addgroup, .x-menu-item .gxp-icon-addgroup, .x-tree-node .gxp-icon-addgroup {
+    background-image: url(img/silk/folder_add.png);
+}
+
+/* gxp_groupproperties button */
+.x-btn .gxp-icon-groupproperties-button, .x-menu-item .gxp-icon-groupproperties-button, .x-tree-node .gxp-icon-groupproperties-button {
+    background-image: url(img/silk/folder_edit.png);
+}
+
+/* gxp_addgroup button */
+.x-btn .gxp-icon-addgroup-button, .x-menu-item .gxp-icon-addgroup-button, .x-tree-node .gxp-icon-addgroup-button {
+    background-image: url(img/silk/add.png);
+}
+
+/* gxp_removegroup */
+.x-btn .gxp-icon-removegroup, .x-menu-item .gxp-icon-removegroup, .x-tree-node .gxp-icon-removegroup {
+    background-image: url(img/silk/folder_delete.png);
 }
 
 /* gxp-icon-savedefaultcontext */

@@ -210,7 +210,9 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
              *  * layerRecord - ``GeoExt.data.LayerRecord`` the record of the
              *    selected layer, or null if no layer is selected.
              */
-            "layerselectionchange"
+            "layerselectionchange",
+            
+            "groupselectionChange"
         );
         
         Ext.apply(this, {
@@ -234,6 +236,20 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
      *  TODO: change to selectLayers (plural)
      */
     selectLayer: function(record) {
+        for(var tool in this.tools){
+            if(this.tools[tool].ptype == "gxp_layerproperties"){
+                this.tools[tool].actions[0].show();
+            }
+            
+            if(this.tools[tool].ptype == "gxp_groupproperties"){            
+                this.tools[tool].actions[0].hide();
+            }
+            
+            if(this.tools[tool].ptype == "gxp_removegroup"){            
+                this.tools[tool].actions[0].disable();
+            }
+        }
+        
         record = record || null;
         var changed = false;
         var allow = this.fireEvent("beforelayerselectionchange", record);
@@ -242,7 +258,32 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
             this.selectedLayer = record;
             this.fireEvent("layerselectionchange", record);
         }
+        
         return changed;
+    },
+    
+    /** api: method[selectGroup]
+     *  :arg groupNode: ``GeoExt.tree.LayerContainer``` Group node.  
+     *      Fire specific event to enable/disable the RemoveGroup and GroupProperties plugin.
+     */
+    selectGroup: function(groupNode){
+        if(groupNode){
+            for(var tool in this.tools){
+                if(this.tools[tool].ptype == "gxp_layerproperties"){
+                    this.tools[tool].actions[0].hide();
+                }
+                
+                if(this.tools[tool].ptype == "gxp_groupproperties"){            
+                    this.tools[tool].actions[0].show();
+                }
+                
+                if(this.tools[tool].ptype == "gxp_removelayer"){            
+                    this.tools[tool].actions[0].disable();
+                }
+            }
+            
+            this.fireEvent("groupselectionChange", groupNode); 
+        }
     },
     
     /** api: method[loadConfig]
@@ -404,6 +445,34 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
                     tool = Ext.ComponentMgr.createPlugin(
                         this.initialConfig.tools[i], this.defaultToolType
                     );
+                    
+                    //
+                    // Overwrite the gxp_layertree 'groups' configuration.
+                    //                     
+                    if(this.initialConfig.tools[i].ptype == "gxp_layertree"){
+                        var layers = this.initialConfig.map.layers;
+                        var size = layers.length;
+                        
+                        var groups = {
+                            "default": tool.overlayNodeText
+                        };
+                            
+                        for(var j=size-1; j>=0; j--){
+                            if(layers[j].group){
+                                if(layers[j].group != "background" && layers[j].group != "default"){                                    
+                                    var s = 'groups.' + layers[j].group + '= {title: "' + layers[j].group + '"}';                                
+                                    eval(s);
+                                }
+                            }
+                        }
+                        
+                        groups.background = {
+                            title: tool.baseNodeText,
+                            exclusive: true
+                        }
+                        
+                        tool.groups = groups;
+                    }
                 } catch (err) {
                     throw new Error("Could not create tool plugin with ptype: " + this.initialConfig.tools[i].ptype);
                 }
@@ -538,6 +607,7 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
      *  configured before the call.
      */
     createLayerRecord: function(config, callback, scope) {
+        alert(callback);
         this.createLayerRecordQueue.push({
             config: config,
             callback: callback,
