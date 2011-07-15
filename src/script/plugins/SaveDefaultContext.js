@@ -58,7 +58,7 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
 			needsAuthorization: true,
             menuText: this.saveDefaultContextMenuText,
             iconCls: "gxp-icon-savedefaultcontext",
-            disabled: true,
+            disabled: false,
             tooltip: this.saveDefaultContextActionTip,
             handler: function() {
 			
