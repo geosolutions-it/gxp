@@ -111,7 +111,9 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
             }
         };
         
+        //
         // create our own layer node UI class, using the TreeNodeUIEventMixin
+        //
         var LayerNodeUI = Ext.extend(GeoExt.tree.LayerNodeUI,
             new GeoExt.tree.TreeNodeUIEventMixin());
         
@@ -119,13 +121,14 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
             text: this.rootNodeText,
             expanded: true,
             isTarget: false,
-            allowDrop: false
+            allowDrop: true
         });
         
         var groupConfig, defaultGroup = this.defaultGroup;
         for (var group in this.groups) {
             groupConfig = typeof this.groups[group] == "string" ?
                 {title: this.groups[group]} : this.groups[group];
+                           
             treeRoot.appendChild(new GeoExt.tree.LayerContainer({
                 text: groupConfig.title,
                 iconCls: "gxp-folder",
@@ -164,7 +167,7 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                     }
                 }),
                 singleClickExpand: true,
-                allowDrag: false,
+                allowDrag: true,
                 listeners: {
                     append: function(tree, node) {
                         node.expand();
@@ -192,7 +195,12 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                             this.selectionChanging = true;
                             changed = this.target.selectLayer(record);
                             this.selectionChanging = false;
+                            
+                            this.target.selectGroup(null);
+                        }else{
+                            this.target.selectGroup(node);
                         }
+                        
                         return changed;
                     },
                     scope: this
@@ -212,15 +220,85 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                 },
                 beforemovenode: function(tree, node, oldParent, newParent, i) {
                     // change the group when moving to a new container
-                    if(oldParent !== newParent) {
-                        var store = newParent.loader.store;
-                        var index = store.findBy(function(r) {
-                            return r.getLayer() === node.layer;
-                        });
-                        var record = store.getAt(index);
-                        record.set("group", newParent.attributes.group);
+                    if(node.loader && i == 0 ){
+                        this.nodeIndex = false;
+                        return false;
+                    }else{
+                        this.nodeIndex = true;
+                        
+                        if(node.attributes.group != "background"){
+                            if(oldParent !== newParent) {
+                                this.nodeIndex = false;
+                                try{
+                                    var store = newParent.loader.store;
+                                    var index = store.findBy(function(r) {
+                                        return r.getLayer() === node.layer;
+                                    });
+                                    var record = store.getAt(index);
+                                    record.set("group", newParent.attributes.group);
+                                }catch(e){
+                                    return false;
+                                }
+                            }else{
+                                if(node.loader){
+                                    if(node.attributes.group != undefined){
+                                        this.oldOffset = 0;
+                                        var previous = node.previousSibling;
+                                        
+                                        while(previous != null){
+                                            var childs = previous.childNodes.length;
+                                            this.oldOffset += childs;                                    
+                                            previous = previous.previousSibling;
+                                        }
+                                    }else{
+                                        return false;
+                                    }
+                                }
+                            }
+                        }else{
+                            return false;
+                        }
                     }
-                },                
+                },
+                enddrag: function(tree, node, e){
+                    if(node.loader && node.attributes.group != undefined && this.nodeIndex){ 
+                        var newOffset = 0;
+                        
+                        var previous = node.previousSibling;
+                        while(previous != null){
+                            var childs = previous.childNodes.length;
+                            newOffset += childs;                            
+                            previous = previous.previousSibling;
+                        }
+                        
+                        var records = [];
+                        var store = node.loader.store;
+                        
+                        for(var i=0; i<node.childNodes.length; i++){
+                            var recordIndex = store.findBy(function(r) {
+                                return node.childNodes[i].layer === r.getLayer();
+                            });
+                            
+                            var record = store.getAt(recordIndex);                            
+                            records.push({index: recordIndex, record: record});
+                        } 
+
+                        for(var u=0; u<records.length; u++){
+                            store.remove(records[u].record);
+                        }  
+
+                        for(var k=records.length-1; k>=0; k--){
+                            var indexOffset = this.oldOffset - newOffset;
+                            store.insert(records[k].index + indexOffset, [records[k].record]);
+                        }       
+                        
+                        window.setTimeout(function() {
+                            for(var x=0; x<tree.root.childNodes.length; x++){
+                                tree.root.childNodes[x].reload();
+                            }
+                        });    
+                    }
+                },      
                 scope: this
             },
             contextMenu: new Ext.menu.Menu({
@@ -232,7 +310,6 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
         
         return layerTree;
     }
-        
 });
 
 Ext.preg(gxp.plugins.LayerTree.prototype.ptype, gxp.plugins.LayerTree);
