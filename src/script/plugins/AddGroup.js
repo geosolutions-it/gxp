@@ -149,8 +149,6 @@ gxp.plugins.AddGroup = Ext.extend(gxp.plugins.Tool, {
                                         });
                                         
                                         tree.root.insertBefore(node, tree.root.firstChild.nextSibling);
-                                        
-                                        win.destroy();
                                     }else{
                                         Ext.Msg.show({
                                              title: "New Group",
@@ -159,6 +157,8 @@ gxp.plugins.AddGroup = Ext.extend(gxp.plugins.Tool, {
                                              icon: Ext.MessageBox.OK
                                         });
                                     }
+                                    
+                                    win.destroy();
                                 }
                             }
                         ]
