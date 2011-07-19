@@ -134,16 +134,9 @@ gxp.plugins.GroupProperties = Ext.extend(gxp.plugins.Tool, {
                                             var record = store.getAt(index);
                                             record.set("group", group);
                                         }
-                                        
-                                        win.destroy();
-                                    }else{
-                                        Ext.Msg.show({
-                                             title: "Group Properties",
-                                             msg: this.groupPropertiesMsg,
-                                             buttons: Ext.Msg.OK,
-                                             icon: Ext.MessageBox.OK
-                                        });
                                     }
+                                    
+                                    win.destroy();
                                 }
                             }
                         ]
