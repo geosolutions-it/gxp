@@ -228,15 +228,19 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                         
                         if(node.attributes.group != "background"){
                             if(oldParent !== newParent) {
-                                this.nodeIndex = false;
-                                try{
-                                    var store = newParent.loader.store;
-                                    var index = store.findBy(function(r) {
-                                        return r.getLayer() === node.layer;
-                                    });
-                                    var record = store.getAt(index);
-                                    record.set("group", newParent.attributes.group);
-                                }catch(e){
+                                if(newParent.attributes.group != "background"){
+                                    this.nodeIndex = false;
+                                    try{
+                                        var store = newParent.loader.store;
+                                        var index = store.findBy(function(r) {
+                                            return r.getLayer() === node.layer;
+                                        });
+                                        var record = store.getAt(index);
+                                        record.set("group", newParent.attributes.group);
+                                    }catch(e){
+                                        return false;
+                                    }
+                                }else{
                                     return false;
                                 }
                             }else{
