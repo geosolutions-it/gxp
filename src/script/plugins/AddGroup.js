@@ -128,7 +128,7 @@ gxp.plugins.AddGroup = Ext.extend(gxp.plugins.Tool, {
                                             text: group,
                                             iconCls: "gxp-folder",
                                             expanded: true,
-                                            checked: true,
+                                            checked: false,
                                             group: group == "default" ? undefined : group,
                                             loader: new GeoExt.tree.LayerLoader({
                                                 baseAttrs: groupConfig.exclusive ? {checkedGroup: group} : undefined,

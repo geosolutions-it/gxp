@@ -103,9 +103,28 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                         node.select();
                     }
                 });
+                                
                 if (record === target.selectedLayer) {
                     node.on("rendernode", function() {
                         node.select();
+                        
+                        // ///////////////////////////////////////////////////////////////////////
+                        // to check the group at startup (if the layer node should be checked) 
+                        // or when a layer is added.
+                        // ///////////////////////////////////////////////////////////////////////
+                        if(node.isLeaf() && node.getUI().isChecked()){
+                            node.parentNode.getUI().toggleCheck(true);
+                        }
+                    });
+                }else{
+                    node.on("rendernode", function() {
+                        // ///////////////////////////////////////////////////////////////////////
+                        // to check the group at startup (if the layer node should be checked) 
+                        // or when a layer is added.
+                        // ///////////////////////////////////////////////////////////////////////
+                        if(node.isLeaf() && node.getUI().isChecked()){
+                            node.parentNode.getUI().toggleCheck(true);
+                        }
                     });
                 }
             }
@@ -132,7 +151,7 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
             treeRoot.appendChild(new GeoExt.tree.LayerContainer({
                 text: groupConfig.title,
                 iconCls: "gxp-folder",
-                checked: true,
+                checked: false,
                 expanded: true,
                 group: group == defaultGroup ? undefined : group,
                 loader: new GeoExt.tree.LayerLoader({
@@ -164,6 +183,7 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                         }
                         var node = GeoExt.tree.LayerLoader.prototype.createNode.apply(this, arguments);
                         addListeners(node, record);
+                        
                         return node;
                     }
                 }),
@@ -220,6 +240,7 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                     }
                 },
                 beforemovenode: function(tree, node, oldParent, newParent, i) {
+                    this.oldParent = oldParent;
                     // change the group when moving to a new container
                     if(node.loader && i == 0 ){
                         this.nodeIndex = false;
@@ -303,14 +324,34 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                             }
                         });    
                     }else{
+                        // //////////////////////////////////////////////////////////////////
+                        // If the new parent is unchecked the new child must be unchecked
+                        // //////////////////////////////////////////////////////////////////
                         var parent = node.parentNode;
                         if(parent.getUI().isChecked())
                             node.getUI().toggleCheck(true);
                         else
                             node.getUI().toggleCheck(false);
+                            
+                        // /////////////////////////////////////////////////////////////
+                        // If in the drag operation the old parent remains without 
+                        // checked nodes it must be unchecked
+                        // /////////////////////////////////////////////////////////////
+                        var oldChilds = this.oldParent.childNodes;
+                        var size = oldChilds.length;
+                        var checkedNodes = 0;
+                        for(var d=0; d<size; d++){
+                            if(oldChilds[d].getUI().isChecked()){
+                                checkedNodes++;
+                            }
+                        }
+                        
+                        if(checkedNodes < 1){    
+                            this.oldParent.getUI().toggleCheck(false)
+                        }
                     }
                 },   
-                checkchange: function(node, checked){                    
+                checkchange: function(node, checked){  
                     if(!node.isLeaf()){
                         var childs = node.childNodes;
                         var size = childs.length;
@@ -324,7 +365,8 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                             for(var y=0; y<size; y++){
                                 if(childs[y].getUI().isChecked())
                                     checkedNodes++;
-                            }                            
+                            }    
+                                                    
                             if(checkedNodes < 1){    
                                 for(var z=0; z<size; z++){
                                     childs[z].getUI().toggleCheck(checked);
