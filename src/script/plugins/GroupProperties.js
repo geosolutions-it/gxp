@@ -133,6 +133,8 @@ gxp.plugins.GroupProperties = Ext.extend(gxp.plugins.Tool, {
                                             });
                                             var record = store.getAt(index);
                                             record.set("group", group);
+                                            
+                                            childs[i].parentNode.attributes.group = group;
                                         }
                                     }
                                     
