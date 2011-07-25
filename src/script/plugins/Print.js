@@ -136,10 +136,10 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                                 this.notAllNotPrintableText,
                                 this.notPrintableLayersText + '<br />' + notSupported.join(',')
                             );
-                        }
-                        
-                        createPrintWindow.call(this);
-                        showPrintWindow.call(this);
+                        } else {                    
+							createPrintWindow.call(this);
+							showPrintWindow.call(this);
+						}
 
                     } else {
                         // no layers supported
