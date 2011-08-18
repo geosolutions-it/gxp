@@ -41,7 +41,7 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
      *  ``String``
      *  Text for overlay node of layer tree (i18n).
      */
-    overlayNodeText: "Overlays",
+    overlayNodeText: "Default",
 
     /** api: config[baseNodeText]
      *  ``String``

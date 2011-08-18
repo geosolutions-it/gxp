@@ -281,6 +281,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
             var data = Ext.applyIf({
                 title: layer.name,
                 group: config.group,
+				uuid: config.uuid,
                 source: config.source,
                 properties: "gxp_wmslayerpanel",
                 fixed: config.fixed,
@@ -292,6 +293,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
             var fields = [
                 {name: "source", type: "string"}, 
                 {name: "group", type: "string"},
+				{name: "uuid", type: "string"},
                 {name: "properties", type: "string"},
                 {name: "fixed", type: "boolean"},
                 {name: "selected", type: "boolean"}

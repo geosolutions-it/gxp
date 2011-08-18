@@ -63,6 +63,7 @@
         "plugins/GroupProperties.js",
         "plugins/RemoveGroup.js",        
         "plugins/RemoveLayer.js",
+		"plugins/GeonetworkSearch.js",
         "plugins/RemoveOverlays.js",
         "plugins/SelectedFeatureActions.js",
         "plugins/SnappingAgent.js",

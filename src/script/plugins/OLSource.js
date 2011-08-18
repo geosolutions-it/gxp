@@ -100,6 +100,7 @@ gxp.plugins.OLSource = Ext.extend(gxp.plugins.LayerSource, {
             var Record = GeoExt.data.LayerRecord.create([
                 {name: "source", type: "string"}, 
                 {name: "group", type: "string"},
+				{name: "uuid", type: "string"},
                 {name: "fixed", type: "boolean"},
                 {name: "selected", type: "boolean"},
                 {name: "type", type: "string"},
@@ -110,6 +111,7 @@ gxp.plugins.OLSource = Ext.extend(gxp.plugins.LayerSource, {
                 title: layer.name,
                 source: config.source,
                 group: config.group,
+				uuid : config.uuid,
                 fixed: ("fixed" in config) ? config.fixed : false,
                 selected: ("selected" in config) ? config.selected : false,
                 type: config.type,

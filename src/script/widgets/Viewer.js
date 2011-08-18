@@ -501,12 +501,27 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
                 items: this.portalItems
             }
         }));
-        
+        		
         if(this.renderToTab){
             var portalContainer = Ext.getCmp(this.renderToTab);
             portalContainer.add(this.portal);
             portalContainer.doLayout();
             portalContainer.setActiveTab(2);
+           
+            var map = this.mapPanel.map;
+            var activeTab = portalContainer.getActiveTab();
+            app.on({
+              'portalready' : function(){
+                activeTab.addListener("activate", function(){
+                    map.size.w += 1;
+                    map.updateSize();
+                    map.size.w -= 1;
+                    map.updateSize();
+                });
+               
+                portalContainer.setActiveTab(0);
+              }
+            });
         }
         
         this.fireEvent("portalready");
