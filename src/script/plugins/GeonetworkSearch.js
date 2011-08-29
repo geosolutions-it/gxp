@@ -59,7 +59,13 @@ gxp.plugins.GeonetworkSearch = Ext.extend(gxp.plugins.Tool, {
 					if(uuid){
 						viewRecordMetadata(uuid);
 					} else {
-						var title = record.get('title');
+						var title = record.get('name');
+						title = title.split(':');
+						if(title.length > 1){
+							title = title[1];
+						} else {
+							title = title[0];
+						}
 						runSimpleSearch(title);
 					}
                 }
