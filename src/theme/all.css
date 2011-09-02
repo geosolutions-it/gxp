@@ -179,6 +179,11 @@
     background-image: url(img/geosilk/layers_delete.png);
 }
 
+/* gxp_removeoverlays */
+.x-btn .gxp-icon-geonetworksearch, .x-menu-item .gxp-icon-geonetworksearch, .x-tree-node .gxp-icon-geonetworksearch {
+    background-image: url(img/silk/find.png);
+}
+
 /* gxp_addgroup */
 .x-btn .gxp-icon-addgroup, .x-menu-item .gxp-icon-addgroup, .x-tree-node .gxp-icon-addgroup {
     background-image: url(img/silk/folder_add.png);
