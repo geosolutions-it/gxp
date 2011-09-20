@@ -452,20 +452,28 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
                     if(this.initialConfig.tools[i].ptype == "gxp_layertree"){
                         var layers = this.initialConfig.map.layers;
                         var size = layers.length;
-                        
                         var groups = {
                             "default": tool.overlayNodeText
                         };
-                            
+
                         for(var j=size-1; j>=0; j--){
                             if(layers[j].group){
-                                if(layers[j].group != "background" && layers[j].group != "default"){                                    
-                                    var s = 'groups.' + layers[j].group + '= {title: "' + layers[j].group + '"}';                                
+                                if(layers[j].group != "background" && layers[j].group != "default"){      
+                                    var s = 'groups.' + layers[j].group + '={title:"' + layers[j].group + '"}';    
+                                    
+                                    //
+                                    // Managing withe spaces in strings
+                                    // 
+                                    if(s.indexOf(" ") != -1){
+                                        s = s.replace(/\s+/g, "_");   
+                                        layers[j].group = layers[j].group.replace(/\s+/g, "_"); 
+                                    }
+                                    
                                     eval(s);
                                 }
                             }
                         }
-                        
+
                         groups.background = {
                             title: tool.baseNodeText,
                             exclusive: true

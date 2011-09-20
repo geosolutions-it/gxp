@@ -147,9 +147,16 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
         for (var group in this.groups) {
             groupConfig = typeof this.groups[group] == "string" ?
                 {title: this.groups[group]} : this.groups[group];
-                           
+            
+            //
+            // Managing withe spaces in strings
+            // 
+            var text = groupConfig.title;
+            if(groupConfig.title.indexOf("_") != -1)        
+                text = text.replace(/_+/g, " ");  
+                
             treeRoot.appendChild(new GeoExt.tree.LayerContainer({
-                text: groupConfig.title,
+                text: text,
                 iconCls: "gxp-folder",
                 checked: false,
                 expanded: true,
