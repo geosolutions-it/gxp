@@ -60,6 +60,8 @@ gxp.plugins.RemoveGroup = Ext.extend(gxp.plugins.Tool, {
         var selectedGroup;
         var removeGroupAction;
         
+        var apptarget = this.target;
+        
         var actions = gxp.plugins.RemoveGroup.superclass.addActions.apply(this, [{
             menuText: this.addGroupMenuText,
             iconCls: "gxp-icon-removegroup",
@@ -88,6 +90,9 @@ gxp.plugins.RemoveGroup = Ext.extend(gxp.plugins.Tool, {
                                 this.target.tools[tool].actions[0].disable();
                             }
                         }
+                        
+                        apptarget.modified = true;
+                        //modified = true;                        
                     }
                 };
                 

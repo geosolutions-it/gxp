@@ -52,6 +52,8 @@ gxp.plugins.RemoveOverlays = Ext.extend(gxp.plugins.Tool, {
      */
     addActions: function() {
         var selectedLayer;
+        var apptarget = this.target;
+        
         var actions = gxp.plugins.RemoveLayer.superclass.addActions.apply(this, [{
             menuText: this.removeOverlaysMenuText,
             iconCls: "gxp-icon-removeoverlays",
@@ -68,6 +70,9 @@ gxp.plugins.RemoveOverlays = Ext.extend(gxp.plugins.Tool, {
                                 layers.remove(record);
                             }
                         }); 
+                        
+                        apptarget.modified = true;
+                        //modified = true;
                     }
                 };
                 

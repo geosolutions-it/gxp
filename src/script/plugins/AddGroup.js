@@ -56,6 +56,8 @@ gxp.plugins.AddGroup = Ext.extend(gxp.plugins.Tool, {
      * api: method[addActions]
      */
     addActions: function() {
+        var apptarget = this.target;
+        
         var actions = gxp.plugins.AddGroup.superclass.addActions.apply(this, [{
             menuText: this.addGroupMenuText,
             iconCls: "gxp-icon-addgroup",
@@ -160,6 +162,9 @@ gxp.plugins.AddGroup = Ext.extend(gxp.plugins.Tool, {
                                     }
                                     
                                     win.destroy();
+                                    
+                                    apptarget.modified = true;
+                                    //modified = true;
                                 }
                             }
                         ]

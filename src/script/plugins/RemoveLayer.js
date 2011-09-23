@@ -46,7 +46,9 @@ gxp.plugins.RemoveLayer = Ext.extend(gxp.plugins.Tool, {
     /** api: method[addActions]
      */
     addActions: function() {
-        var selectedLayer;
+        var selectedLayer;        
+        var apptarget = this.target;
+        
         var actions = gxp.plugins.RemoveLayer.superclass.addActions.apply(this, [{
             menuText: this.removeMenuText,
             iconCls: "gxp-icon-removelayers",
@@ -56,6 +58,8 @@ gxp.plugins.RemoveLayer = Ext.extend(gxp.plugins.Tool, {
                 var record = selectedLayer;
                 if(record) {
                     this.target.mapPanel.layers.remove(record);
+                    apptarget.modified = true;
+                    //modified = true;
                 }
             },
             scope: this

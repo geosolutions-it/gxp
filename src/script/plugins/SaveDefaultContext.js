@@ -55,13 +55,15 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
     addActions: function() {
 		
 		var saveContext = new Ext.Button({
-			needsAuthorization: true,
+		        id: "save-context-button",
+			      needsAuthorization: true,
             menuText: this.saveDefaultContextMenuText,
             iconCls: "gxp-icon-savedefaultcontext",
             disabled: true,
             tooltip: this.saveDefaultContextActionTip,
             handler: function() {
-			
+            
+			  var app = this.target;
 				var xmlContext;
 				var handleSave = function(){
 					  var xmlContext = this.xmlContext;
@@ -132,12 +134,14 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
 					  mask.show();
 								
             Ext.Ajax.request({
-               url: "proxy/?url=" + "http://admin:1geosol2@demo1.geo-solutions.it/exist/rest/mapadmin/context.xml",
+               url: "proxy/?url=" + "http://admin:1geoadmin2@demo1.geo-solutions.it/exist/rest/mapadmin/context.xml",
                method: 'PUT',
                params: xmlContext,
                scope: this,
                success: function(response, opts){
                   mask.hide();
+                  app.modified = false;
+                  //modified = false;
                   Ext.Msg.show({
                        title: this.contextSaveSuccessString,
                        msg: response.statusText,
@@ -161,19 +165,20 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
 				var url = app.xmlJsonTranslateService + "HTTPWebGISSave";
 				
 				OpenLayers.Request.issue({
-					method: 'POST',
-					url: url,
-					data: configStr,
-					callback: function(request) {
-						if (request.status == 200) {
-							this.xmlContext = request.responseText;
-							handleSave.call(this);
-						} else {
-							throw /*this.saveErrorText + */request.responseText;
-						}						
-					},
-					scope: this
-				});					
+            method: 'POST',
+            url: url,
+            data: configStr,
+            callback: function(request) {
+              if (request.status == 200) {
+                this.xmlContext = request.responseText;
+                handleSave.call(this);
+              } else {
+                //throw this.saveErrorText + request.responseText;
+                throw request.responseText;
+              }						
+            },
+            scope: this
+          });				
    
             },
             scope: this

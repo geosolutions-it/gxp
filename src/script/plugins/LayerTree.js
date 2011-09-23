@@ -235,6 +235,10 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                 }
             }),
             listeners: {
+                afterlayout: function(cmp, layout){
+                    target.modified = false;
+                    //modified = false;
+                },
                 contextmenu: function(node, e) {
                     if(node && node.layer) {
                         node.select();
@@ -293,7 +297,10 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                         }
                     }
                 },
-                enddrag: function(tree, node, e){                        
+                enddrag: function(tree, node, e){    
+                    target.modified = true;
+                    //modified = true;
+                                   
                     if(node.loader && node.attributes.group != undefined && this.nodeIndex){ 
                         var newOffset = 0;
                         
@@ -359,6 +366,9 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                     }
                 },   
                 checkchange: function(node, checked){  
+                    target.modified = true;
+                    //modified = true;
+                
                     if(!node.isLeaf()){
                         var childs = node.childNodes;
                         var size = childs.length;

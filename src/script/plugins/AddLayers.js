@@ -182,7 +182,7 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
     /** api: method[addActions]
      */
     addActions: function() {
-        var selectedLayer;
+        var selectedLayer;        
         var actions = gxp.plugins.AddLayers.superclass.addActions.apply(this, [{
             tooltip : this.addActionTip,
             text: this.addActionText,
@@ -227,6 +227,8 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
         var expander = this.createExpander();
         
         var addLayers = function() {
+            var apptarget = this.target;
+        
             var key = sourceComboBox.getValue();
             var layerStore = this.target.mapPanel.layers;
             var source = this.target.layerSources[key];
@@ -245,6 +247,9 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
                     }
                 }
             }
+            
+            apptarget.modified = true;
+            //modified = true;
         };
 
         var idx = 0;
