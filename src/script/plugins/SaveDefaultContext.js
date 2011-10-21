@@ -134,7 +134,7 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
 					  mask.show();
 								
             Ext.Ajax.request({
-               url: "proxy/?url=" + "http://admin:1geoadmin2@demo1.geo-solutions.it/exist/rest/mapadmin/context.xml",
+               url: proxy + "http://admin:1geoadmin2@demo1.geo-solutions.it/exist/rest/mapadmin/context.xml",
                method: 'PUT',
                params: xmlContext,
                scope: this,

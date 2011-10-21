@@ -235,10 +235,35 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
             var records = capGridPanel.getSelectionModel().getSelections();
             var record;
             for (var i=0, ii=records.length; i<ii; ++i) {
-                record = source.createLayerRecord({
-                    name: records[i].get("name"),
-                    source: key
-                });
+            
+                var keywords = records[i].get("keywords");
+                if(keywords){
+                    var keyword;
+                    for(var k=0; k<keywords.length; k++){
+                        keyword = keywords[k].value;
+                        if(keyword.indexOf("uuid") != -1){
+                          keyword = keyword.substring(keyword.indexOf("uuid="));
+                          keyword = keyword.split("=")[1];
+                        }                      
+                    }
+                    
+                    if(keyword)
+                        record = source.createLayerRecord({
+                            name: records[i].get("name"),
+                            source: key,
+                            uuid: keyword
+                        });
+                    else
+                        record = source.createLayerRecord({
+                            name: records[i].get("name"),
+                            source: key
+                        });
+                }else
+                    record = source.createLayerRecord({
+                        name: records[i].get("name"),
+                        source: key
+                    });
+                  
                 if (record) {
                     if (record.get("group") === "background") {
                         layerStore.insert(0, [record]);
@@ -270,7 +295,8 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
             colModel: new Ext.grid.ColumnModel([
                 expander,
                 {id: "title", header: this.panelTitleText, dataIndex: "title", sortable: true},
-                {header: "Id", dataIndex: "name", width: 150, sortable: true}
+                {header: "Id", dataIndex: "name", width: 150, sortable: true},
+                {header: "uuid", dataIndex: "keywords", width: 150, sortable: true, hidden: true}
             ]),
             listeners: {
                 rowdblclick: addLayers,
