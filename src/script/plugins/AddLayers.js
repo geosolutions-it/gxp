@@ -238,20 +238,20 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
             
                 var keywords = records[i].get("keywords");
                 if(keywords){
-                    var keyword;
+                    var uuidKey;
                     for(var k=0; k<keywords.length; k++){
-                        keyword = keywords[k].value;
+                        var keyword = keywords[k].value;
                         if(keyword.indexOf("uuid") != -1){
-                          keyword = keyword.substring(keyword.indexOf("uuid="));
-                          keyword = keyword.split("=")[1];
+                          uuidKey = keyword.substring(keyword.indexOf("uuid="));
+                          uuidKey = keyword.split("=")[1];
                         }                      
                     }
                     
-                    if(keyword)
+                    if(uuidKey)
                         record = source.createLayerRecord({
                             name: records[i].get("name"),
                             source: key,
-                            uuid: keyword
+                            uuid: uuidKey
                         });
                     else
                         record = source.createLayerRecord({
