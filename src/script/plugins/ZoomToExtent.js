@@ -92,15 +92,14 @@ gxp.plugins.ZoomToExtent = Ext.extend(gxp.plugins.Tool, {
             handler: function() {
                 var map = this.target.mapPanel.map;
 				
-				
-				
-				var bbox = new OpenLayers.Bounds.fromString('-7.343,8.368,-15,14.771');
-				bbox = bbox.transform(
-					new OpenLayers.Projection("EPSG:4326"),
-					new OpenLayers.Projection(map.projection));
+				        /*
+				        var bbox = new OpenLayers.Bounds.fromString('-7.343,8.368,-15,14.771');
+				        bbox = bbox.transform(
+					         new OpenLayers.Projection("EPSG:4326"),
+					         new OpenLayers.Projection(map.projection));
                 map.zoomToExtent(bbox);
-				
-				/*				
+                */
+							
                 var extent = typeof this.extent == "function" ? this.extent() : this.extent;
                 if (!extent) {
                     // determine visible extent
@@ -130,7 +129,7 @@ gxp.plugins.ZoomToExtent = Ext.extend(gxp.plugins.Tool, {
                     }
                     map.zoomToExtent(extent, this.closest);
                 }				
-				*/
+				
             },
             scope: this
         }]);
