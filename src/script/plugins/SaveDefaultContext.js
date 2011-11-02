@@ -50,6 +50,12 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
      */
     contextSaveFailString: "Context not saved succesfully",
     
+    /** api: config[addResourceButtonText]
+     *  ``String``
+     */
+    addResourceButtonText: "Add Map",
+    
+    
     /** api: method[addActions]
      */
     addActions: function() {
@@ -63,38 +69,21 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
             handler: function() {
                   var configStr = Ext.util.JSON.encode(app.getState()); 
                   
-                  var mask = new Ext.LoadMask(Ext.getBody(), {msg:"Please wait..."});
-                  mask.show();
+                  if(mapId == -1){
+                      //
+                      // SAVE MAP
+                      //
+                      this.metadataDialog(configStr);                      
+                  }else{
+                      //
+                      // UPDATE MAP
+                      // 
+                      var url = proxy + geoStoreBaseURL + "data/" + mapId;
+                      var method = 'PUT';
+                      var contentType = 'application/json';
                       
-                  Ext.Ajax.request({
-                     url: proxy + geoStoreBaseURL + "data/" + mapId,
-                     method: 'PUT',
-                     headers:{
-                        'Content-type' : 'application/json'
-                     },
-                     params: configStr,
-                     scope: this,
-                     success: function(response, opts){
-                        mask.hide();
-                        app.modified = false;
-                        //modified = false;
-                        Ext.Msg.show({
-                             title: this.contextSaveSuccessString,
-                             msg: response.statusText + " Map successfully saved",
-                             buttons: Ext.Msg.OK,
-                             icon: Ext.MessageBox.OK
-                        });
-                     },
-                     failure:  function(response, opts){
-                        mask.hide();
-                        Ext.Msg.show({
-                           title: this.contextSaveFailString,
-                           msg: response.statusText,
-                           buttons: Ext.Msg.OK,
-                           icon: Ext.MessageBox.ERROR
-                        });
-                     }
-                  });   
+                      this.save(url, method, contentType, configStr);
+                  }
             },
             scope: this
         });
@@ -102,6 +91,124 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
         var actions = gxp.plugins.SaveDefaultContext.superclass.addActions.apply(this, [ saveContext ]);        
         
         return actions;
+    },
+    
+    save: function(url, method, contentType, configStr){    
+        var mask = new Ext.LoadMask(Ext.getBody(), {msg:"Please wait..."});
+        mask.show();
+        
+        Ext.Ajax.request({
+           url: url,
+           method: method,
+           headers:{
+              'Content-Type' : contentType,
+              'Accept' : 'application/json, text/plain, text/xml'
+           },
+           params: configStr,
+           scope: this,
+           success: function(response, opts){
+              mask.hide();
+              app.modified = false;
+              //modified = false;
+              
+              var id = response.responseText;
+              
+              Ext.Msg.show({
+                   title: this.contextSaveSuccessString,
+                   msg: response.statusText + " Map successfully saved",
+                   buttons: Ext.Msg.OK,
+                   fn: this.reload(id),
+                   icon: Ext.MessageBox.OK,
+                   scope: this
+              });
+           },
+           failure:  function(response, opts){
+              mask.hide();
+              Ext.Msg.show({
+                 title: this.contextSaveFailString,
+                 msg: response.statusText,
+                 buttons: Ext.Msg.OK,
+                 icon: Ext.MessageBox.ERROR
+              });
+           }
+        }); 
+    },
+    
+    reload: function(id){
+        var href = location.href;
+        if(href.indexOf('mapId') == -1){
+            window.open(href + '?mapId=' + id, '_self');
+        }
+    },
+    
+    metadataDialog: function(configStr){
+        var enableBtnFunction = function(){
+            if(this.getValue() != "")
+                Ext.getCmp("resource-addbutton").enable();
+            else
+                Ext.getCmp("resource-addbutton").disable();
+        };
+        
+        var win = new Ext.Window({
+            width: 315,
+            height: 200,
+            //title: "Map Name",
+            items: [
+                new Ext.form.FormPanel({
+                    width: 300,
+                    height: 150,
+                    items: [
+                        {
+                          xtype: 'fieldset',
+                          id: 'name-field-set',
+                          title: "Map Name",
+                          items: [
+                              {
+                                xtype: 'textfield',
+                                width: 120,
+                                id: 'diag-text-field',
+                                fieldLabel: "Name",
+                                listeners: {
+                                    render: function(f){
+                                        f.el.on('keydown', enableBtnFunction, f, {buffer: 350});
+                                    }
+                                }
+                              }
+                          ]
+                        }
+                    ]
+                })
+            ],
+            bbar: new Ext.Toolbar({
+                items:[
+                    '->',
+                    {
+                        text: this.addResourceButtonText,
+                        iconCls: "gxp-icon-addgroup-button",
+                        id: "resource-addbutton",
+                        scope: this,
+                        disabled: true,
+                        handler: function(){      
+                            win.hide(); 
+                            
+                            var mapName = Ext.getCmp("diag-text-field").getValue();        
+                            
+                            var resourceXML = '<Resource><description></description><metadata></metadata><name>' + mapName + '</name><category><name>MAP</name></category><store><data><![CDATA[ ' + configStr + ' ]]></data></store></Resource>';
+                            
+                            var url = proxy + geoStoreBaseURL + "resources";
+                            var method = 'POST';
+                            var contentType = 'text/xml';              
+                                  
+                            this.save(url, method, contentType, resourceXML);
+                            
+                            win.destroy(); 
+                        }
+                    }
+                ]
+            })
+        });
+        
+        win.show();
     }
         
 });
