@@ -69,7 +69,7 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
             handler: function() {
                   var configStr = Ext.util.JSON.encode(app.getState()); 
                   
-                  if(mapId == -1){
+                  if(this.target.mapId == -1){
                       //
                       // SAVE MAP
                       //
@@ -78,7 +78,7 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
                       //
                       // UPDATE MAP
                       // 
-                      var url = proxy + geoStoreBaseURL + "data/" + mapId;
+                      var url = proxy + geoStoreBaseURL + "data/" + this.target.mapId;
                       var method = 'PUT';
                       var contentType = 'application/json';
                       
@@ -111,13 +111,26 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
               app.modified = false;
               //modified = false;
               
-              var id = response.responseText;
+              this.target.mapId = response.responseText;
               
+              var reload = function(buttonId, text, opt){
+                  if(buttonId === 'ok'){  
+                      var href = location.href;
+                      if(href.indexOf('mapId') == -1){
+                          if(href.indexOf('?') != -1){
+                              window.open(href + '&mapId=' + this.target.mapId, '_self');
+                          }else{
+                              window.open(href + '?mapId=' + this.target.mapId, '_self');
+                          }
+                      }
+                  } 
+              };
+    
               Ext.Msg.show({
                    title: this.contextSaveSuccessString,
                    msg: response.statusText + " Map successfully saved",
                    buttons: Ext.Msg.OK,
-                   fn: this.reload(id),
+                   fn: reload,
                    icon: Ext.MessageBox.OK,
                    scope: this
               });
@@ -132,13 +145,6 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
               });
            }
         }); 
-    },
-    
-    reload: function(id){
-        var href = location.href;
-        if(href.indexOf('mapId') == -1){
-            window.open(href + '?mapId=' + id, '_self');
-        }
     },
     
     metadataDialog: function(configStr){

@@ -442,6 +442,10 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
             var tool;
             for (var i=0, len=this.initialConfig.tools.length; i<len; i++) {
                 try {
+
+                    if(this.initialConfig.tools[i].needsAuthorization && !this.auth)
+                        continue;
+                    
                     tool = Ext.ComponentMgr.createPlugin(
                         this.initialConfig.tools[i], this.defaultToolType
                     );
