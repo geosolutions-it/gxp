@@ -156,29 +156,38 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
         };
         
         var win = new Ext.Window({
-            width: 315,
+            width: 415,
             height: 200,
+            resizable: false,
             //title: "Map Name",
             items: [
                 new Ext.form.FormPanel({
-                    width: 300,
+                    width: 400,
                     height: 150,
                     items: [
                         {
                           xtype: 'fieldset',
                           id: 'name-field-set',
-                          title: "Map Name",
+                          title: "Map Metadata",
                           items: [
                               {
-                                xtype: 'textfield',
-                                width: 120,
-                                id: 'diag-text-field',
-                                fieldLabel: "Name",
-                                listeners: {
-                                    render: function(f){
-                                        f.el.on('keydown', enableBtnFunction, f, {buffer: 350});
+                                    xtype: 'textfield',
+                                    width: 120,
+                                    id: 'diag-text-field',
+                                    fieldLabel: "Name",
+                                    listeners: {
+                                        render: function(f){
+                                            f.el.on('keydown', enableBtnFunction, f, {buffer: 350});
+                                        }
                                     }
-                                }
+                              },
+                              {
+                                    xtype: 'textarea',
+                                    width: 200,
+                                    id: 'diag-text-description',
+                                    fieldLabel: "Description",
+                                    readOnly: false,
+                                    hideLabel : false                    
                               }
                           ]
                         }
@@ -198,8 +207,9 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
                             win.hide(); 
                             
                             var mapName = Ext.getCmp("diag-text-field").getValue();        
+                            var mapDescription = Ext.getCmp("diag-text-description").getValue(); 
                             
-                            var resourceXML = '<Resource><description></description><metadata></metadata><name>' + mapName + '</name><category><name>MAP</name></category><store><data><![CDATA[ ' + configStr + ' ]]></data></store></Resource>';
+                            var resourceXML = '<Resource><description>' + mapDescription + '</description><metadata></metadata><name>' + mapName + '</name><category><name>MAP</name></category><store><data><![CDATA[ ' + configStr + ' ]]></data></store></Resource>';
                             
                             var url = proxy + geoStoreBaseURL + "resources";
                             var method = 'POST';
