@@ -66,7 +66,7 @@ gxp.plugins.GeonetworkSearch = Ext.extend(gxp.plugins.Tool, {
 						} else {
 							title = title[0];
 						}
-						runSimpleSearch(title);
+						runSimpleSearch(title, true, false, false, false, false);
 					}
                 }
             },
