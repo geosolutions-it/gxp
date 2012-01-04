@@ -206,7 +206,7 @@
 
 /* gxp-icon-savedefaultcontext */
 .x-btn .gxp-icon-savedefaultcontext, .x-menu-item .gxp-icon-savedefaultcontext, .x-tree-node .gxp-icon-savedefaultcontext {
-    background-image: url(img/geosilk/server_table.png);
+    background-image: url(img/geosilk/disk.png);
 }
 
 /* gxp_zoomtodataextent, gxp_zoomtoselectedfeatures, gxp_zoomtolayerextent */

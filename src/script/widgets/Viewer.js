@@ -357,6 +357,12 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
             source = Ext.ComponentMgr.createPlugin(
                 options.config, this.defaultSourceType
             );
+            
+            //
+            // Setting the id of the source in order to add a new source and a new layer dinamically (no AddLayer plugin).
+            // (by default this id is only for the conresponding element inside the ext sources combobox).
+            //
+            source.id = id;
         } catch (err) {
             throw new Error("Could not create new source plugin with ptype: " + options.config.ptype);
         }
@@ -506,18 +512,19 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
         this.portal = new Constructor(Ext.applyIf(this.portalConfig || {}, {
             layout: "fit",
             hideBorders: true,
-            //title: this.mapTitle ? this.mapTitle : 'map',
+            title: this.mapTitle ? this.mapTitle : 'map',
             items: {
                 layout: "border",
                 deferredRender: false,
                 items: this.portalItems
             }
         }));
-        		
+        
         if(this.renderToTab){
             var portalContainer = Ext.getCmp(this.renderToTab);
             portalContainer.add(this.portal);
             portalContainer.doLayout();
+            portalContainer.setActiveTab(0);
         }
         
         this.fireEvent("portalready");
