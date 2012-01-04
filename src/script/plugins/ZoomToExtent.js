@@ -99,7 +99,7 @@ gxp.plugins.ZoomToExtent = Ext.extend(gxp.plugins.Tool, {
 					         new OpenLayers.Projection(map.projection));
                 map.zoomToExtent(bbox);
                 */
-							
+								
                 var extent = typeof this.extent == "function" ? this.extent() : this.extent;
                 if (!extent) {
                     // determine visible extent
@@ -115,7 +115,8 @@ gxp.plugins.ZoomToExtent = Ext.extend(gxp.plugins.Tool, {
                             }
                         }
                     }
-                }else{
+                }
+                if (extent) {
                     // respect map properties
                     var restricted = map.restrictedExtent || map.maxExtent;
                     if (restricted) {
