@@ -63,7 +63,7 @@ gxp.plugins.RemoveGroup = Ext.extend(gxp.plugins.Tool, {
         var apptarget = this.target;
         
         var actions = gxp.plugins.RemoveGroup.superclass.addActions.apply(this, [{
-            menuText: this.addGroupMenuText,
+            menuText: this.removeGroupMenuText,
             iconCls: "gxp-icon-removegroup",
             disabled: true,
             tooltip: this.removeGroupActionTip,

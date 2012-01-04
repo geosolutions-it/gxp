@@ -206,7 +206,6 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                     modal: true,
                     border: false,
                     resizable: false,
-                    //width: 360,
                     items: [
                         new GeoExt.ux.PrintPreview({
                             autoHeight: true,
