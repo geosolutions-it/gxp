@@ -72,7 +72,10 @@ gxp.plugins.AddGroup = Ext.extend(gxp.plugins.Tool, {
                         Ext.getCmp("group-addbutton").disable();
                 };
                 
-                var win = new Ext.Window({
+                if(this.win)
+                    this.win.destroy();
+
+                this.win = new Ext.Window({
                     width: 315,
                     height: 200,
                     title: this.addGroupDialogTitle,
@@ -112,7 +115,7 @@ gxp.plugins.AddGroup = Ext.extend(gxp.plugins.Tool, {
                                 scope: this,
                                 disabled: true,
                                 handler: function(){      
-                                    win.hide();     
+                                    this.win.hide();     
                                                              
                                     var tree = Ext.getCmp("layertree");                                        
                                     var textField = Ext.getCmp("diag-text-field");
@@ -161,7 +164,7 @@ gxp.plugins.AddGroup = Ext.extend(gxp.plugins.Tool, {
                                         });
                                     }
                                     
-                                    win.destroy();
+                                    this.win.destroy();
                                     
                                     apptarget.modified = true;
                                     //modified = true;
@@ -171,7 +174,7 @@ gxp.plugins.AddGroup = Ext.extend(gxp.plugins.Tool, {
                     })
                 });
                 
-                win.show();
+                this.win.show();
             },
             scope: this
         }]);
