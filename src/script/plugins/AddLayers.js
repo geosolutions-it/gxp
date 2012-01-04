@@ -250,17 +250,20 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
                     if(uuidKey)
                         record = source.createLayerRecord({
                             name: records[i].get("name"),
+                            title: records[i].get("title"),
                             source: key,
                             uuid: uuidKey
                         });
                     else
                         record = source.createLayerRecord({
                             name: records[i].get("name"),
+                            title: records[i].get("title"),
                             source: key
                         });
                 }else
                     record = source.createLayerRecord({
                         name: records[i].get("name"),
+                        title: records[i].get("title"),
                         source: key
                     });
                   

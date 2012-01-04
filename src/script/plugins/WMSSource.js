@@ -262,7 +262,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
             params = Ext.applyIf(params, layer.params);
 
             layer = new OpenLayers.Layer.WMS(
-                config.title || layer.name, 
+                config.title || config.name, 
                 layer.url, 
                 params, {
                     attribution: layer.attribution,
@@ -280,7 +280,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
             // data for the new record
             var data = Ext.applyIf({
                 title: config.title, 
-                name: layer.name,
+                name: config.name,
                 group: config.group,
 				        uuid: config.uuid,
 				        gnURL: config.gnURL,
