@@ -517,7 +517,7 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
         this.portal = new Constructor(Ext.applyIf(this.portalConfig || {}, {
             layout: "fit",
             hideBorders: true,
-            title: this.mapTitle ? this.mapTitle : 'map',
+            title: this.mapTitle ? this.mapTitle : this.viewTabTitle ? this.viewTabTitle : 'map',
             items: {
                 layout: "border",
                 deferredRender: false,
