@@ -101,6 +101,8 @@ gxp.plugins.LayerProperties = Ext.extend(gxp.plugins.Tool, {
         if (panelConfig && panelConfig[xtype]) {
             Ext.apply(config, panelConfig[xtype]);
         }
+        this.outputConfig.renderTo = this.target.mapPanelContainer.body;
+        this.outputConfig.constrainHeader=true;
         return gxp.plugins.LayerProperties.superclass.addOutput.call(this, Ext.apply({
             xtype: xtype,
             authorized: this.target.isAuthorized(),
