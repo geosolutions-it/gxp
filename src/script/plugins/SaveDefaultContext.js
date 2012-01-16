@@ -70,7 +70,7 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
 					var xmlContext = this.xmlContext;				
 					var mask = new Ext.LoadMask(Ext.getBody(), {msg:"Please wait..."});
 					mask.show();
-					alert(this.target.auth);
+					
 					//var auth='Basic ' + Base64.encode(this.user+":"+this.pass);					
 					Ext.Ajax.request({
 						//** REMOVE USER AND PASS IN URL WHEN PROXY WILL SUPPORT BASIC AUTH **//
@@ -106,7 +106,7 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
 				
 				var configStr = Ext.util.JSON.encode(app.getState());  
 				var url = app.xmlJsonTranslateService + "HTTPWebGISSave";
-				alert(app.auth);
+				
 				OpenLayers.Request.issue({
 					method: 'POST',
 					url: url,
