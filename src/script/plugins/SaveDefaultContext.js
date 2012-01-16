@@ -126,8 +126,8 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
 			},
 			scope: this
         });
-		
-        var actions = gxp.plugins.SaveDefaultContext.superclass.addActions.apply(this, [ saveContext ]);        
+		var spacer= "-";
+        var actions = gxp.plugins.SaveDefaultContext.superclass.addActions.apply(this, [[ spacer,saveContext] ]);        
         
         return actions;
     }
