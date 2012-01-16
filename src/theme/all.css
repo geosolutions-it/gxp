@@ -263,6 +263,13 @@
 .x-btn .gxp-icon-palette, .x-menu-item .gxp-icon-palette, .x-tree-node .gxp-icon-palette {
    background-image: url(img/silk/palette.png);
 }
+/* gxp_login */
+.gxp-icon-login{
+	background-image: url(img/silk/door_in.png);
+}
+.gxp-icon-logout{
+	 background-image: url(img/silk/door_out.png);
+}
 
 /* fixes textarea scrollbar issue in FF on OSX */
 .ext-gecko.ext-mac textarea.x-form-field {
