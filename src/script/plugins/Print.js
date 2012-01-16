@@ -214,6 +214,7 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                             printMapPanel: {
                                 map: Ext.applyIf({
                                     controls: [
+										//UNCOMMENT TO ADD CONTROLS TO PRINT PREVIEW
                                         //new OpenLayers.Control.Navigation(),
                                         //new OpenLayers.Control.PanPanel(),
                                         //new OpenLayers.Control.ZoomPanel(),
@@ -225,6 +226,7 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                                         }
                                     }
                                 }, mapPanel.initialConfig.map)
+								//UNCOMMENT TO ADD ZOOM SLIDER TO PRINT PREVIEW
                                 /*items: [{
                                     xtype: "gx_zoomslider",
                                     vertical: true,
