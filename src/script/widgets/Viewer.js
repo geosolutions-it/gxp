@@ -248,6 +248,14 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
             if(this.tools[tool].ptype == "gxp_removegroup"){            
                 this.tools[tool].actions[0].disable();
             }
+            
+            if(this.tools[tool].ptype == "gxp_geonetworksearch"){            
+                this.tools[tool].actions[0].show();
+            }
+            
+            if(this.tools[tool].ptype == "gxp_zoomtolayerextent"){            
+                this.tools[tool].actions[0].show();
+            }
         }
         
         record = record || null;
@@ -280,6 +288,13 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
                 if(this.tools[tool].ptype == "gxp_removelayer"){            
                     this.tools[tool].actions[0].disable();
                 }
+                
+                if(this.tools[tool].ptype == "gxp_geonetworksearch"){            
+                    this.tools[tool].actions[0].hide();
+                }
+                if(this.tools[tool].ptype == "gxp_zoomtolayerextent"){            
+                this.tools[tool].actions[0].hide();
+            }
             }
             
             this.fireEvent("groupselectionChange", groupNode); 
@@ -513,25 +528,36 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
         if(this.renderToTab){
             var portalContainer = Ext.getCmp(this.renderToTab);
             portalContainer.add(this.portal);
+			
             portalContainer.doLayout();
+			this.currentTab = portalContainer.getActiveTab() || 0;
             portalContainer.setActiveTab(2);
-                        
-            Ext.getCmp('west').collapse();
-            
+  			if(!this.currentTab){
+				Ext.getCmp('west').collapse();
+			}
             var map = this.mapPanel.map;
             var activeTab = portalContainer.getActiveTab();
             app.on({
               'portalready' : function(){
-                activeTab.addListener("activate", function(){
-                    Ext.getCmp('west').expand();
-
-                    map.size.w += 1;
-                    map.updateSize();
-                    map.size.w -= 1;
-                    map.updateSize();
-                });
-                
-                portalContainer.setActiveTab(0);
+					activeTab.addListener("activate", function(){
+						
+						Ext.getCmp('west').expand();
+						
+						map.size.w += 1;
+						map.updateSize();
+						map.size.w -= 1;
+						map.updateSize();
+					});
+					//set the current tab 					
+					if(!this.currentTab){
+						portalContainer.setActiveTab(0);
+					}else{
+						portalContainer.setActiveTab(2);
+					}
+					if(this.currentTab){
+						Ext.getCmp('west').expand();
+					}
+					
               }
             });
         }
@@ -634,7 +660,6 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
      *  configured before the call.
      */
     createLayerRecord: function(config, callback, scope) {
-        alert(callback);
         this.createLayerRecordQueue.push({
             config: config,
             callback: callback,
