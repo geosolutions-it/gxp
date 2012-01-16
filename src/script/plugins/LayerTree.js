@@ -240,7 +240,7 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                     //modified = false;
                 },
                 contextmenu: function(node, e) {
-                    if(node && node.layer) {
+                    if(node /*&& node.layer*/) {//NOTE: commented for enable menu for groups
                         node.select();
                         var tree = node.getOwnerTree();
                         if (tree.getSelectionModel().getSelectedNode() === node) {
@@ -249,6 +249,7 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                             c.items.getCount() > 0 && c.showAt(e.getXY());
                         }
                     }
+                    
                 },
                 beforemovenode: function(tree, node, oldParent, newParent, i) {
                     this.oldParent = oldParent;
