@@ -34,13 +34,13 @@ gxp.plugins.GroupProperties = Ext.extend(gxp.plugins.Tool, {
      *  ``String``
      *  Text for add menu item (i18n).
      */
-    groupPropertiesMenuText: "Modify Group Name",
+    groupPropertiesMenuText: "Group Properties",
 
     /** api: config[groupPropertiesActionTip]
      *  ``String``
      *  Text for add action tooltip (i18n).
      */
-    groupPropertiesActionTip: "Modify group properties",
+    groupPropertiesActionTip: "Group Properties",
     
     groupPropertiesDialogTitle: "Group Properties - ",
     
@@ -68,16 +68,19 @@ gxp.plugins.GroupProperties = Ext.extend(gxp.plugins.Tool, {
             handler: function() {
                 
                 var enableBtnFunction = function(){
-                    if(this.getValue() != "")
+                    if(this.getValue() != "" || Ext.getCmp("group-field-set").visible())
                         Ext.getCmp("group-addbutton").enable();
                     else
                         Ext.getCmp("group-addbutton").disable();
                 };
-                
-                var win = new Ext.Window({
+                var x="";
+                if(this.win) {this.win.destroy();}
+                this.win = new Ext.Window({
                     width: 315,
                     height: 200,
                     title: this.groupPropertiesDialogTitle + selectedGroup.text,
+                    renderTo: this.target.mapPanelContainer.body,
+                    constrainHeader:true,
                     items: [
                         new Ext.form.FormPanel({
                             width: 300,
@@ -115,7 +118,7 @@ gxp.plugins.GroupProperties = Ext.extend(gxp.plugins.Tool, {
                                 scope: this,
                                 disabled: false,
                                 handler: function(){      
-                                    win.hide();     
+                                    this.win.hide();     
                                     
                                     var textField = Ext.getCmp("diag-text-field");
                                     
@@ -138,14 +141,14 @@ gxp.plugins.GroupProperties = Ext.extend(gxp.plugins.Tool, {
                                         }
                                     }
                                     
-                                    win.destroy();
+                                    this.win.destroy();
                                 }
                             }
                         ]
                     })
                 });
                 
-                win.show();
+                this.win.show();
             },
             scope: this
         }]);
