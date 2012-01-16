@@ -17,6 +17,8 @@ GeoExt.Lang.add("en", {
         panelTitleText: "Title",
         layerSelectionText: "View available data from:",
         doneText: "Done",
+        removeFilterText: "Clear filter", 
+        filterEmptyText: "Filter",
         uploadText: "Upload Data"
     },
     
@@ -352,6 +354,12 @@ GeoExt.Lang.add("en", {
 
     "gxp.ScaleOverlay.prototype": { 
         zoomLevelText: "Zoom level"
+    },
+    "gxp.plugins.ZoomBox.prototype":{
+        zoomInMenuText: "Zoom Box In",
+        zoomOutMenuText: "Zoom Box Out",
+        zoomInTooltip: "Zoom Box In",
+        zoomOutTooltip: "Zoom Box Out"
     }
 
 });

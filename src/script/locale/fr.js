@@ -9,6 +9,8 @@ GeoExt.Lang.add("fr", {
         addLayerSourceErrorText: "Erreur capacités WMS obtenir ({msg}).\nVeuillez vérifier URL et essayez à nouveau.",
         availableLayersText: "Layers disponible",
         doneText: "Terminé",
+        removeFilterText: "effacer le filtre", 
+        filterEmptyText: "Filtre",
         uploadText: "Upload Data"
     },
     
@@ -285,6 +287,12 @@ GeoExt.Lang.add("fr", {
 
     "gxp.ScaleOverlay.prototype": { 
         zoomLevelText: "Niveau de zoom"
+    },
+    "gxp.plugins.ZoomBox.prototype":{
+        zoomInMenuText: "Zoom Box Avant",
+        zoomOutMenuText: "Zoom Box Arrière",
+        zoomInTooltip: "Zoom Box Avant",
+        zoomOutTooltip: "Zoom Box Arrière"
     }
 
 });
