@@ -67,24 +67,78 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
             disabled: false,
             tooltip: this.saveDefaultContextActionTip,
             handler: function() {
-                  var configStr = Ext.util.JSON.encode(app.getState()); 
+            
+                  var loginPanel;
+                  var loginWin;
+                  var thisObj = this;
                   
-                  if(this.target.mapId == -1){
-                      //
-                      // SAVE MAP
-                      //
-                      this.metadataDialog(configStr);                      
-                  }else{
-                      //
-                      // UPDATE MAP
-                      // 
-                      //var url = proxy + geoStoreBaseURL + "data/" + this.target.mapId;
-                      var url = geoStoreBaseURL + "data/" + this.target.mapId;
-                      var method = 'PUT';
-                      var contentType = 'application/json';
+                  var submitLogin = function() {
+                      var form = loginPanel.getForm();
+                      var fields = form.getValues();
                       
-                      this.save(url, method, contentType, configStr);
-                  }
+                      var pass = fields.password;
+                      var user = fields.username;
+                                  
+                      loginWin.destroy();
+                      
+                      thisObj.auth = 'Basic ' + Base64.encode(user + ':' + pass);           
+                      var configStr = Ext.util.JSON.encode(app.getState()); 
+                      
+                      if(thisObj.target.mapId == -1){
+                          //
+                          // SAVE MAP
+                          //
+                          thisObj.metadataDialog(configStr);                      
+                      }else{
+                          //
+                          // UPDATE MAP
+                          // 
+                          //var url = proxy + geoStoreBaseURL + "data/" + thisObj.target.mapId;
+                          var url = geoStoreBaseURL + "data/" + thisObj.target.mapId;
+                          var method = 'PUT';
+                          var contentType = 'application/json';
+                          
+                          this.save(url, method, contentType, configStr);
+                      }
+                  };
+                  
+                  loginPanel = new Ext.FormPanel({
+                      frame: true,
+                      labelWidth: 80,
+                      defaultType: "textfield",
+                      items: [{
+                          fieldLabel: "Utente",
+                          name: "username",
+                          allowBlank: false
+                      }, {
+                          fieldLabel: "Password",
+                          name: "password",
+                          inputType: "password",
+                          allowBlank: false
+                      }],
+                      buttons: [{
+                          text: "Login",
+                          formBind: true,
+                          handler: submitLogin
+                      }],
+                      keys: [{ 
+                          key: [Ext.EventObject.ENTER], 
+                          handler: submitLogin
+                      }]
+                  });
+                  
+                  var loginWin = new Ext.Window({
+                      title: "Login",
+                      layout: "fit",
+                      width: 275,
+                      height: 130,
+                      plain: true,
+                      border: false,
+                      modal: true,
+                      items: [loginPanel]
+                  });
+                  
+                  loginWin.show();
             },
             scope: this
         });
@@ -103,7 +157,8 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
            method: method,
            headers:{
               'Content-Type' : contentType,
-              'Accept' : 'application/json, text/plain, text/xml'
+              'Accept' : 'application/json, text/plain, text/xml',
+              'Authorization' : this.auth
            },
            params: configStr,
            scope: this,
