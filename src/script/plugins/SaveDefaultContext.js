@@ -98,7 +98,7 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
                           var method = 'PUT';
                           var contentType = 'application/json';
                           
-                          this.save(url, method, contentType, configStr);
+                          thisObj.save(url, method, contentType, configStr);
                       }
                   };
                   
