@@ -195,8 +195,8 @@ gxp.plugins.Login = Ext.extend(gxp.plugins.Tool, {
 		Ext.Ajax.request({
 			method: 'GET',
 			//** REMOVE USER AND PASS IN URL WHEN PROXY WILL SUPPORT BASIC AUTH **//
-			url: proxy + "http://"+user+":"+pass+"@"+"demo1.geo-solutions.it/exist/rest/mapadmin/login.xml", //TODO parametrize
-			//url: this.url,
+			//url: proxy + "http://"+user+":"+pass+"@"+"demo1.geo-solutions.it/exist/rest/mapadmin/login.xml", //TODO parametrize
+			url: proxy + this.url,
 			scope: this,
 			//proxy: '',
 			headers: {
