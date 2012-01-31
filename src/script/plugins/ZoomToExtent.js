@@ -115,7 +115,8 @@ gxp.plugins.ZoomToExtent = Ext.extend(gxp.plugins.Tool, {
                             }
                         }
                     }
-                }else{
+                }
+				if(extent){
                     // respect map properties
                     var restricted = map.restrictedExtent || map.maxExtent;
                     if (restricted) {
