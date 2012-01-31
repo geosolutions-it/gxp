@@ -71,50 +71,53 @@ gxp.plugins.Login = Ext.extend(gxp.plugins.Tool, {
 	logoutAction: null,
 	user:null,
 	pass:null,
+	loginService: null,
 	
 	
     /** 
      * api: method[addActions]
      */
     addActions: function() {
-        var apptarget = this.target;
+		if (this.loginService !== null) {
+		    var apptarget = this.target;
         
-        var actions = gxp.plugins.Login.superclass.addActions.apply(this, [
+			var actions = gxp.plugins.Login.superclass.addActions.apply(this, [
+				
+				[{
+					menuText: this.loginText,
+					iconCls: "gxp-icon-login",
+					text: this.loginText,
+					disabled: false,
+					hidden: false,
+					tooltip: this.loginText,
+					handler: function() {
+						if(!this.logged){
+							this.showLoginDialog();
+							
+						}	
+					},
+					scope: this
+				},{
+					menuText: this.logoutTitle,
+					iconCls: "gxp-icon-logout",
+					text: this.logoutTitle,
+					hidden: true,
+					disabled: true,
+					tooltip: this.logoutTitle,
+					handler: function() {
+						if(this.logged){
+							this.showLogout();
+						}		
+					},
+					scope: this
+				}]
+			]);
 			
-			[{
-				menuText: this.loginText,
-				iconCls: "gxp-icon-login",
-				text: this.loginText,
-				disabled: false,
-				hidden: false,
-				tooltip: this.loginText,
-				handler: function() {
-					if(!this.logged){
-						this.showLoginDialog();
-						
-					}	
-				},
-				scope: this
-			},{
-				menuText: this.logoutTitle,
-				iconCls: "gxp-icon-logout",
-				text: this.logoutTitle,
-				hidden: true,
-				disabled: true,
-				tooltip: this.logoutTitle,
-				handler: function() {
-					if(this.logged){
-						this.showLogout();
-					}		
-				},
-				scope: this
-			}]
-		]);
-		
-		this.loginAction = actions[0];
-		this.logoutAction= actions[1];
-        
-        return actions;
+			this.loginAction = actions[0];
+			this.logoutAction= actions[1];
+			
+			return actions;
+		}
 	},
 	/** api: method[showLoginDialog]
      * Shows the window for login.
@@ -122,7 +125,7 @@ gxp.plugins.Login = Ext.extend(gxp.plugins.Tool, {
     showLoginDialog: function() {
 	
         this.panel = new Ext.FormPanel({
-            url: this.url,
+            url: this.loginService,
             frame: true,
             labelWidth: 80,
             defaultType: "textfield",
@@ -196,7 +199,7 @@ gxp.plugins.Login = Ext.extend(gxp.plugins.Tool, {
 			method: 'GET',
 			//** REMOVE USER AND PASS IN URL WHEN PROXY WILL SUPPORT BASIC AUTH **//
 			//url: proxy + "http://"+user+":"+pass+"@"+"demo1.geo-solutions.it/exist/rest/mapadmin/login.xml", //TODO parametrize
-			url: proxy + this.url,
+			url: proxy + this.loginService,
 			scope: this,
 			//proxy: '',
 			headers: {
@@ -250,10 +253,10 @@ gxp.plugins.Login = Ext.extend(gxp.plugins.Tool, {
 					var xmlContext = this.xmlContext;            
 					var mask = new Ext.LoadMask(Ext.getBody(), {msg:"Please wait..."});
 					mask.show();
-					var auth= 	 this.encode(user+':'+pass);
+					var auth =  'Basic ' + this.encode(this.user+':'+this.pass);
 					Ext.Ajax.request({
-					   url: proxy + "http://"+user+":"+pass+"@"+"demo1.geo-solutions.it/exist/rest/mapadmin/context.xml", //TODO parametrize
-					   //url: this.url,
+					   url: proxy + "http://"/*+user+":"+pass+"@"*/+"demo1.geo-solutions.it/exist/rest/mapadmin/context.xml", //TODO parametrize
+					   //url: this.loginService,
 					   headers:{
 							'Authorization' : auth
 					   },
