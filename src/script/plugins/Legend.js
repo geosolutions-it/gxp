@@ -60,7 +60,7 @@ gxp.plugins.Legend = Ext.extend(gxp.plugins.Tool, {
                 height: 300
             };
         }
-        Ext.applyIf(this.outputConfig, {title: this.menuText});
+        Ext.applyIf(this.outputConfig, {});
     },
 
     /** api: method[addActions]
@@ -85,6 +85,7 @@ gxp.plugins.Legend = Ext.extend(gxp.plugins.Tool, {
         return gxp.plugins.Legend.superclass.addOutput.call(this, {
             xtype: 'gx_legendpanel',
             id : this.legendConfig.legendPanelId,
+			title: this.menuText,
             ascending: false,
             border: false,
             layerStore: this.target.mapPanel.layers,
