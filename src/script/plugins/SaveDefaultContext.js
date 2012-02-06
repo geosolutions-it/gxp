@@ -140,7 +140,7 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
               mask.hide();
               Ext.Msg.show({
                  title: this.contextSaveFailString,
-                 msg: response.statusText,
+                 msg: response.statusText + "(status " + response.status + "):  " + response.responseText,
                  buttons: Ext.Msg.OK,
                  icon: Ext.MessageBox.ERROR
               });

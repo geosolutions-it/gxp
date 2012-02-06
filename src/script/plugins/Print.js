@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
  * 
- * Published under the BSD license.
+ * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
  */
@@ -23,7 +23,8 @@ Ext.namespace("gxp.plugins");
 /** api: constructor
  *  .. class:: Print(config)
  *
- *    Provides an action to print the map.
+ *    Provides an action to print the map. Requires GeoExt.ux.PrintPreview,
+ *    which is currently mirrored at git://github.com/GeoNode/PrintPreview.git.
  */
 gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
     
@@ -32,9 +33,17 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
 
     /** api: config[printService]
      *  ``String``
-     *  URL of the print service.
+     *  URL of the print service. Specify either printService
+     *  or printCapabilities.
      */
     printService: null,
+
+    /** api: config[printCapabilities]
+     *  ``Object``
+     *  Capabilities object of the print service. Specify either printService
+     *  or printCapabilities.
+     */
+    printCapabilities: null,
 
     /** api: config[customParams]
      *  ``Object`` Key-value pairs of custom data to be sent to the print
@@ -42,7 +51,12 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
      *  on the server side that require additional parameters.
      */
     customParams: null,
-    legendPanelId : null,
+
+    /** api: config[includeLegend]
+     *  ``Boolean`` Should we include the legend in the print? Defaults to false.
+     */
+    includeLegend: false,
+
     /** api: config[menuText]
      *  ``String``
      *  Text for print menu item (i18n).
@@ -67,8 +81,6 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
      */
     nonePrintableText: "None of your current map layers can be printed",
 
-    notPrintableLayersText: "Following layers are not supported for print:",
-    
     /** api: config[previewText]
      *  ``String``
      *  Text for print preview text (i18n).
@@ -86,9 +98,10 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
     addActions: function() {
 
         // don't add any action if there is no print service configured
-        if (this.printService !== null) {
+        if (this.printService !== null || this.printCapabilities !== null) {
 
             var printProvider = new GeoExt.data.PrintProvider({
+                capabilities: this.printCapabilities,
                 url: this.printService,
                 customParams: this.customParams,
                 autoLoad: false,
@@ -106,8 +119,10 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                         });
                     },
                     loadcapabilities: function() {
-                        printButton.initialConfig.disabled = false;
-                        printButton.enable();
+                        if (printButton) {
+                            printButton.initialConfig.disabled = false;
+                            printButton.enable();
+                        }
                     },
                     print: function() {
                         try {
@@ -115,7 +130,11 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                         } catch (err) {
                             // TODO: improve destroy
                         }
-                    }
+                    },
+                    printException: function(cmp, response) {
+                        this.target.displayXHRTrouble && this.target.displayXHRTrouble(response);
+                    },
+                    scope: this
                 }
             });
 
@@ -123,24 +142,12 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                 menuText: this.menuText,
                 tooltip: this.tooltip,
                 iconCls: "gxp-icon-print",
-                disabled: false,
+                disabled: this.printCapabilities !== null ? false : true,
                 handler: function() {
-                    var layers = getSupportedLayers();
-                    var supported = layers.supported;
-                    var notSupported = layers.notSupported;
-                    
+                    var supported = getSupportedLayers();
                     if (supported.length > 0) {
-
-                        if(notSupported.length > 0){
-                            Ext.Msg.alert(
-                                this.notAllNotPrintableText,
-                                this.notPrintableLayersText + '<br />' + notSupported.join(',')
-                            );
-                        } else {                    
-							createPrintWindow.call(this);
-							showPrintWindow.call(this);
-						}
-
+                        createPrintWindow.call(this);
+                        showPrintWindow.call(this);
                     } else {
                         // no layers supported
                         Ext.Msg.alert(
@@ -158,7 +165,7 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                 }
             }]);
 
-            var printButton = this.actions[0].items[0];
+            var printButton = actions[0].items[0];
 
             var printWindow;
 
@@ -178,44 +185,56 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
 
             var mapPanel = this.target.mapPanel;
             function getSupportedLayers() {
-                var supported = [], notSupported = [];
+                var supported = [];
                 mapPanel.layers.each(function(record) {
                     var layer = record.getLayer();
                     if (isSupported(layer)) {
                         supported.push(layer);
-                    } else {
-                        if(layer.getVisibility()){
-                            notSupported.push(layer.name);
-                        }
                     }
                 });
-                return  { 'supported' : supported, 'notSupported' : notSupported };
+                return supported;
             }
 
             function isSupported(layer) {
                 return (
                     layer instanceof OpenLayers.Layer.WMS ||
-                    layer instanceof OpenLayers.Layer.OSM 
-                    //|| layer instanceof OpenLayers.Layer.Google
+                    layer instanceof OpenLayers.Layer.OSM
                 );
             }
 
             function createPrintWindow() {
+                var legend = null;
+                if (this.includeLegend === true) {
+                    for (var key in this.target.tools) {
+                        var tool = this.target.tools[key];
+                        if (tool.ptype === "gxp_legend") {
+                            legend = tool.getLegendPanel();
+                        }
+                    }
+                }
                 printWindow = new Ext.Window({
                     title: this.previewText,
                     modal: true,
                     border: false,
+                    autoHeight: true,
                     resizable: false,
-                    //width: 360,
+                    width: 360,
                     items: [
                         new GeoExt.ux.PrintPreview({
                             autoHeight: true,
                             mapTitle: this.target.about && this.target.about["title"],
                             comment: this.target.about && this.target.about["abstract"],
+                            minWidth: 336,
                             printMapPanel: {
+                                height: Math.min(450, Ext.get(document.body).getHeight()-150),
+                                autoWidth: true,
+                                limitScales: true,
                                 map: Ext.applyIf({
                                     controls: [
-                                        new OpenLayers.Control.Navigation(),
+                                        new OpenLayers.Control.Navigation({
+                                            zoomWheelEnabled: false,
+                                            zoomBoxEnabled: false
+                                        }),
                                         new OpenLayers.Control.PanPanel(),
                                         new OpenLayers.Control.ZoomPanel(),
                                         new OpenLayers.Control.Attribution()
@@ -234,8 +253,8 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                                 }]
                             },
                             printProvider: printProvider,
-                            legend : Ext.getCmp(this.legendPanelId),
-                            includeLegend: true,
+                            includeLegend: this.includeLegend,
+                            legend: legend,
                             sourceMap: mapPanel
                         })
                     ],
@@ -247,7 +266,7 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
 
             function showPrintWindow() {
                 printWindow.show();
-                /*
+
                 // measure the window content width by it's toolbar
                 printWindow.setWidth(0);
                 var tb = printWindow.items.get(0).items.get(0);
@@ -261,11 +280,6 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                     Math.max(printWindow.items.get(0).printMapPanel.getWidth(),
                     w + 20)
                 );
-                */
-                printWindow.setWidth(
-                    printWindow.items.get(0).printMapPanel.getWidth()+30
-                );                
-                
                 printWindow.center();
             }
 

@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
  * 
- * Published under the BSD license.
+ * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
  */
@@ -58,8 +58,8 @@ gxp.plugins.ZoomToExtent = Ext.extend(gxp.plugins.Tool, {
      *  ``Boolean`` Find the zoom level that most closely fits the specified
      *  extent. Note that this may result in a zoom that does not exactly
      *  contain the entire extent.  Default is true.
-     
-    closest: true,*/
+     */
+    closest: true,
     
     /** private: property[iconCls]
      */
@@ -91,15 +91,6 @@ gxp.plugins.ZoomToExtent = Ext.extend(gxp.plugins.Tool, {
             tooltip: this.tooltip,
             handler: function() {
                 var map = this.target.mapPanel.map;
-				
-				        /*
-				        var bbox = new OpenLayers.Bounds.fromString('-7.343,8.368,-15,14.771');
-				        bbox = bbox.transform(
-					         new OpenLayers.Projection("EPSG:4326"),
-					         new OpenLayers.Projection(map.projection));
-                map.zoomToExtent(bbox);
-                */
-							
                 var extent = typeof this.extent == "function" ? this.extent() : this.extent;
                 if (!extent) {
                     // determine visible extent
@@ -128,8 +119,7 @@ gxp.plugins.ZoomToExtent = Ext.extend(gxp.plugins.Tool, {
                         );
                     }
                     map.zoomToExtent(extent, this.closest);
-                }				
-				
+                }
             },
             scope: this
         }]);

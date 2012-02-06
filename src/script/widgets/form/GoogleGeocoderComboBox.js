@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
  * 
- * Published under the BSD license.
+ * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
  */
@@ -64,9 +64,10 @@ gxp.form.GoogleGeocoderComboBox = Ext.extend(Ext.form.ComboBox, {
         
         // only enable when Google Maps API is available
         this.disabled = true;
-        if (!window.google) {
+        var ready = !!(window.google && google.maps);
+        if (!ready) {
             if (!gxp.plugins || !gxp.plugins.GoogleSource) {
-                throw new Error("The gxp.form.GoogleGeocoderComboBox requres the gxp.plugins.GoogleSource or the Google Maps V3 API to be loaded.");
+                throw new Error("The gxp.form.GoogleGeocoderComboBox requires the gxp.plugins.GoogleSource or the Google Maps V3 API to be loaded.");
             }
             gxp.plugins.GoogleSource.loader.onLoad({
                 callback: this.prepGeocoder,

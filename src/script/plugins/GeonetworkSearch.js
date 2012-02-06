@@ -47,6 +47,7 @@ gxp.plugins.GeonetworkSearch = Ext.extend(gxp.plugins.Tool, {
      */
     addActions: function() {
         var selectedLayer;
+        
         var actions = gxp.plugins.GeonetworkSearch.superclass.addActions.apply(this, [{
             menuText: this.geonetworkSearchText,
             iconCls: "gxp-icon-geonetworksearch",
@@ -55,36 +56,40 @@ gxp.plugins.GeonetworkSearch = Ext.extend(gxp.plugins.Tool, {
             handler: function() {
                 var record = selectedLayer;
                 if(record) {
+                    var gnURL = record.get('gnURL');
                     var uuid = record.get('uuid');
-					if(uuid){
-						viewRecordMetadata(uuid);
-					} else {
-						var title = record.get('name');
-						title = title.split(':');
-						if(title.length > 1){
-							title = title[1];
-						} else {
-							title = title[0];
-						}
-						runSimpleSearch(title);
-					}
+                    var title = record.get('title');
+                    
+                    if(gnURL && uuid && title){
+                        this.target.viewMetadata(gnURL, uuid, title);
+                    } else {
+                        Ext.Msg.show({
+                            title: 'View Metadata',
+                            msg: "This operation cant be performed for this layer",
+                            width: 300,
+                            icon: Ext.MessageBox.ALERT
+                        });  
+                    }
                 }
             },
             scope: this
         }]);
+        
         var geonetworkSearchAction = actions[0];
 
         this.target.on("layerselectionchange", function(record) {
-            selectedLayer = record.get('group') === 'background' ? null : record;
+            selectedLayer = record.get('group') === 'background' ? null : (record.get('gnURL') &&  record.get('uuid') && record.get('name') ? record : null);
             geonetworkSearchAction.setDisabled(
                  !selectedLayer || this.target.mapPanel.layers.getCount() <= 1 || !record
             );
         }, this);
+        
         var enforceOne = function(store) {
             geonetworkSearchAction.setDisabled(
                 !selectedLayer || store.getCount() <= 1
             );
         }
+        
         this.target.mapPanel.layers.on({
             "add": enforceOne,
             "remove": function(store){

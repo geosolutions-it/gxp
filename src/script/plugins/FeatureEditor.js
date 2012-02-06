@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
  * 
- * Published under the BSD license.
+ * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
  */
@@ -38,11 +38,33 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
      */
     iconClsAdd: "gxp-icon-addfeature",
 
+    /** api: config[supportAbstractGeometry]
+     *  Should we support layers that advertize an abstract geometry type?
+     *  In this case, we will provide menu options for digitizing point, line
+     *  or polygon features. Default is false.
+     */
+    supportAbstractGeometry: false,
+
+    /** api: config[supportNoGeometry]
+     *  Should we support the ability to create features with no geometry?
+     *  This only works when combined with supportAbstractGeometry: true.
+     *  Default is false.
+     */
+    supportNoGeometry: false,
+
     /** api: config[iconClsEdit]
      *  ``String``
      *  iconCls to use for the edit button.
      */
     iconClsEdit: "gxp-icon-editfeature",
+
+    /** i18n **/
+    exceptionTitle: "Save Failed",
+    exceptionText: "Trouble saving features",
+    pointText: "Point",
+    lineText: "Line",
+    polygonText: "Polygon",
+    noGeometryText: "Event",
 
     /** api: config[createFeatureActionTip]
      *  ``String``
@@ -140,24 +162,65 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
      */
     schema: null,
     
+
+    /** private: method[constructor]
+     */
+    constructor: function(config) {
+        this.addEvents(
+            /** api: event[layereditable]
+             *  Fired when a layer is selected or unselected in the target 
+             *  viewer.  Listeners can use this method to determine when a 
+             *  layer is ready for editing.
+             *
+             *  Listener arguments:
+             *
+             *  * tool   - :class:`gxp.plugins.FeatureManager` This tool
+             *  * record - ``GeoExt.data.LayerRecord`` The selected layer record.
+             *    Will be ``null`` if no layer record is selected.
+             *  * editable - ``Boolean`` The layer is ready to be edited.
+             */
+            "layereditable",
+
+            /** api: event[featureeditable]
+             *  Fired when a feature is selected or unselected for editing.  
+             *  Listeners can use this method to determine when a feature is 
+             *  ready for editing.  Beware that this event is fired multiple 
+             *  times when a feature is unselected.
+             *
+             *  Listener arguments:
+             *
+             *  * tool   - :class:`gxp.plugins.FeatureManager` This tool
+             *  * feature - ``OpenLayers.Feature.Vector`` The feature.
+             *  * editable - ``Boolean`` The feature is ready to be edited.
+             */
+            "featureeditable"
+
+        );
+        gxp.plugins.FeatureEditor.superclass.constructor.apply(this, arguments);        
+    },
+
+    /** private: method[init]
+     *  :arg target: ``Object`` The object initializing this plugin.
+     */
+    init: function(target) {
+        gxp.plugins.FeatureEditor.superclass.init.apply(this, arguments);
+        this.target.on("authorizationchange", this.enableOrDisable, this);
+    },
+
+    /** private: method[destroy]
+     */
+    destroy: function() {
+        this.target.un("authorizationchange", this.enableOrDisable, this);
+        gxp.plugins.FeatureEditor.superclass.destroy.apply(this, arguments);
+    },
+
     /** api: method[addActions]
      */
     addActions: function() {
         var popup;
-        var featureManager = this.target.tools[this.featureManager];
+        var featureManager = this.getFeatureManager();
         var featureLayer = featureManager.featureLayer;
-
-        // optionally set up snapping
-        var snapId = this.snappingAgent;
-        if (snapId) {
-            var snappingAgent = this.target.tools[snapId];
-            if (snappingAgent) {
-                snappingAgent.addSnappingControl(featureLayer);
-            } else {
-                throw new Error("Unable to locate snapping agent: " + snapId);
-            }
-        }
-
+        
         var intercepting = false;
         // intercept calls to methods that change the feature store - allows us
         // to persist unsaved changes before calling the original function
@@ -180,7 +243,7 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
                         } else {
                             mgr[fn].apply(mgr, fnArgs);
                         }
-                    };
+                    }
                     function unregisterDoIt() {
                         featureManager.featureStore.un("write", doIt, this);
                         popup.un("canceledit", doIt, this);
@@ -197,8 +260,9 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
                 return !popup.editing;
             }
             intercepting = false;
-        };
+        }
         featureManager.on({
+            // TODO: determine where these events should be unregistered
             "beforequery": intercept.createDelegate(this, "loadFeatures", 1),
             "beforelayerchange": intercept.createDelegate(this, "setLayer", 1),
             "beforesetpage": intercept.createDelegate(this, "setPage", 1),
@@ -283,10 +347,16 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
         
         featureLayer.events.on({
             "beforefeatureremoved": function(evt) {
-                this.selectControl.unselect(evt.feature);
+                if (this.popup && evt.feature === this.popup.feature) {
+                    this.selectControl.unselect(evt.feature);
+                }
             },
             "featureunselected": function(evt) {
-                if(popup) {
+                var feature = evt.feature;
+                if (feature) {
+                    this.fireEvent("featureeditable", this, feature, false);
+                }
+                if (popup && !popup.hidden) {
                     popup.close();
                 }
             },
@@ -305,12 +375,22 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
             },
             "featureselected": function(evt) {
                 var feature = evt.feature;
+                if (feature) {
+                    this.fireEvent("featureeditable", this, feature, true);
+                }
                 var featureStore = featureManager.featureStore;
-                if(this.selectControl.active) {
+                if(this._forcePopupForNoGeometry === true || (this.selectControl.active && feature.geometry !== null)) {
+                    // deactivate select control so no other features can be
+                    // selected until the popup is closed
+                    if (this.readOnly === false) {
+                        this.selectControl.deactivate();
+                        // deactivate will hide the layer, so show it again
+                        featureManager.showLayer(this.id, this.showSelectedOnly && "selected");
+                    }
                     popup = this.addOutput({
                         xtype: "gxp_featureeditpopup",
                         collapsible: true,
-                        feature: feature,
+                        feature: featureStore.getByFeature(feature),
                         vertexRenderIntent: "vertex",
                         readOnly: this.readOnly,
                         fields: this.fields,
@@ -322,11 +402,17 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
                         height: 250,
                         listeners: {
                             "close": function() {
+                                if (this.readOnly === false) {
+                                    this.selectControl.activate();
+                                }
                                 if(feature.layer && feature.layer.selectedFeatures.indexOf(feature) !== -1) {
                                     this.selectControl.unselect(feature);
                                 }
                                 if (feature === this.autoLoadedFeature) {
-                                    featureStore.remove(featureStore.getRecordFromFeature(feature));
+                                    if (feature.layer) {
+                                        feature.layer.removeFeatures([evt.feature]);
+                                    }
+                                    this.autoLoadedFeature = null;
                                 }
                             },
                             "featuremodified": function(popup, feature) {
@@ -336,6 +422,43 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
                                         fn: function() {
                                             if (popup && popup.isVisible()) {
                                                 popup.enable();
+                                            }
+                                            var layer = featureManager.layerRecord;
+                                            this.target.fireEvent("featureedit", featureManager, {
+                                                name: layer.get("name"),
+                                                source: layer.get("source")
+                                            });
+                                        },
+                                        single: true
+                                    },
+                                    exception: {
+                                        fn: function(proxy, type, action, options, response, records) {
+                                            var msg = this.exceptionText;
+                                            if (type === "remote") {
+                                                // response is service exception
+                                                if (response.exceptionReport) {
+                                                    msg = gxp.util.getOGCExceptionText(response.exceptionReport);
+                                                }
+                                            } else {
+                                                // non-200 response from server
+                                                msg = "Status: " + response.status;
+                                            }
+                                            // fire an event on the feature manager
+                                            featureManager.fireEvent("exception", featureManager, 
+                                                response.exceptionReport || {}, msg, records);
+                                            // only show dialog if there is no listener registered
+                                            if (featureManager.hasListener("exception") === false && 
+                                                featureStore.hasListener("exception") === false) {
+                                                    Ext.Msg.show({
+                                                        title: this.exceptionTitle,
+                                                        msg: msg,
+                                                        icon: Ext.MessageBox.ERROR,
+                                                        buttons: {ok: true}
+                                                    });
+                                            }
+                                            if (popup && popup.isVisible()) {
+                                                popup.enable();
+                                                popup.startEditing();
                                             }
                                         },
                                         single: true
@@ -388,8 +511,11 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
         });
 
         var toggleGroup = this.toggleGroup || Ext.id();
-        var actions = gxp.plugins.FeatureEditor.superclass.addActions.call(this, [new GeoExt.Action({
+
+        var actions = [];
+        var commonOptions = {
             tooltip: this.createFeatureActionTip,
+            menuText: this.createFeatureActionText,
             text: this.createFeatureActionText,
             iconCls: this.iconClsAdd,
             disabled: true,
@@ -400,9 +526,89 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
             control: this.drawControl,
             deactivateOnDisable: true,
             map: this.target.mapPanel.map
-        }), new GeoExt.Action({
+        };
+        if (this.supportAbstractGeometry === true) {
+            var menuItems = [];
+            if (this.supportNoGeometry === true) {
+                menuItems.push(
+                    new Ext.menu.CheckItem({
+                        text: this.noGeometryText,
+                        iconCls: "gxp-icon-event",
+                        groupClass: null,
+                        group: toggleGroup,
+                        listeners: {
+                            checkchange: function(item, checked) {
+                                if (checked === true) {
+                                    var feature = new OpenLayers.Feature.Vector(null);
+                                    feature.state = OpenLayers.State.INSERT;
+                                    featureLayer.addFeatures([feature]);
+                                    this._forcePopupForNoGeometry = true;
+                                    featureLayer.events.triggerEvent("featureselected", {feature: feature});
+                                    delete this._forcePopupForNoGeometry;
+                                }
+                                if (this.actions[0].items[0] instanceof Ext.menu.CheckItem) {
+                                    this.actions[0].items[0].setChecked(false);
+                                } else {
+                                    this.actions[0].items[0].toggle(false);
+                                }
+                            },
+                            scope: this
+                        }
+                    })
+                );
+            }
+            var checkChange = function(item, checked, Handler) {
+                if (checked === true) {
+                    this.setHandler(Handler, false);
+                }
+                if (this.actions[0].items[0] instanceof Ext.menu.CheckItem) {
+                    this.actions[0].items[0].setChecked(checked);
+                } else {
+                    this.actions[0].items[0].toggle(checked);
+                }
+            };
+            menuItems.push(
+                new Ext.menu.CheckItem({
+                    groupClass: null,
+                    text: this.pointText,
+                    group: toggleGroup,
+                    iconCls: 'gxp-icon-point',
+                    listeners: {
+                        checkchange: checkChange.createDelegate(this, [OpenLayers.Handler.Point], 2)
+                    }
+                }),
+                new Ext.menu.CheckItem({
+                    groupClass: null,
+                    text: this.lineText,
+                    group: toggleGroup,
+                    iconCls: 'gxp-icon-line',
+                    listeners: {
+                        checkchange: checkChange.createDelegate(this, [OpenLayers.Handler.Path], 2)
+                    }
+                }),
+                new Ext.menu.CheckItem({
+                    groupClass: null,
+                    text: this.polygonText,
+                    group: toggleGroup,
+                    iconCls: 'gxp-icon-polygon',
+                    listeners: {
+                        checkchange: checkChange.createDelegate(this, [OpenLayers.Handler.Polygon], 2)
+                    }
+                })
+            );
+
+            actions.push(
+                new GeoExt.Action(Ext.apply(commonOptions, {
+                    menu: new Ext.menu.Menu({items: menuItems})
+                }))
+            );
+        } else {
+            actions.push(new GeoExt.Action(commonOptions));
+        }
+        actions.push(new GeoExt.Action({
             tooltip: this.editFeatureActionTip,
             text: this.editFeatureActionText,
+            menuText: this.editFeatureActionText,
             iconCls: this.iconClsEdit,
             disabled: true,
             toggleGroup: toggleGroup,
@@ -411,11 +617,70 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
             control: this.selectControl,
             deactivateOnDisable: true,
             map: this.target.mapPanel.map
-        })]);
+        }));
+
+        actions = gxp.plugins.FeatureEditor.superclass.addActions.call(this, actions);
 
         featureManager.on("layerchange", this.onLayerChange, this);
-        
+
+        var snappingAgent = this.getSnappingAgent();
+        if (snappingAgent) {
+            snappingAgent.registerEditor(this);
+        }
+
         return actions;
+    },
+
+    /** private: method[getFeatureManager]
+     *  :returns: :class:`gxp.plugins.FeatureManager`
+     */
+    getFeatureManager: function() {
+        var manager = this.target.tools[this.featureManager];
+        if (!manager) {
+            throw new Error("Unable to access feature manager by id: " + this.featureManager);
+        }
+        return manager;
+    },
+
+    /** private: getSnappingAgent
+     *  :returns: :class:`gxp.plugins.SnappingAgent`
+     */
+    getSnappingAgent: function() {
+        var agent;
+        var snapId = this.snappingAgent;
+        if (snapId) {
+            agent = this.target.tools[snapId];
+            if (!agent) {
+                throw new Error("Unable to locate snapping agent with id: " + snapId);
+            }
+        }
+        return agent;
+    },
+
+    setHandler: function(Handler, multi) {
+        var control = this.drawControl;
+        var active = control.active;
+        if(active) {
+            control.deactivate();
+        }
+        control.handler.destroy(); 
+        control.handler = new Handler(
+            control, control.callbacks,
+            Ext.apply(control.handlerOptions, {multi: multi})
+        );
+        if(active) {
+            control.activate();
+        } 
+    },
+
+    /**
+     * private: method[enableOrDisable]
+     */
+    enableOrDisable: function() {
+        var disable = !this.schema || !this.target.isAuthorized();
+        this.actions[0].setDisabled(disable);
+        this.actions[1].setDisabled(disable);
+        return disable;
     },
     
     /** private: method[onLayerChange]
@@ -425,11 +690,10 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
      */
     onLayerChange: function(mgr, layer, schema) {
         this.schema = schema;
-        var disable = !schema || !this.target.isAuthorized();
-        this.actions[0].setDisabled(disable);
-        this.actions[1].setDisabled(disable);
+        var disable = this.enableOrDisable();
         if (disable) {
             // not a wfs capable layer or not authorized
+            this.fireEvent("layereditable", this, layer, false);
             return;
         }
 
@@ -445,21 +709,15 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
         var simpleType = mgr.geometryType.replace("Multi", "");
         var Handler = handlers[simpleType];
         if (Handler) {
-            var active = control.active;
-            if(active) {
-                control.deactivate();
-            }
-            control.handler = new Handler(
-                control, control.callbacks,
-                Ext.apply(control.handlerOptions, {multi: (simpleType != mgr.geometryType)})
-            );
-            if(active) {
-                control.activate();
-            }
+            var multi = (simpleType != mgr.geometryType);
+            this.setHandler(Handler, multi);
+            button.enable();
+        } else if (this.supportAbstractGeometry === true && mgr.geometryType === 'Geometry') {
             button.enable();
         } else {
             button.disable();
         }
+        this.fireEvent("layereditable", this, layer, true);
     },
     
     /** private: method[select]

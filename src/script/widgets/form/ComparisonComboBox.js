@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
  * 
- * Published under the BSD license.
+ * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
  */
@@ -28,7 +28,8 @@ gxp.form.ComparisonComboBox = Ext.extend(Ext.form.ComboBox, {
         [OpenLayers.Filter.Comparison.GREATER_THAN, ">"],
         [OpenLayers.Filter.Comparison.LESS_THAN_OR_EQUAL_TO, "<="],
         [OpenLayers.Filter.Comparison.GREATER_THAN_OR_EQUAL_TO, ">="],
-        [OpenLayers.Filter.Comparison.LIKE, "like"]
+        [OpenLayers.Filter.Comparison.LIKE, "like"],
+        [OpenLayers.Filter.Comparison.BETWEEN, "between"]
     ],
 
     allowBlank: false,

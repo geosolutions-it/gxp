@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
  * 
- * Published under the BSD license.
+ * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
  */
@@ -56,7 +56,7 @@ gxp.LayerUploadPanel = Ext.extend(Ext.FormPanel, {
      *  ``String``
      *  URL for GeoServer RESTConfig root.  E.g. "http://example.com/geoserver/rest".
      */
-
+    
     /** private: method[constructor]
      */
     constructor: function(config) {
@@ -98,12 +98,19 @@ gxp.LayerUploadPanel = Ext.extend(Ext.FormPanel, {
             buttonCfg: {
                 iconCls: "gxp-icon-filebrowse"
             },
+            listeners: {
+                "fileselected": function(cmp, value) {
+                    // remove the path from the filename - avoids C:/fakepath etc.
+                    cmp.setValue(value.split(/[/\\]/).pop());
+                }
+            },
             validator: this.fileNameValidator.createDelegate(this)
         }, {
             xtype: "fieldset",
             title: this.optionsText,
             checkboxToggle: true,
             collapsed: true,
+            hidden: this.workspace != undefined && this.store != undefined && this.crs != undefined,
             hideMode: "offsets",
             defaults: {
                 anchor: "97%"
@@ -202,7 +209,7 @@ gxp.LayerUploadPanel = Ext.extend(Ext.FormPanel, {
                 break;
             }
         }
-        return valid || this.invalidFileExtensionText + this.validFileExtensions.join(", ");
+        return valid || this.invalidFileExtensionText + '<br/>' + this.validFileExtensions.join(", ");
     },
 
     /** private: method[createWorkspacesCombo]

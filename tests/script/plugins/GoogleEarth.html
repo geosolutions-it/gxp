@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script src="http://extjs.cachefly.net/ext-3.3.0/adapter/ext/ext-base.js"></script>
-        <script src="http://extjs.cachefly.net/ext-3.3.0/ext-all-debug.js"></script>
-        <script type="text/javascript" src="../../../../openlayers/lib/OpenLayers.js"></script>
-        <script type="text/javascript" src="../../../../geoext/lib/GeoExt.js"></script>
-        <script type="text/javascript" src="../../../src/script/plugins/Tool.js"></script>
-        <script type="text/javascript" src="../../../src/script/plugins/GoogleEarth.js"></script>
+        <script src="http://extjs.cachefly.net/ext-3.4.0/adapter/ext/ext-base.js"></script>
+        <script src="http://extjs.cachefly.net/ext-3.4.0/ext-all-debug.js"></script>
+        <script type="text/javascript" src="../../../externals/openlayers/lib/OpenLayers.js"></script>
+        <script type="text/javascript" src="../../../externals/geoext/lib/GeoExt.js"></script>
+        <script type="text/javascript" src="../../../src/script/loader.js"></script>
 
         <script type="text/javascript">
 
@@ -64,6 +63,7 @@
                 apiKeys: {
                     "example.com": "key for example.com",
                     "foo.example.net": "key for foo.example.net",
+                    "example.com:9080": "key for example.com:9080",
                     "localhost": "key for localhost"
                 }
             });
@@ -79,7 +79,13 @@
             var cases = [{
                 hostname: "example.com", key: "key for example.com"
             }, {
+                hostname: "example.com:80", key: "key for example.com"
+            }, {
+                hostname: "example.com:8080", key: "prompt"
+            }, {
                 hostname: "EXAMPLE.COM", key: "key for example.com"
+            }, {
+                hostname: "EXAMPLE.COM:9080", key: "key for example.com:9080"
             }, {
                 hostname: "badexample.com", key: "prompt"
             }, {
@@ -104,10 +110,16 @@
             t.plan(len + 1);
             
             var c;
+            var hasPort = /:\d+$/;
             for (var i=0; i<len; ++i) {
                 c = cases[i];
-                plugin.getHostName = function() {
-                    return c.hostname;
+                // mock the getHost method to simulate working with different hosts
+                plugin.getHost = function() {
+                    var name = c.hostname;
+                    if (!hasPort.test(name)) {
+                        name += ":80";
+                    }
+                    return name;
                 };
                 plugin.getAPIKey(function(k) {
                     log.push(k);

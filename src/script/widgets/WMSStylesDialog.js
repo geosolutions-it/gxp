@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
  * 
- * Published under the BSD license.
+ * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
  */
@@ -464,10 +464,13 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
             itemId: "rulesfieldset",
             title: this.rulesFieldsetTitle,
             autoScroll: true,
-            style: "margin-bottom: 0;"
+            style: "margin-bottom: 0;",
+            hideMode: "offsets",
+            hidden: true
         });
         var rulesToolbar = new Ext.Toolbar({
             style: "border-width: 0 1px 1px 1px;",
+            hidden: true,
             items: [
                 {
                     xtype: "button",
@@ -628,14 +631,16 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
         this.selectedStyle.store.afterEdit(this.selectedStyle);
     },
     
-    /** private: method[removeRulesFieldSet[
-     *  Removes rulesFieldSet when the legend image cannot be loaded
+    /** private: method[setRulesFieldSetVisible]
+     *  :arg visible: ``Boolean``
+     *
+     *  Sets the visibility of the rules fieldset
      */
-    removeRulesFieldSet: function() {
-        // remove the toolbar
-        this.remove(this.items.get(3));
+    setRulesFieldSetVisible: function(visible) {
+        // the toolbar
+        this.items.get(3).setVisible(visible && this.editable);
         // and the fieldset itself
-        this.remove(this.items.get(2));
+        this.items.get(2).setVisible(visible);
         this.doLayout();
     },
 
@@ -843,11 +848,16 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
     getStyles: function(callback) {
         var layer = this.layerRecord.getLayer();
         if(this.editable === true) {
+            var version = layer.params["VERSION"];
+            if (parseFloat(version) > 1.1) {
+                //TODO don't force 1.1.1, fall back instead
+                version = "1.1.1";
+            }
             Ext.Ajax.request({
                 url: layer.url,
                 params: {
                     "SERVICE": "WMS",
-                    "VERSION": layer.params["VERSION"],
+                    "VERSION": version,
                     "REQUEST": "GetStyles",
                     "LAYERS": [layer.params["LAYERS"]].join(",")
                 },
@@ -875,11 +885,16 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
             }, 0);
         } else {
             var layer = this.layerRecord.getLayer();
+            var version = layer.params["VERSION"];
+            if (parseFloat(version) > 1.1) {
+                //TODO don't force 1.1.1, fall back instead
+                version = "1.1.1";
+            }
             Ext.Ajax.request({
                 url: layer.url,
                 params: {
                     "SERVICE": "WMS",
-                    "VERSION": layer.params["VERSION"],
+                    "VERSION": version,
                     "REQUEST": "DescribeLayer",
                     "LAYERS": [layer.params["LAYERS"]].join(",")
                 },
@@ -944,12 +959,22 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
         var legend = new GeoExt.WMSLegend({
             showTitle: false,
             layerRecord: this.layerRecord,
+            autoScroll: true,
             defaults: {
                 listeners: {
-                    "render": function() {
-                        this.getEl().on({
-                            "load": this.doLayout,
-                            "error": this.removeRulesFieldSet,
+                    "render": function(cmp) {
+                        cmp.getEl().on({
+                            load: function(evt, img) {
+                                if (img.getAttribute("src") != cmp.defaultImgSrc) {
+                                    this.setRulesFieldSetVisible(true);
+                                    if (cmp.getEl().getHeight() > 250) {
+                                        legend.setHeight(250);
+                                    }
+                                }
+                            },
+                            "error": function() {
+                                this.setRulesFieldSetVisible(false);
+                            },
                             scope: this
                         });
                     },
@@ -1044,6 +1069,9 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
                     tbItems.get(2).disable();
                     tbItems.get(3).disable();
                 },
+                "rulemoved": function() {
+                    this.markModified();
+                },
                 "afterlayout": function() {
                     // restore selection
                     //TODO QA: avoid accessing private properties/methods
@@ -1056,7 +1084,7 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
                 scope: this
             }
         });
-        this.doLayout();
+        this.setRulesFieldSetVisible(true);
         return legend;
     },
     
@@ -1082,6 +1110,9 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
 gxp.WMSStylesDialog.createGeoServerStylerConfig = function(layerRecord, url) {
     var layer = layerRecord.getLayer();
     if (!url) {
+        url = layerRecord.get("restUrl");
+    }
+    if (!url) {
         url = layer.url.split("?").shift().replace(/\/(wms|ows)\/?$/, "/rest");
     }
     return {
@@ -1093,8 +1124,7 @@ gxp.WMSStylesDialog.createGeoServerStylerConfig = function(layerRecord, url) {
         }],
         listeners: {
             "styleselected": function(cmp, style) {
-                //cmp.modified && 
-				layer.mergeNewParams({
+                layer.mergeNewParams({
                     styles: style
                 });
             },
@@ -1139,36 +1169,35 @@ Ext.reg('gxp_wmsstylesdialog', gxp.WMSStylesDialog);
  * vendor specific extensions introduced by GeoTools.
  */
 
-
-// read/write GeoTools custom VendorOption elements
-OpenLayers.Format.SLD.v1.prototype.readers.sld["VendorOption"] = function(node, obj) {
-    if (!obj.vendorOptions) {
-        obj.vendorOptions = [];
-    }
-    obj.vendorOptions.push({
-        name: node.getAttribute("name"),
-        value: this.getChildValue(node)
-    });    
-};
-OpenLayers.Format.SLD.v1.prototype.writers.sld["VendorOption"] = function(option) {
-    return this.createElementNSPlus("sld:VendorOption", {
-        attributes: {name: option.name},
-        value: option.value
-    });
-};
-
-// read GeoTools custom Priority element in TextSymbolizer
-OpenLayers.Format.SLD.v1.prototype.readers.sld["Priority"] = function(node, obj) {
-    obj.priority = this.readOgcExpression(node);
-};
-OpenLayers.Format.SLD.v1.prototype.writers.sld["Priority"] = function(priority) {
-    var node = this.createElementNSPlus("sld:Priority");
-    this.writeNode("ogc:Literal", priority, node);
-    return node;
-};
-
-(function() {
+OpenLayers.Format && OpenLayers.Format.SLD && OpenLayers.Format.SLD.v1 && (function() {
     
+    // read/write GeoTools custom VendorOption elements
+    OpenLayers.Format.SLD.v1.prototype.readers.sld["VendorOption"] = function(node, obj) {
+        if (!obj.vendorOptions) {
+            obj.vendorOptions = [];
+        }
+        obj.vendorOptions.push({
+            name: node.getAttribute("name"),
+            value: this.getChildValue(node)
+        });    
+    };
+    OpenLayers.Format.SLD.v1.prototype.writers.sld["VendorOption"] = function(option) {
+        return this.createElementNSPlus("sld:VendorOption", {
+            attributes: {name: option.name},
+            value: option.value
+        });
+    };
+
+    // read GeoTools custom Priority element in TextSymbolizer
+    OpenLayers.Format.SLD.v1.prototype.readers.sld["Priority"] = function(node, obj) {
+        obj.priority = this.readOgcExpression(node);
+    };
+    OpenLayers.Format.SLD.v1.prototype.writers.sld["Priority"] = function(priority) {
+        var node = this.createElementNSPlus("sld:Priority");
+        this.writeNode("ogc:Literal", priority, node);
+        return node;
+    };
+
     // extend OL SLD parser to accommodate GeoTools extensions to SLD
     // http://svn.osgeo.org/geotools/branches/2.6.x/modules/extension/xsd/xsd-sld/src/main/resources/org/geotools/sld/bindings/StyledLayerDescriptor.xsd
 
@@ -1207,7 +1236,7 @@ OpenLayers.Format.SLD.v1.prototype.writers.sld["Priority"] = function(priority) 
                     }
                 }
                 return node;
-            }
+            };
         })(original);
     }
 

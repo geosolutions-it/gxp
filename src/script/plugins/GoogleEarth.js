@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
  * 
- * Published under the BSD license.
+ * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
  */
@@ -87,13 +87,14 @@ gxp.plugins.GoogleEarth = Ext.extend(gxp.plugins.Tool, {
      *  If the ``apiKey`` property is not set, this object can be provided as a
      *  lookup of API keys for multiple URL.  Each key in the object should be
      *  a hostname (e.g. "example.com"), and each value should be a complete 
-     *  API key.
+     *  API key.  Include the port number if different than 80.
      *
      *  .. code-block:: javascript
      *
      *    apiKeys: {
      *        "localhost": "ABQIAAAAeDjUod8ItM9dBg5_lz0esxTnme5EwnLVtEDGnh-lFVzRJhbdQhQBX5VH8Rb3adNACjSR5kaCLQuBmw",
-     *        "example.com": "-your-key-here-"
+     *        "example.com": "-your-key-here-",
+     *        "example.com:8080": "-your-key-here-"
      *    }
      */
 
@@ -101,6 +102,7 @@ gxp.plugins.GoogleEarth = Ext.extend(gxp.plugins.Tool, {
     apiKeyPrompt: "Please enter the Google API key for ",
     menuText: "3D Viewer",
     tooltip: "Switch to 3D Viewer",
+    tooltipMap: "Switch back to normal map view",
 
     /** private: method[constructor]
      */
@@ -165,6 +167,7 @@ gxp.plugins.GoogleEarth = Ext.extend(gxp.plugins.Tool, {
                             layout.setActiveItem(1);
                             // enable action press any buttons associated with the action
                             this.actions[0].enable();
+                            this.actions[0].items[0].setTooltip(this.tooltipMap);
                             this.actions[0].each(function(cmp) {
                                 if (cmp.toggle) {
                                     cmp.toggle(true, true);
@@ -178,26 +181,42 @@ gxp.plugins.GoogleEarth = Ext.extend(gxp.plugins.Tool, {
             } else {
                 // hide the panel
                 layout.setActiveItem(0);
+                this.actions[0].items[0].setTooltip(this.tooltip);
             }
         }
+    },
+
+    /** api: method[hasValidAPIKey]
+     *  :returns: ``String`` if it has a valid key and undefined if not.
+     */
+    hasValidAPIKey: function() {
+        var key = this.initialConfig.apiKey;
+        var keys = this.initialConfig.apiKeys;
+        if (!key && keys) {
+            var host = this.getHost();
+            var hasPort = /:\d+$/;
+            var completeCandidate;
+            for (var candidate in keys) {
+                if (!hasPort.test(candidate)) {
+                    completeCandidate = candidate + ":80";
+                } else {
+                    completeCandidate = candidate;
+                }
+                // check if case-insensitive match
+                if ((new RegExp("^(.*\\.)?" + completeCandidate + "$", "i")).test(host)) {
+                    key = keys[candidate];
+                    break;
+                }
+            }
+        }
+        return key;
     },
 
     /** private: method[getAPIKey]
      *  :arg callback: ``Function`` To be called with API key.
      */
     getAPIKey: function(callback) {
-        var key = this.initialConfig.apiKey;
-        var keys = this.initialConfig.apiKeys;
-        if (!key && keys) {
-            var hostname = this.getHostName();
-            for (var candidate in keys) {
-                // check if case-insensitive match
-                if ((new RegExp("^(.*\\.)?" + candidate + "$", "i")).test(hostname)) {
-                    key = keys[candidate];
-                    break;
-                }
-            }
-        }
+        var key = this.hasValidAPIKey();
         if (key) {
             // return then call callback
             window.setTimeout(
@@ -220,13 +239,15 @@ gxp.plugins.GoogleEarth = Ext.extend(gxp.plugins.Tool, {
         }
     },
 
-    /** private: method[getHostName]
-     *  :returns: ``String`` The current host name (no port).
+    /** private: method[getHost]
+     *  :returns: ``String`` The current host name and port.
      * 
      *  This method is here mainly for mocking in tests.
      */
-    getHostName: function() {
-        return window.location.host.split(":").shift();
+    getHost: function() {
+        var name = window.location.host.split(":").shift();
+        var port = window.location.port || "80";
+        return name + ":" + port;
     }
 
 });

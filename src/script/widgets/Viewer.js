@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
  * 
- * Published under the BSD license.
+ * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
  */
@@ -48,11 +48,21 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
     /** private: property[mapPanel]
      *  ``GeoExt.MapPanel``
      */
+
+    /** api: config[proxy]
+     * ``String`` An optional proxy url which can be used to bypass the same
+     * origin policy. This will be set as ``OpenLayers.ProxyHost``.
+     */
     
     /** api: config[mapItems]
      *  ``Array(Ext.Component)``
      *  Any items to be added to the map panel. A typical item to put on a map
      *  would be a ``GeoExt.ZoomSlider``.
+     */
+
+    /** api: config[mapPlugins]
+     *  ``Array(Ext.util.Observable)``
+     *  Any plugins to be added to the map panel, e.g. ``gxp.plugins.LoadingIndicator``.
      */
      
     /** api: config[portalConfig]
@@ -212,7 +222,24 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
              */
             "layerselectionchange",
             
-            "groupselectionChange"
+            /** api: event[featureedit]
+             *  Fired when features were edited.
+             *
+             *  Listener arguments:
+             *  * featureManager - ``gxp.plugins.FeatureManager`` the
+             *    the feature manager that was used for editing
+             *  * layer - ``Object`` object with name and source of the layer
+             *    that was edited
+             */
+            "featureedit",
+
+            /** api: event[authorizationchange]
+             *  Fired when the authorizedRoles are changed, e.g. when a user 
+             *  logs in or out.
+             */
+            "authorizationchange",
+	    
+	    "groupselectionChange"
         );
         
         Ext.apply(this, {
@@ -223,7 +250,7 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
         // private array of pending getLayerRecord requests
         this.createLayerRecordQueue = [];
 
-        this.loadConfig(config, this.applyConfig);
+        (config.loadConfig || this.loadConfig).call(this, config, this.applyConfig);
         gxp.Viewer.superclass.constructor.apply(this, arguments);
         
     },
@@ -248,6 +275,14 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
             if(this.tools[tool].ptype == "gxp_removegroup"){            
                 this.tools[tool].actions[0].disable();
             }
+            
+            if(this.tools[tool].ptype == "gxp_geonetworksearch"){            
+                this.tools[tool].actions[0].show();
+            }
+            
+            if(this.tools[tool].ptype == "gxp_zoomtolayerextent"){            
+                this.tools[tool].actions[0].show();
+            }
         }
         
         record = record || null;
@@ -255,10 +290,15 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
         var allow = this.fireEvent("beforelayerselectionchange", record);
         if (allow !== false) {
             changed = true;
+            /*if (this.selectedLayer) {
+                this.selectedLayer.set("selected", false);
+            }*/
             this.selectedLayer = record;
+            /*if (this.selectedLayer) {
+                this.selectedLayer.set("selected", true);
+            }*/
             this.fireEvent("layerselectionchange", record);
         }
-        
         return changed;
     },
     
@@ -280,6 +320,13 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
                 if(this.tools[tool].ptype == "gxp_removelayer"){            
                     this.tools[tool].actions[0].disable();
                 }
+                
+                if(this.tools[tool].ptype == "gxp_geonetworksearch"){            
+                    this.tools[tool].actions[0].hide();
+                }
+                if(this.tools[tool].ptype == "gxp_zoomtolayerextent"){            
+                this.tools[tool].actions[0].hide();
+            }
             }
             
             this.fireEvent("groupselectionChange", groupNode); 
@@ -339,7 +386,7 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
                 id: key,
                 config: config,
                 callback: done,
-                fallback: function() {
+                fallback: function(source, msg, details) {
                     // TODO: log these issues somewhere that the app can display
                     // them after loading.
                     // console.log(arguments);
@@ -353,24 +400,39 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
     addLayerSource: function(options) {
         var id = options.id || Ext.id(null, "gxp-source-");
         var source;
+        var config = options.config;
+        config.id = id;
         try {
             source = Ext.ComponentMgr.createPlugin(
-                options.config, this.defaultSourceType
+                config, this.defaultSourceType
             );
+            
+            //
+            // Setting the id of the source in order to add a new source and a new layer dinamically (no AddLayer plugin).
+            // (by default this id is only for the conresponding element inside the ext sources combobox).
+            //
+            source.id = id;
         } catch (err) {
             throw new Error("Could not create new source plugin with ptype: " + options.config.ptype);
         }
         source.on({
-            ready: function() {
-                var callback = options.callback || Ext.emptyFn;
-                callback.call(options.scope || this, id);
+            ready: {
+                fn: function() {
+                    var callback = options.callback || Ext.emptyFn;
+                    callback.call(options.scope || this, id);
+                },
+                scope: this,
+                single: true
             },
-            failure: function() {
-                var fallback = options.fallback || Ext.emptyFn;
-                delete this.layerSources[id];
-                fallback.apply(options.scope || this, arguments);
-            },
-            scope: this
+            failure: {
+                fn: function() {
+                    var fallback = options.fallback || Ext.emptyFn;
+                    delete this.layerSources[id];
+                    fallback.apply(options.scope || this, arguments);
+                },
+                scope: this,
+                single: true
+            }
         });
         this.layerSources[id] = source;
         source.init(this);
@@ -385,18 +447,19 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
         
         // split initial map configuration into map and panel config
         if (this.initialConfig.map) {
-            var props = "theme,controls,resolutions,projection,units,maxExtent,restrictedExtent,maxResolution,numZoomLevels".split(",");
+            var props = "theme,controls,resolutions,projection,units,maxExtent,restrictedExtent,maxResolution,numZoomLevels,panMethod".split(",");
             var prop;
             for (var i=props.length-1; i>=0; --i) {
                 prop = props[i];
                 if (prop in config) {
                     mapConfig[prop] = config[prop];
                     delete config[prop];
-                };
+                }
             }
         }
 
-        this.mapPanel = new GeoExt.MapPanel(Ext.applyIf({
+        this.mapPanel = Ext.ComponentMgr.create(Ext.applyIf({
+            xtype: config.xtype || "gx_mappanel",
             map: Ext.applyIf({
                 theme: mapConfig.theme || null,
                 controls: mapConfig.controls || [
@@ -411,8 +474,10 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
             }, mapConfig),
             center: config.center && new OpenLayers.LonLat(config.center[0], config.center[1]),
             resolutions: config.resolutions,
+            forceInitialExtent: true,
             layers: null,
             items: this.mapItems,
+            plugins: this.mapPlugins,
             tbar: config.tbar || {hidden: true}
         }, config));
         
@@ -506,18 +571,38 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
         this.portal = new Constructor(Ext.applyIf(this.portalConfig || {}, {
             layout: "fit",
             hideBorders: true,
-            //title: this.mapTitle ? this.mapTitle : 'map',
+            title: this.mapTitle ? this.mapTitle : this.viewTabTitle ? this.viewTabTitle : 'map',
             items: {
                 layout: "border",
                 deferredRender: false,
                 items: this.portalItems
             }
         }));
-        		
+        
         if(this.renderToTab){
             var portalContainer = Ext.getCmp(this.renderToTab);
             portalContainer.add(this.portal);
             portalContainer.doLayout();
+            portalContainer.setActiveTab(1);
+                        
+            Ext.getCmp('west').collapse();
+            
+            var map = this.mapPanel.map;
+            var activeTab = portalContainer.getActiveTab();
+            app.on({
+              'portalready' : function(){
+                activeTab.addListener("activate", function(){
+                    Ext.getCmp('west').expand();
+
+                    map.size.w += 1;
+                    map.updateSize();
+                    map.size.w -= 1;
+                    map.updateSize();
+                });
+                
+                portalContainer.setActiveTab(0);
+              }
+            });
         }
         
         this.fireEvent("portalready");
@@ -570,16 +655,6 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
             var records = baseRecords.concat(overlayRecords);
             if (records.length) {
                 panel.layers.add(records);
-
-                // set map center
-                if(panel.center) {
-                    // zoom does not have to be defined
-                    map.setCenter(panel.center, panel.zoom);
-                } else if (panel.extent) {
-                    map.zoomToExtent(panel.extent);
-                } else {
-                    map.zoomToMaxExtent();
-                }
             }
             
         }        
@@ -618,7 +693,6 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
      *  configured before the call.
      */
     createLayerRecord: function(config, callback, scope) {
-        alert(callback);
         this.createLayerRecordQueue.push({
             config: config,
             callback: callback,
@@ -698,6 +772,29 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
             }
         }, this);
         
+        //standardize portal configuration to portalConfig
+        if (state.portalItems) {
+            //initial config included both portal config and items
+            if (state.portalConfig && state.portalConfig.items && state.portalConfig.items.length) {
+                //merge arrays of portalItems and portalConfig.items
+                for (var items = state.portalItems, i = 0, len = items.length; i < len; i++) {
+                    var item = items[i];
+                    if (state.portalConfig.items.indexOf(item) == -1) {
+                        state.portalConfig.items.push(item);
+                    }
+                }
+            }
+            else if (state.portalItems && state.portalItems.length) {
+                !state.portalConfig && (state.portalConfig = {});
+                state.portalConfig.items = state.portalItems;
+            }
+        }
+        
+        //get tool states, for most tools this will be the same as its initial config
+        state.tools = [];
+        Ext.iterate(this.tools,function(key,val,obj){
+            state.tools.push(val.getState());
+        });
         return state;
     },
     
@@ -724,6 +821,16 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
          */
         return !this.authorizedRoles || 
             (this.authorizedRoles.indexOf(role || "ROLE_ADMINISTRATOR") !== -1);
+    },
+
+    /** api: method[setAuthorizedRoles]
+     *  :arg authorizedRoles: ``Array``
+     *
+     *  Change the authorized roles.
+     */
+    setAuthorizedRoles: function(authorizedRoles) {
+        this.authorizedRoles = authorizedRoles;
+        this.fireEvent("authorizationchange");
     },
     
     /** api: method[isAuthenticated]

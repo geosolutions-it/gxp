@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
  * 
- * Published under the BSD license.
+ * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
  */
@@ -35,7 +35,7 @@ gxp.plugins.WizardContainer = {
      */
     init: function(target) {
         target.addEvents(
-            /** private: event[valid]
+            /** private: event[wizardstepvalid]
              *  Triggered when a wizard step is valid.
              *
              *  Listener arguments:
@@ -45,15 +45,30 @@ gxp.plugins.WizardContainer = {
              */
             "wizardstepvalid",
             
-            /** private: event[invalid]
+            /** private: event[wizardstepinvalid]
              *  Triggered when a wizard step is invalid.
              *
              *  Listener arguments:
              *
              *  * ``gxp.plugins.Tool`` - the wizard step plugin
              */
-            "wizardstepinvalid"
+            "wizardstepinvalid",
+            
+            /** api: event[wizardstepexpanded]
+             *  Triggered when a wizard step is expanded.
+             *
+             *  Listener arguments:
+             *
+             *  * ``Number`` - the index of the expanded wizard step
+             */
+            "wizardstepexpanded"
         );
+        
+        target.on("add", function(cmp) {
+            cmp.on("expand", function() {
+                target.fireEvent("wizardstepexpanded", target.items.indexOf(cmp));
+            });
+        });
     }
 
 };

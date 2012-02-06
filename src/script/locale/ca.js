@@ -72,6 +72,27 @@ GeoExt.Lang.add("ca", {
         tooltip: "Mostra Llegenda"
     },
 
+    "gxp.plugins.LoadingIndicator.prototype": {
+        loadingMapMessage: "Loading Map..."
+    },
+
+    "gxp.plugins.MapBoxSource.prototype": {
+        title: "MapBox Layers",
+        blueMarbleTopoBathyJanTitle: "Blue Marble Topography & Bathymetry (January)",
+        blueMarbleTopoBathyJulTitle: "Blue Marble Topography & Bathymetry (July)",
+        blueMarbleTopoJanTitle: "Blue Marble Topography (January)",
+        blueMarbleTopoJulTitle: "Blue Marble Topography (July)",
+        controlRoomTitle: "Control Room",
+        geographyClassTitle: "Geography Class",
+        naturalEarthHypsoTitle: "Natural Earth Hypsometric",
+        naturalEarthHypsoBathyTitle: "Natural Earth Hypsometric & Bathymetry",
+        naturalEarth1Title: "Natural Earth I",
+        naturalEarth2Title: "Natural Earth II",
+        worldDarkTitle: "World Dark",
+        worldLightTitle: "World Light",
+        worldPrintTitle: "World Print"
+    },
+
     "gxp.plugins.Measure.prototype": {
         lengthMenuText: "Longitud",
         areaMenuText: "Àrea",
@@ -283,7 +304,9 @@ GeoExt.Lang.add("ca", {
         transparentText: "Transparent",
         cacheText: "Caché",
         cacheFieldText: "Utiliza la versió en caché",
-        stylesText: "Estils"
+        stylesText: "Estils",
+        infoFormatText: "Info format",
+        infoFormatEmptyText: "Select a format"
     },
 
     "gxp.EmbedMapDialog.prototype": {

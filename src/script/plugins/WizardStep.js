@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
  * 
- * Published under the BSD license.
+ * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
  */
@@ -144,12 +144,12 @@ gxp.plugins.WizardStep = Ext.extend(gxp.plugins.Tool, {
             ct.ownerCt.on({
                 "wizardstepvalid": function(plugin, data) {
                     Ext.apply(this.wizardData, data);
-                    if (this.previousStepsCompleted(this)) {
+                    if (this.previousStepsCompleted()) {
                         ct.enable();
                     }
                 },
                 "wizardstepinvalid": function(plugin) {
-                    if (!this.previousStepsCompleted(this)) {
+                    if (!this.previousStepsCompleted()) {
                         ct.disable();
                     }
                 },
@@ -183,8 +183,8 @@ gxp.plugins.WizardStep = Ext.extend(gxp.plugins.Tool, {
     /** private: method[previousStepsCompleted]
      *  :returns: ``Boolean`` true when all previous steps are completed
      */
-    previousStepsCompleted: function(plugin) {
-        var index = plugin.index, completed = true;
+    previousStepsCompleted: function() {
+        var index = this.index, completed = true;
         if (index > 0) {
             var tool;
             for (var i in this.target.tools) {

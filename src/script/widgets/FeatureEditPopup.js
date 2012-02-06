@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
  * 
- * Published under the BSD license.
+ * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
  */
@@ -17,7 +17,7 @@
  *
  *      Create a new popup which displays the attributes of a feature and
  *      makes the feature editable,
- *      using an ``OpenLayers.Control.MofidyFeature``.
+ *      using an ``OpenLayers.Control.ModifyFeature``.
  */
 Ext.namespace("gxp");
 gxp.FeatureEditPopup = Ext.extend(GeoExt.Popup, {
@@ -40,7 +40,8 @@ gxp.FeatureEditPopup = Ext.extend(GeoExt.Popup, {
     layout: "fit",
     
     /** api: config[feature]
-     *  ``OpenLayers.Feature.Vector`` The feature to edit and display.
+     *  ``OpenLayers.Feature.Vector``|``GeoExt.data.FeatureRecord`` The feature
+     *  to edit and display.
      */
     
     /** api: config[vertexRenderIntent]
@@ -76,6 +77,11 @@ gxp.FeatureEditPopup = Ext.extend(GeoExt.Popup, {
     /** private: property[excludeFields]
      */
     
+    /** api: config[propertyNames]
+     *  ``Object`` Property name/display name pairs. If specified, the display
+     *  name will be shown in the name column instead of the property name.
+     */
+
     /** api: config[readOnly]
      *  ``Boolean`` Set to true to disable editing. Default is false.
      */
@@ -192,9 +198,12 @@ gxp.FeatureEditPopup = Ext.extend(GeoExt.Popup, {
             this.timeFormat = Ext.form.TimeField.prototype.format;
         }
         var feature = this.feature;
+        if (feature instanceof GeoExt.data.FeatureRecord) {
+            feature = this.feature = feature.getFeature();
+        }
         if (!this.location) {
-            this.location = feature
-        };
+            this.location = feature;
+        }
         
         this.anchored = !this.editing;
         
@@ -234,6 +243,7 @@ gxp.FeatureEditPopup = Ext.extend(GeoExt.Popup, {
                         case "date":
                             format = this.dateFormat;
                             fieldCfg.editable = false;
+                            break;
                         case "dateTime":
                             if (!format) {
                                 format = this.dateFormat + " " + this.timeFormat;
@@ -264,7 +274,7 @@ gxp.FeatureEditPopup = Ext.extend(GeoExt.Popup, {
                                         date = Date.parseDate(value.replace(/Z$/, ""), "c");
                                     }
                                     return date ? date.format(format) : value;
-                                }
+                                };
                             })();
                             break;
                         case "boolean":
@@ -272,7 +282,7 @@ gxp.FeatureEditPopup = Ext.extend(GeoExt.Popup, {
                                 "startedit": function(el, value) {
                                     this.setValue(Boolean(value));
                                 }
-                            }
+                            };
                             break;
                     }
                 }
@@ -335,6 +345,7 @@ gxp.FeatureEditPopup = Ext.extend(GeoExt.Popup, {
             source: feature.attributes,
             customEditors: customEditors,
             customRenderers: customRenderers,
+            propertyNames: this.propertyNames,
             viewConfig: {
                 forceFit: true,
                 getRowClass: function(record) {
@@ -445,7 +456,7 @@ gxp.FeatureEditPopup = Ext.extend(GeoExt.Popup, {
             this.saveButton.show();
             this.cancelButton.show();
             
-            this.geometry = this.feature.geometry.clone();
+            this.geometry = this.feature.geometry && this.feature.geometry.clone();
             this.attributes = Ext.apply({}, this.feature.attributes);
 
             this.modifyControl = new OpenLayers.Control.ModifyFeature(
@@ -454,7 +465,9 @@ gxp.FeatureEditPopup = Ext.extend(GeoExt.Popup, {
             );
             this.feature.layer.map.addControl(this.modifyControl);
             this.modifyControl.activate();
-            this.modifyControl.selectFeature(this.feature);
+            if (this.feature.geometry) {
+                this.modifyControl.selectFeature(this.feature);
+            }
         }
     },
     

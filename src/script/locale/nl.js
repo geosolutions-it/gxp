@@ -63,6 +63,27 @@ GeoExt.Lang.add("nl", {
         tooltip: "Toon legenda"
     },
 
+    "gxp.plugins.LoadingIndicator.prototype": {
+        loadingMapMessage: "Laden van de kaart..."
+    },
+
+    "gxp.plugins.MapBoxSource.prototype": {
+        title: "MapBox Layers",
+        blueMarbleTopoBathyJanTitle: "Blue Marble Topography & Bathymetry (January)",
+        blueMarbleTopoBathyJulTitle: "Blue Marble Topography & Bathymetry (July)",
+        blueMarbleTopoJanTitle: "Blue Marble Topography (January)",
+        blueMarbleTopoJulTitle: "Blue Marble Topography (July)",
+        controlRoomTitle: "Control Room",
+        geographyClassTitle: "Geography Class",
+        naturalEarthHypsoTitle: "Natural Earth Hypsometric",
+        naturalEarthHypsoBathyTitle: "Natural Earth Hypsometric & Bathymetry",
+        naturalEarth1Title: "Natural Earth I",
+        naturalEarth2Title: "Natural Earth II",
+        worldDarkTitle: "World Dark",
+        worldLightTitle: "World Light",
+        worldPrintTitle: "World Print"
+    },
+
     "gxp.plugins.Measure.prototype": {
         lengthMenuText: "Lengte",
         areaMenuText: "Oppervlakte",
@@ -248,7 +269,9 @@ GeoExt.Lang.add("nl", {
         transparentText: "Transparant",
         cacheText: "Cache",
         cacheFieldText: "Gebruik de versie vanuit de cache",
-        stylesText: "Stijlen"
+        stylesText: "Stijlen",
+        infoFormatText: "Info formaat",
+        infoFormatEmptyText: "Selecteer een formaat"
     },
 
     "gxp.EmbedMapDialog.prototype": {

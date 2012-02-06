@@ -25,7 +25,7 @@ GeoExt.Lang.add("en", {
         roadTitle: "Bing Roads",
         aerialTitle: "Bing Aerial",
         labeledAerialTitle: "Bing Aerial With Labels"
-    },    
+    },
 
     "gxp.plugins.FeatureEditor.prototype": {
         createFeatureActionTip: "Create a new feature",
@@ -70,6 +70,27 @@ GeoExt.Lang.add("en", {
     "gxp.plugins.Legend.prototype": {
         menuText: "Show Legend",
         tooltip: "Show Legend"
+    },
+
+    "gxp.plugins.LoadingIndicator.prototype": {
+        loadingMapMessage: "Loading Map..."
+    },
+
+    "gxp.plugins.MapBoxSource.prototype": {
+        title: "MapBox Layers",
+        blueMarbleTopoBathyJanTitle: "Blue Marble Topography & Bathymetry (January)",
+        blueMarbleTopoBathyJulTitle: "Blue Marble Topography & Bathymetry (July)",
+        blueMarbleTopoJanTitle: "Blue Marble Topography (January)",
+        blueMarbleTopoJulTitle: "Blue Marble Topography (July)",
+        controlRoomTitle: "Control Room",
+        geographyClassTitle: "Geography Class",
+        naturalEarthHypsoTitle: "Natural Earth Hypsometric",
+        naturalEarthHypsoBathyTitle: "Natural Earth Hypsometric & Bathymetry",
+        naturalEarth1Title: "Natural Earth I",
+        naturalEarth2Title: "Natural Earth II",
+        worldDarkTitle: "World Dark",
+        worldLightTitle: "World Light",
+        worldPrintTitle: "World Print"
     },
 
     "gxp.plugins.Measure.prototype": {
@@ -284,7 +305,9 @@ GeoExt.Lang.add("en", {
         transparentText: "Transparent",
         cacheText: "Cache",
         cacheFieldText: "Use cached version",
-        stylesText: "Styles"
+        stylesText: "Styles",
+        infoFormatText: "Info format",
+        infoFormatEmptyText: "Select a format"
     },
 
     "gxp.EmbedMapDialog.prototype": {

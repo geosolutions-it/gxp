@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
  * 
- * Published under the BSD license.
+ * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
  */
@@ -135,7 +135,8 @@ gxp.plugins.LayerSource = Ext.extend(Ext.util.Observable, {
             visibility: record.get("visibility") || layer.getVisibility(),
             opacity: layer.opacity || undefined,
             group: record.get("group"),
-			uuid : record.get("uuid"),
+			      uuid : record.get("uuid"),
+			      gnURL: record.get("gnURL"),
             fixed: record.get("fixed"),
             selected: record.get("selected")
         };
