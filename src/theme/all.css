@@ -134,6 +134,11 @@
     background-image: url(img/silk/information.png);
 }
 
+/* gxp_wmsgeojsongetfeatureinfo */
+.x-btn .gxp-icon-getgeojsonfeatureinfo, .x-menu-item .gxp-icon-getgeojsonfeatureinfo, .x-tree-node .gxp-icon-getgeojsonfeatureinfo {
+    background-image: url(img/silk/page_white_put.png);
+}
+
 /* gxp_featureeditor */
 .x-btn .gxp-icon-addfeature, .x-menu-item .gxp-icon-addfeature {
     background-image: url(img/silk/pencil_add.png);
