@@ -272,6 +272,11 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
                         layerStore.insert(0, [record]);
                     } else {
                         layerStore.add([record]);
+
+                        if(records.length == 1){
+				var layer = record.get('layer');
+				app.mapPanel.map.zoomToExtent(layer.restrictedExtent || layer.maxExtent || app.mapPanel.map.maxExtent);
+			}
                     }
                 }
             }
