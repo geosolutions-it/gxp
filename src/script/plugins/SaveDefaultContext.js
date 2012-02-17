@@ -93,8 +93,8 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
                           //
                           // UPDATE MAP
                           // 
-                          //var url = proxy + geoStoreBaseURL + "data/" + thisObj.target.mapId;
-                          var url = geoStoreBaseURL + "data/" + thisObj.target.mapId;
+                          var url = proxy + geoStoreBaseURL + "data/" + thisObj.target.mapId;
+                          //var url = geoStoreBaseURL + "data/" + thisObj.target.mapId;
                           var method = 'PUT';
                           var contentType = 'application/json';
                           
@@ -267,8 +267,8 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
                             
                             var resourceXML = '<Resource><description>' + mapDescription + '</description><metadata></metadata><name>' + mapName + '</name><category><name>MAP</name></category><store><data><![CDATA[ ' + configStr + ' ]]></data></store></Resource>';
                             
-                            //var url = proxy + geoStoreBaseURL + "resources";
-                            var url = geoStoreBaseURL + "resources";
+                            var url = proxy + geoStoreBaseURL + "resources";
+                            //var url = geoStoreBaseURL + "resources";
                             var method = 'POST';
                             var contentType = 'text/xml';              
                                   
