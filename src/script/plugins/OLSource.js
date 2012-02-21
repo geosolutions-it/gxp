@@ -98,7 +98,8 @@ gxp.plugins.OLSource = Ext.extend(gxp.plugins.LayerSource, {
             
             // create a layer record for this layer
             var Record = GeoExt.data.LayerRecord.create([
-                {name: "source", type: "string"}, 
+                {name: "source", type: "string"},
+                {name: "properties", type: "string"},
                 {name: "group", type: "string"},
 				{name: "uuid", type: "string"},
                 {name: "fixed", type: "boolean"},
@@ -110,6 +111,7 @@ gxp.plugins.OLSource = Ext.extend(gxp.plugins.LayerSource, {
                 layer: layer,
                 title: layer.name,
                 source: config.source,
+                properties: "gxp_wmslayerpanel",
                 group: config.group,
 				uuid : config.uuid,
                 fixed: ("fixed" in config) ? config.fixed : false,

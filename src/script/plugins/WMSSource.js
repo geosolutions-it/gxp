@@ -401,7 +401,9 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
             var params = Ext.applyIf({
                 STYLES: config.styles,
                 FORMAT: config.format,
-                TRANSPARENT: config.transparent
+                TRANSPARENT: config.transparent,
+                ELEVATION: config.elevation,
+                TIME: config.time
             }, layer.params);
             
             var singleTile = false;
@@ -436,8 +438,8 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
                 title: config.title, 
                 name: config.name,
                 group: config.group,
-				        uuid: config.uuid,
-				        gnURL: config.gnURL,
+                uuid: config.uuid,
+                gnURL: config.gnURL,
                 source: config.source,
                 properties: "gxp_wmslayerpanel",
                 fixed: config.fixed,
@@ -451,9 +453,9 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
                 {name: "source", type: "string"}, 
                 {name: "name", type: "string"}, 
                 {name: "group", type: "string"},
-				        {name: "uuid", type: "string"},
-				        {name: "gnURL", type: "string"},
-				        {name: "title", type: "string"},
+                {name: "uuid", type: "string"},
+                {name: "gnURL", type: "string"},
+                {name: "title", type: "string"},
                 {name: "properties", type: "string"},
                 {name: "fixed", type: "boolean"},
                 {name: "selected", type: "boolean"},

@@ -583,9 +583,9 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
             var portalContainer = Ext.getCmp(this.renderToTab);
             portalContainer.add(this.portal);
             portalContainer.doLayout();
-            portalContainer.setActiveTab(1);
+            portalContainer.setActiveTab(0);
                         
-            Ext.getCmp('west').collapse();
+            //Ext.getCmp('west').collapse();
             
             var map = this.mapPanel.map;
             var activeTab = portalContainer.getActiveTab();

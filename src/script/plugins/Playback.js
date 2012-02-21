@@ -148,12 +148,31 @@ gxp.plugins.Playback = Ext.extend(gxp.plugins.Tool, {
             });
             if (control) {
                 config.outputConfig.controlConfig = {
-                    range: (control.fixedRange) ? control.range : undefined,
-                    step: control.step,
-                    units: (control.units) ? control.units : undefined,
-                    loop: control.loop,
-                    snapToIntervals: control.snapToIntervals
+                    range : control.range, //(control.fixedRange) ? control.range : undefined,
+                    step : control.step,
+                    units : (control.units) ? control.units : undefined,
+                    loop : control.loop,
+                    snapToIntervals : control.snapToIntervals
                 };
+                if(control.timeAgents.length > 1) {
+                    var agents = control.timeAgents;
+                    var agentConfigs = [];
+                    for(var i = 0; i < agents.length; i++) {
+                        var agentConfig = {
+                            type : agents[i].CLASS_NAME.split("TimeAgent.")[1],
+                            rangeMode : agents[i].rangeMode,
+                            rangeInterval : agents[i].rangeInterval,
+                            intervals : agents[i].intervals,
+                            layers : []
+                        };
+                        for(var j = 0; j < agents[i].layers.length; j++) {
+                            var layerRec = app.mapPanel.layers.getByLayer(agents[i].layers[j]);
+                            agentConfig.layers.push(layerRec.json);
+                        }
+                        agentConfigs.push(agentConfig);
+                    }
+                    config.outputConfig.controlConfig.timeAgents = agentConfigs;
+                }
             }
             //get rid of 2 instantiated objects that will cause problems
             delete config.outputConfig.mapPanel;
