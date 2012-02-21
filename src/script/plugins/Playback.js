@@ -105,7 +105,8 @@ gxp.plugins.Playback = Ext.extend(gxp.plugins.Tool, {
         this._ready = 0;
         this.target.mapPanel.map.events.register('addlayer', this, function(e) {
             var layer = e.layer;
-            if (layer instanceof OpenLayers.Layer.WMS && layer.dimensions && layer.dimensions.time) {
+            //if (layer instanceof OpenLayers.Layer.WMS && layer.dimensions && layer.dimensions.time) {
+			if (layer instanceof OpenLayers.Layer.WMS) {	
                 this.target.mapPanel.map.events.unregister('addlayer', this, arguments.callee);
                 this._ready += 1;
                 if (this._ready > 1) {
