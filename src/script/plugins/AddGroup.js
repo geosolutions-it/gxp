@@ -79,6 +79,8 @@ gxp.plugins.AddGroup = Ext.extend(gxp.plugins.Tool, {
                     width: 315,
                     height: 200,
                     title: this.addGroupDialogTitle,
+                    constrainHeader: true,
+                    renderTo: apptarget.mapPanel.body,
                     items: [
                         new Ext.form.FormPanel({
                             width: 300,
