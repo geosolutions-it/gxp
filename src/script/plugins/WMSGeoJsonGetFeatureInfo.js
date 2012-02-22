@@ -12,7 +12,7 @@
 
 /** api: (define)
  *  module = gxp.plugins
- *  class = WMSGetFeatureInfo
+ *  class = WMSGeoJsonGetFeatureInfo
  */
 
 /** api: (extends)
@@ -21,15 +21,15 @@
 Ext.namespace("gxp.plugins");
 
 /** api: constructor
- *  .. class:: WMSGetFeatureInfo(config)
+ *  .. class:: WMSGeoJsonGetFeatureInfo(config)
  *
  *    This plugins provides an action which, when active, will issue a
  *    GetFeatureInfo request to the WMS of all layers on the map. The output
  *    will be displayed in a popup.
  */   
-gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
+gxp.plugins.WMSGeoJsonGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
     
-    /** api: ptype = gxp_wmsgetfeatureinfo */
+    /** api: ptype = gxp_wmsgeojsongetfeatureinfo */
     ptype: "gxp_wmsgeojsongetfeatureinfo",
     
     /** api: config[outputTarget]
@@ -67,7 +67,7 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
     addActions: function() {
         this.popupCache = {};
         
-        var actions = gxp.plugins.WMSGetFeatureInfo.superclass.addActions.call(this, [{
+        var actions = gxp.plugins.WMSGeoJsonGetFeatureInfo.superclass.addActions.call(this, [{
             tooltip: this.infoActionTip,
             iconCls: "gxp-icon-getgeojsonfeatureinfo",
             toggleGroup: this.toggleGroup,
@@ -193,4 +193,4 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
     
 });
 
-Ext.preg(gxp.plugins.WMSGetFeatureInfo.prototype.ptype, gxp.plugins.WMSGetFeatureInfo);
+Ext.preg(gxp.plugins.WMSGeoJsonGetFeatureInfo.prototype.ptype, gxp.plugins.WMSGeoJsonGetFeatureInfo);
