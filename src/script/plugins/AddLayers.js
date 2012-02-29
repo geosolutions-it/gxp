@@ -275,7 +275,21 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
 
                         if(records.length == 1){
 				var layer = record.get('layer');
-				app.mapPanel.map.zoomToExtent(layer.restrictedExtent || layer.maxExtent || app.mapPanel.map.maxExtent);
+				var extent = layer.restrictedExtent || layer.maxExtent || app.mapPanel.map.maxExtent;
+				var map = app.mapPanel.map;
+
+				// respect map properties
+				var restricted = map.restrictedExtent || map.maxExtent;
+				if (restricted) {
+				    extent = new OpenLayers.Bounds(
+				        Math.max(extent.left, restricted.left),
+				        Math.max(extent.bottom, restricted.bottom),
+				        Math.min(extent.right, restricted.right),
+				        Math.min(extent.top, restricted.top)
+				    );
+				}
+
+				map.zoomToExtent(extent, true);
 			}
                     }
                 }
@@ -349,7 +363,7 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
             ];
         }
         
-        if (this.target.proxy) {
+        /*if (this.target.proxy) {
             capGridToolbar.push("-", new Ext.Button({
                 text: this.addServerText,
                 iconCls: "gxp-icon-addserver",
@@ -357,7 +371,7 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
                     newSourceWindow.show();
                 }
             }));
-        }
+        }*/
         
         var newSourceWindow = new gxp.NewSourceWindow({
             modal: true,
