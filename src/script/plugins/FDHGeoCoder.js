@@ -29,7 +29,7 @@ Ext.namespace("gxp.plugins");
 gxp.plugins.FDHGeoCoder = Ext.extend(gxp.plugins.Tool, {
     
     /** api: ptype = gxp_zoomtoextent */
-    ptype: "gxp_fdhgeocoder",
+    ptype: "gxp_mapstoregeocoder",
     
     /** api: config[buttonText]
      *  ``String`` Text to show next to the zoom button
@@ -64,6 +64,8 @@ gxp.plugins.FDHGeoCoder = Ext.extend(gxp.plugins.Tool, {
     /** api: method[addActions]
      */
     addActions: function() {
+        this.data = this.target.geocodingData;
+        
         var geocodingStore = new Ext.data.ArrayStore({
             fields: ['name', 'geometry'],
             data :  this.data
@@ -85,7 +87,8 @@ gxp.plugins.FDHGeoCoder = Ext.extend(gxp.plugins.Tool, {
                     var bbox = new OpenLayers.Bounds.fromString(record.get('geometry'));
                     bbox = bbox.transform(
                         new OpenLayers.Projection("EPSG:4326"),
-                        new OpenLayers.Projection(map.projection));
+                        new OpenLayers.Projection(map.projection)
+                    );
                     map.zoomToExtent(bbox);
                 }
             }

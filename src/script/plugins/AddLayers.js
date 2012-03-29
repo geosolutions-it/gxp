@@ -241,7 +241,7 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
                     var uuidKey;
                     for(var k=0; k<keywords.length; k++){
                         var keyword = keywords[k].value;
-                        if(keyword.indexOf("uuid") != -1){
+                        if(keyword && keyword.indexOf("uuid") != -1){
                           uuidKey = keyword.substring(keyword.indexOf("uuid="));
                           uuidKey = keyword.split("=")[1];
                         }                      
@@ -271,26 +271,45 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
                     if (record.get("group") === "background") {
                         layerStore.insert(0, [record]);
                     } else {
-                        layerStore.add([record]);
+                        
+                        // ///////////////////////////////////////////////////////////////////////////////
+                        // If the featuremanager is present on the app config, all the layers must 
+                        // be added after the feature manager vector layer that is the first.
+                        // ///////////////////////////////////////////////////////////////////////////////
+                        var featureEd = false;
+                        for(var b=0; b<apptarget.initialConfig.tools.length; b++){
+                            var tool = apptarget.initialConfig.tools[b];
+                            if(tool){
+                                var ptype = tool.ptype;
+                                if(ptype === "gxp_featuremanager"){
+                                    featureEd = true;
+                                }
+                            }
+                        }
+                        
+                        if(featureEd)
+                            layerStore.insert(layerStore.data.length-2, [record]);
+                        else
+                            layerStore.add([record]);
 
                         if(records.length == 1){
-				var layer = record.get('layer');
-				var extent = layer.restrictedExtent || layer.maxExtent || app.mapPanel.map.maxExtent;
-				var map = app.mapPanel.map;
+                          var layer = record.get('layer');
+                          var extent = layer.restrictedExtent || layer.maxExtent || app.mapPanel.map.maxExtent;
+                          var map = app.mapPanel.map;
 
-				// respect map properties
-				var restricted = map.restrictedExtent || map.maxExtent;
-				if (restricted) {
-				    extent = new OpenLayers.Bounds(
-				        Math.max(extent.left, restricted.left),
-				        Math.max(extent.bottom, restricted.bottom),
-				        Math.min(extent.right, restricted.right),
-				        Math.min(extent.top, restricted.top)
-				    );
-				}
+                          // respect map properties
+                          var restricted = map.restrictedExtent || map.maxExtent;
+                          if (restricted) {
+                              extent = new OpenLayers.Bounds(
+                                  Math.max(extent.left, restricted.left),
+                                  Math.max(extent.bottom, restricted.bottom),
+                                  Math.min(extent.right, restricted.right),
+                                  Math.min(extent.top, restricted.top)
+                              );
+                          }
 
-				map.zoomToExtent(extent, true);
-			}
+                          map.zoomToExtent(extent, true);
+                        }
                     }
                 }
             }

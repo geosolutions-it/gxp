@@ -533,7 +533,7 @@ gxp.plugins.FeatureManager = Ext.extend(gxp.plugins.Tool, {
      *      of the laoded features (``OpenLayers.Feature.Vector``) as argument.
      *  :arg scope: ``Object`` Optional scope for the callback function.
      */
-    loadFeatures: function(filter, callback, scope) {
+    loadFeatures: function(mf, filter, callback, scope) {
         if (this.fireEvent("beforequery", this, filter, callback, scope) !== false) {
             this.filter = filter;
             this.pages = null;
@@ -569,6 +569,10 @@ gxp.plugins.FeatureManager = Ext.extend(gxp.plugins.Tool, {
                 this.setFeatureStore(filter, !this.paging);
             } else {
                 this.featureStore.setOgcFilter(filter);
+                
+                if(mf)
+                    this.featureStore.setMaxFeatures(mf);
+                
                 if (this.paging) {
                     this.setPage();
                 } else {

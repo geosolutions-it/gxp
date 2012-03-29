@@ -1,0 +1,10 @@
+.aoi-fields{
+    margin-left: 15%;
+    margin-right: 10%;
+}
+.spatial-cell{
+    text-align: center;
+}
+.aoi-button{
+    background-image: url(img/silk/shape_square.png) !important;
+}

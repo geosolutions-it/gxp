@@ -271,6 +271,7 @@ gxp.plugins.FeatureGrid = Ext.extend(gxp.plugins.ClickableFeatures, {
             },
             contextMenu: new Ext.menu.Menu({items: []})
         }, config || {});
+        
         var featureGrid = gxp.plugins.FeatureGrid.superclass.addOutput.call(this, config);
         
         if (this.alwaysDisplayOnMap || this.selectOnMap) {
@@ -297,6 +298,9 @@ gxp.plugins.FeatureGrid = Ext.extend(gxp.plugins.ClickableFeatures, {
             featureGrid.ignoreFields = ignoreFields;
             featureGrid.setStore(featureManager.featureStore, schema);
         }, this);
+        
+        if(this.outputTarget)
+            Ext.getCmp(this.outputTarget).setActiveTab(featureGrid);
         
         return featureGrid;
     }
