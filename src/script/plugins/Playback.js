@@ -32,6 +32,18 @@ gxp.plugins.Playback = Ext.extend(gxp.plugins.Tool, {
     /** api: ptype = gxp_playback */
     ptype: "gxp_playback",
     
+    /** api: config[autoStart]
+     *  ``Boolean``
+     *  Should playback begin as soon as possible.
+     */
+    autoStart: false,
+
+    /** api: config[looped]
+     *  ``Boolean``
+     *  Should playback start in continuous loop mode.
+     */    
+    looped: false,
+    
     /** api: config[menuText]
      *  ``String``
      *  Text for Playback menu item (i18n).
@@ -71,9 +83,11 @@ gxp.plugins.Playback = Ext.extend(gxp.plugins.Tool, {
             xtype: 'gxp_playbacktoolbar',
             mapPanel:this.target.mapPanel,
             playbackMode:this.playbackMode,
+            looped:this.looped,
+            autoPlay:this.autoStart,
             optionsWindow: new Ext.Window({
                 title: gxp.PlaybackOptionsPanel.prototype.titleText,
-                width: 300,
+                width: 350,
                 height: 425,
                 layout: 'fit',
                 items: [{xtype: 'gxp_playbackoptions'}],
@@ -93,7 +107,7 @@ gxp.plugins.Playback = Ext.extend(gxp.plugins.Tool, {
             })
         });
         var toolbar = gxp.plugins.Playback.superclass.addOutput.call(this,config); 
-        this.relayEvents(toolbar,['timechange','rangemodified'])
+        this.relayEvents(toolbar,['timechange','rangemodified']);
         this.playbackToolbar = toolbar;
         //firing the 'rangemodified' event to indicate that the toolbar has been created with temporal layers
         if(toolbar.control.layers){
@@ -105,8 +119,7 @@ gxp.plugins.Playback = Ext.extend(gxp.plugins.Tool, {
         this._ready = 0;
         this.target.mapPanel.map.events.register('addlayer', this, function(e) {
             var layer = e.layer;
-            //if (layer instanceof OpenLayers.Layer.WMS && layer.dimensions && layer.dimensions.time) {
-			if (layer instanceof OpenLayers.Layer.WMS) {	
+            if (layer instanceof OpenLayers.Layer.WMS && layer.dimensions && layer.dimensions.time) {
                 this.target.mapPanel.map.events.unregister('addlayer', this, arguments.callee);
                 this._ready += 1;
                 if (this._ready > 1) {
@@ -133,21 +146,22 @@ gxp.plugins.Playback = Ext.extend(gxp.plugins.Tool, {
     setTime: function(time){
         return this.playbackToolbar.setTime(time);
     },
+
     /** api: method[getState]
      *  :returns {Object} - initial config plus any user configured settings
      *  
      *  Tool specific implementation of the getState function
-     */
-    getState: function(){
+     */    
+    getState: function() {
         var config = gxp.plugins.Playback.superclass.getState.call(this);
         var toolbar = this.playbackToolbar;
-        if (toolbar) {
+        if(toolbar) {
             var control = toolbar.control;
             config.outputConfig = Ext.apply(toolbar.initialConfig, {
-                dynamicRange: toolbar.dyanamicRange,
-                playbackMode: toolbar.playbackMode
+                dynamicRange : toolbar.dyanamicRange,
+                playbackMode : toolbar.playbackMode
             });
-            if (control) {
+            if(control) {
                 config.outputConfig.controlConfig = {
                     range : control.range, //(control.fixedRange) ? control.range : undefined,
                     step : control.step,
@@ -168,7 +182,8 @@ gxp.plugins.Playback = Ext.extend(gxp.plugins.Tool, {
                         };
                         for(var j = 0; j < agents[i].layers.length; j++) {
                             var layerRec = app.mapPanel.layers.getByLayer(agents[i].layers[j]);
-                            agentConfig.layers.push(layerRec.json);
+                            var layerConfig = this.target.layerSources[layerRec.get('source')].getConfigForRecord(layerRec);
+                            agentConfig.layers.push(layerConfig);
                         }
                         agentConfigs.push(agentConfig);
                     }
