@@ -585,7 +585,7 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
             portalContainer.doLayout();
             portalContainer.setActiveTab(2);
                         
-            Ext.getCmp('west').collapse();
+            //Ext.getCmp('west').collapse();
             
             var map = this.mapPanel.map;
             var activeTab = portalContainer.getActiveTab();
@@ -600,7 +600,7 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
                     map.updateSize();
                 });
                 
-                portalContainer.setActiveTab(0);
+                //portalContainer.setActiveTab(0);
               }
             });
         }
