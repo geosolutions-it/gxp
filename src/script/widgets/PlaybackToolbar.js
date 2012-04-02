@@ -435,9 +435,15 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
         }
     },
     toggleDoubleSpeed:function(btn,pressed){
+<<<<<<< HEAD
         var framerate = this.control.frameRate * ((pressed) ? 2 : 0.5);
         this.control.setFrameRate(framerate);
         btn.setTooltip((pressed) ? this.normalTooltip : this.fastforwardTooltip);
+=======
+        this.control.frameRate = this.control.frameRate*(pressed)?2:0.1;
+        this.control.stop();this.control.play();
+        btn.setTooltip(pressed?this.normalTooltip:this.fastforwardTooltip);
+>>>>>>> 8e0eb3e893f028f93e039c21737c7ae187077c87
     },
     toggleOptionsWindow:function(btn,pressed){
         if(pressed && this.optionsWindow.hidden){
