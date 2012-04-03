@@ -720,7 +720,7 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
         if (this._silent !== true && this.playbackTool && this.playbackTool.playbackToolbar.playing !== true) {
             this._ignoreTimeChange = true;
             this.playbackTool.setTime(time);
-            this.timeline.getBand(0)._decorators[0]._date = this.playbackTool.playbackToolbar.control.currentTime;
+            this.timeline.getBand(0)._decorators[0]._date = time;
             this.timeline.getBand(0)._decorators[0].paint();
             delete this._ignoreTimeChange;
             this.showAnnotations(time);
@@ -1076,7 +1076,10 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
                 dismissDelay: 0
             });
         }
-        this.tooltips[fid].showBy(this.viewer.mapPanel.body, record.get("appearance"));
+        var tooltip = this.tooltips[fid];
+        // http://www.sencha.com/forum/showthread.php?101593-OPEN-1054-Tooltip-anchoring-problem
+        tooltip.showBy(this.viewer.mapPanel.body, record.get("appearance"));
+        tooltip.showBy(this.viewer.mapPanel.body, record.get("appearance"));
     },
 
     /** private: method[hideTooltip]
@@ -1101,7 +1104,7 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
             this.annotationsLayer = new OpenLayers.Layer.Vector(null, {
                 displayInLayerSwitcher: false,
                 styleMap: new OpenLayers.StyleMap({'default':{
-                    label: "${title}",
+                    label: "${title}\n${content}",
                     fontColor: "black",
                     fontSize: "12px",
                     fontFamily: "Courier New, monospace",
@@ -1206,8 +1209,8 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
                     this.updateTimelineEvents({force: true, noAbort: true}, true);
                 }
             }
-            this.showAnnotations(time);
         }
+        this.showAnnotations(time);
     },
 
     /** private: method[calculateNewRange]
