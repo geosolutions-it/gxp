@@ -8,6 +8,8 @@
 
 /**
  * @requires plugins/Tool.js
+ * @requires OpenLayers/Control/WMSGetFeatureInfo.js
+ * @requires OpenLayers/Format/WMSGetFeatureInfo.js
  */
 
 /** api: (define)
@@ -76,16 +78,14 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
     /** api: config[itemConfig]
      *  ``Object`` A configuration object overriding options for the items that
      *  get added to the popup for each server response or feature. By default,
-     *  each item will be configured with the following object:
+     *  each item will be configured with the following options:
      *
-     *  ..code-block:: javascript
+     *  .. code-block:: javascript
      *
-     *      {
-     *          xtype: "propertygrid", // only for "grid" format
-     *          title: feature.fid ? feature.fid : title, // only for "grid" format
-     *          source: feature.attributes, // only for "grid" format
-     *          html: text, // responseText from server - only for "html" format
-     *      } 
+     *      xtype: "propertygrid", // only for "grid" format
+     *      title: feature.fid ? feature.fid : title, // just title for "html" format
+     *      source: feature.attributes, // only for "grid" format
+     *      html: text, // responseText from server - only for "html" format
      */
 
     /** api: method[addActions]
@@ -196,14 +196,16 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
                 xtype: "gx_popup",
                 title: this.popupTitle,
                 layout: "accordion",
+                fill: false,
+                autoScroll: true,
                 location: evt.xy,
                 map: this.target.mapPanel,
                 width: 250,
                 height: 300,
                 defaults: {
-                    title: title,
                     layout: "fit",
                     autoScroll: true,
+                    autoHeight: true,
                     autoWidth: true,
                     collapsible: true
                 },
@@ -228,12 +230,18 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
                 feature = features[i];
                 config.push(Ext.apply({
                     xtype: "propertygrid",
+                    listeners: {
+                        'beforeedit': function (e) { 
+                            return false; 
+                        } 
+                    },
                     title: feature.fid ? feature.fid : title,
                     source: feature.attributes
                 }, this.itemConfig));
             }
         } else if (text) {
             config.push(Ext.apply({
+                title: title,
                 html: text
             }, this.itemConfig));
         }
