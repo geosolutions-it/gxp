@@ -150,6 +150,7 @@ gxp.plugins.LayerSource = Ext.extend(Ext.util.Observable, {
     
     /** api: method[getState]
      *  :returns: ``Object``
+     *
      *  Gets the configured source state.
      */
     getState: function() {
@@ -157,5 +158,4 @@ gxp.plugins.LayerSource = Ext.extend(Ext.util.Observable, {
         // of the initialConfig property.
         return Ext.apply({}, this.initialConfig);
     }
-    
 });
