@@ -125,7 +125,6 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
     outputAction: 0,
     
     // Begin i18n.
-    title: "PUPPA",
     northLabel:"North",
     westLabel:"West",
     eastLabel:"East",
@@ -250,7 +249,7 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
 						style:"color:orange; font-size:10px",
 						ref: "../spatialLabel",
 						id: "spatialLabel",
-						text: ""
+						text: this.spatialLabelText
 					}, {
 						xtype: "panel",
 						border: false,
@@ -587,8 +586,8 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
                          map.removeLayer(aoiLayer);
                      
                      if(pressed){
-					      Ext.getCmp("spatialLabel").setText(this.spatialLabelText);
-                          
+                          Ext.getCmp("spatialLabel").setText("");
+						  
 						  if(this.northField.isDirty() && this.southField.isDirty() && 
                               this.eastField.isDirty() && this.westField.isDirty()){
                               this.northField.reset();
@@ -602,7 +601,7 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
                           //                          
                           selectAOI.activate();
                       }else{
-					      Ext.getCmp("spatialLabel").setText("");
+					      Ext.getCmp("spatialLabel").setText(this.spatialLabelText);
                           selectAOI.deactivate();
 
                           var extentArray = this.target.mapPanel.map.getExtent().toArray();
