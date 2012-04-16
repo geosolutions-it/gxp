@@ -125,7 +125,7 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
     outputAction: 0,
     
     // Begin i18n.
-    title: "Search",
+    title: "PUPPA",
     northLabel:"North",
     westLabel:"West",
     eastLabel:"East",
@@ -137,6 +137,8 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
     searchType: "Base Settings",
     typeLabel: "Type",
     featureLabel: "Max Features",
+	spatialLabelText: "Without setting a ROI you query the entire set of data in the current Map extent.",
+	featureLabelText: "With an high number of features the server can take a long time to respond. Limit your search!",
     // End i18n.
     
     spatialFilterOptions: {
@@ -162,6 +164,7 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
         map.enebaleMapEvent = true;
         
         config = Ext.apply({
+		    title: this.title,
             border: false,
             bodyStyle: "padding: 10px",
             layout: "form",
@@ -181,7 +184,7 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
                     anchor: "50%",
                     fieldLabel: this.typeLabel,
                     name: this.typeLabel,
-                    allowBlank: true,
+                    allowBlank: false,
                     emptyText: "Basic",
                     editable: false,
                     triggerAction: "all",
@@ -206,6 +209,7 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
                     anchor: "50%",
                     fieldLabel: this.featureLabel,
                     value: this.maxFeatures,
+					allowBlank: false,
                     minValue: 5,
                     maxValue: 100,
                     allowDecimals: false
@@ -215,7 +219,12 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
                                   return false;
                         	}
                     }*/
-                }]
+                }, {
+				    xtype: "label",
+					style:"color:red; font-size:10px",
+					ref: "../baseLabel",
+					text: ""
+				}]
             },/*{
                 xtype: "fieldset",
                 ref: "spatialFieldset",
@@ -233,20 +242,36 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
                 xtype: "fieldset",
                 ref: "spatialFieldset",
                 title: this.queryByLocationText,
-                id: 'bboxAOI-set',
                 autoHeight: true,
-                layout: 'table',
-                layoutConfig: {
-                    columns: 3
-                },
-                defaults: {
-                    // applied to each contained panel
-                    bodyStyle:'padding:5px;'
-                },
-                bodyCssClass: 'aoi-fields',
                 checkboxToggle: true,
                 items: [
-                    this.populateSpatialForm(map)
+					{
+						xtype: "label",
+						style:"color:orange; font-size:10px",
+						ref: "../spatialLabel",
+						id: "spatialLabel",
+						text: ""
+					}, {
+						xtype: "panel",
+						border: false,
+						header: false,
+						ref: "../aoiFieldset",
+						id: 'bboxAOI-set',
+						autoHeight: true,
+						layout: 'table',
+						layoutConfig: {
+							columns: 3
+						},
+						defaults: {
+							// applied to each contained panel
+							bodyStyle:'padding:5px;'
+						},
+						bodyCssClass: 'aoi-fields',
+						checkboxToggle: true,
+						items: [
+							this.populateSpatialForm(map)
+						]
+					}
                 ]
             }, {
                 xtype: "fieldset",
@@ -283,7 +308,9 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
                     //
                     queryForm.type.reset();
                     queryForm.maxfeature.reset();
-                    
+                    queryForm.baseLabel.setText("");
+					queryForm.spatialLabel.setText("");
+
                     //
                     // Removing the ROI 
                     //
@@ -335,18 +362,36 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
                             }
                             
                             var mf = null;
-                            if(queryForm.maxfeature.isDirty() && queryForm.maxfeature.isValid()) 
+                            if(queryForm.maxfeature.isValid()){ 
+							    var south = Ext.getCmp('south'); 
+								
+								if(south.collapsed){
+									south.expand();
+									south.syncSize();
+								}
+								 
                                 mf = queryForm.maxfeature.getValue();
-                            else
-                                mf = this.maxFeatures;
-                           
-                            featureManager.loadFeatures(mf, filters.length > 1 ?
-                                new OpenLayers.Filter.Logical({
-                                    type: OpenLayers.Filter.Logical.AND,
-                                    filters: filters
-                                }) :
-                                filters[0]
-                            );
+								
+								if(mf > 50)
+									queryForm.baseLabel.setText(this.featureLabelText);
+								else
+									queryForm.baseLabel.setText("");
+									
+								featureManager.loadFeatures(mf, filters.length > 1 ?
+									new OpenLayers.Filter.Logical({
+										type: OpenLayers.Filter.Logical.AND,
+										filters: filters
+									}) :
+									filters[0]
+								);
+                            }else
+                                //mf = this.maxFeatures;
+								Ext.Msg.show({
+									title: "Max Features",
+									msg: "MaxFeature value is null or incorrect !",
+									buttons: Ext.Msg.OK,
+									icon: Ext.Msg.INFO
+								});
                         }else{
                             Ext.Msg.show({
                                 title: "Features Search",
@@ -542,7 +587,9 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
                          map.removeLayer(aoiLayer);
                      
                      if(pressed){
-                          if(this.northField.isDirty() && this.southField.isDirty() && 
+					      Ext.getCmp("spatialLabel").setText(this.spatialLabelText);
+                          
+						  if(this.northField.isDirty() && this.southField.isDirty() && 
                               this.eastField.isDirty() && this.westField.isDirty()){
                               this.northField.reset();
                               this.southField.reset();
@@ -555,6 +602,7 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
                           //                          
                           selectAOI.activate();
                       }else{
+					      Ext.getCmp("spatialLabel").setText("");
                           selectAOI.deactivate();
 
                           var extentArray = this.target.mapPanel.map.getExtent().toArray();

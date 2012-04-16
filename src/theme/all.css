@@ -244,11 +244,15 @@
 .x-btn .gxp-icon-zoom-out, .x-tree-node .gxp-icon-zoom-out {
     background-image: url(img/silk/magnifier_zoom_out.png);
 }
-.x-btn .gxp-icon-zoombox-in, .x-tree-node .gxp-icon-zoombox-out {
+.x-btn .gxp-icon-zoombox-in, .x-tree-node .gxp-icon-zoombox-in {
     background-image: url(img/silk/shape_square_green.png);
 }
 .x-btn .gxp-icon-zoombox-out, .x-tree-node .gxp-icon-zoombox-out {
     background-image: url(img/silk/shape_square_red.png);
+}
+
+.x-btn .gxp-icon-graticule, .x-tree-node .gxp-icon-graticule {
+    background-image: url(img/silk/raster_add.png);
 }
 
 /* gxp_measure */

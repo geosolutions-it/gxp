@@ -320,7 +320,9 @@ gxp.FilterBuilder = Ext.extend(Ext.Container, {
     },
     
     createDefaultFilter: function() {
-        return new OpenLayers.Filter.Comparison();
+        return new OpenLayers.Filter.Comparison({
+			matchCase : false
+		});
     },
     
     /** private: method[wrapFilter]
