@@ -74,7 +74,7 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
      *  ``Array`` List of param names that should be taken from the layer and
      *  added to the GetFeatureInfo request (e.g. ["CQL_FILTER"]).
      */
-     
+     layerParams: ["TIME"],
     /** api: config[itemConfig]
      *  ``Object`` A configuration object overriding options for the items that
      *  get added to the popup for each server response or feature. By default,
