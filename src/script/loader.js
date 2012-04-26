@@ -72,7 +72,7 @@
         "plugins/Zoom.js",
         "plugins/ZoomBox.js",
         "plugins/ZoomToExtent.js",
-        "plugins/FDHGeoCoder.js",
+        "plugins/GeoCoder.js",
         "plugins/ZoomToDataExtent.js",
         "plugins/ZoomToLayerExtent.js",
         "plugins/ZoomToSelectedFeatures.js",
