@@ -61,7 +61,7 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
     addActions: function() {
 		
 		var saveContext = new Ext.Button({
-		        id: "save-context-button",
+		    id: "save-context-button",
             menuText: this.saveDefaultContextMenuText,
             iconCls: "gxp-icon-savedefaultcontext",
             disabled: false,
@@ -78,8 +78,8 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
                       //
                       // UPDATE MAP
                       // 
-                      //var url = proxy + geoStoreBaseURL + "data/" + this.target.mapId;
-                      var url = geoStoreBaseURL + "data/" + this.target.mapId;
+                      var url = proxy + geoStoreBaseURL + "data/" + this.target.mapId;
+                      //var url = geoStoreBaseURL + "data/" + this.target.mapId;
                       var method = 'PUT';
                       var contentType = 'application/json';
                       
@@ -98,12 +98,16 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
         var mask = new Ext.LoadMask(Ext.getBody(), {msg:"Please wait..."});
         mask.show();
         
+        // TODO: to fix
+        var auth = 'Basic ' + Base64.encode('admin:admin');
+        
         Ext.Ajax.request({
            url: url,
            method: method,
            headers:{
               'Content-Type' : contentType,
-              'Accept' : 'application/json, text/plain, text/xml'
+              'Accept' : 'application/json, text/plain, text/xml',
+              'Authorization' : auth
            },
            params: configStr,
            scope: this,
@@ -212,8 +216,8 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
                             
                             var resourceXML = '<Resource><description>' + mapDescription + '</description><metadata></metadata><name>' + mapName + '</name><category><name>MAP</name></category><store><data><![CDATA[ ' + configStr + ' ]]></data></store></Resource>';
                             
-                            //var url = proxy + geoStoreBaseURL + "resources";
-                            var url = geoStoreBaseURL + "resources";
+                            var url = proxy + geoStoreBaseURL + "resources";
+                            //var url = geoStoreBaseURL + "resources";
                             var method = 'POST';
                             var contentType = 'text/xml';              
                                   
