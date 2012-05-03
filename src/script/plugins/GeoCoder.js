@@ -66,7 +66,7 @@ gxp.plugins.GeoCoder = Ext.extend(gxp.plugins.Tool, {
     addActions: function() {
         var geocodingStore = new Ext.data.ArrayStore({
             fields: ['name', 'geometry'],
-            data :  this.target.data
+            data :  this.data
         });
 
         var map = this.target.mapPanel.map;
