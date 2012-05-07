@@ -99,7 +99,7 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
         mask.show();
         
         // TODO: to fix
-        var auth = 'Basic ' + Base64.encode('admin:admin');
+        var auth = 'Basic ' + Base64.encode('pinco:pinco');
         
         Ext.Ajax.request({
            url: url,
