@@ -521,14 +521,14 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
                     if(this.initialConfig.tools[i].ptype == "gxp_layertree"){
                         var layers = this.initialConfig.map.layers;
                         var size = layers.length;
-                        var groups = {
+                        this.groups = {
                             "default": tool.overlayNodeText
                         };
 
                         for(var j=size-1; j>=0; j--){
                             if(layers[j].group){
                                 if(layers[j].group != "background" && layers[j].group != "default"){      
-                                    var s = 'groups.' + layers[j].group + '={title:"' + layers[j].group + '"}';    
+                                    var s = 'this.groups.' + layers[j].group + '={title:"' + layers[j].group + '"}';    
                                     
                                     //
                                     // Managing withe spaces in strings
@@ -543,12 +543,12 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
                             }
                         }
 
-                        groups.background = {
+                        this.groups.background = {
                             title: tool.baseNodeText,
                             exclusive: true
                         }
                         
-                        tool.groups = groups;
+                        tool.groups = this.groups;
                     }
                 } catch (err) {
                     throw new Error("Could not create tool plugin with ptype: " + this.initialConfig.tools[i].ptype);
