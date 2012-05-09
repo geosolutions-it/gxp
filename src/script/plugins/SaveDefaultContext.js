@@ -26,7 +26,7 @@ Ext.namespace("gxp.plugins");
  *    Plugin for removing all overlays from the map.
  */
 gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
-    
+    id: "id_saveDefaultContext",
     /** api: ptype = gxp_removeoverlays */
     ptype: "gxp_saveDefaultContext",
     
@@ -55,6 +55,7 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
      */
     addResourceButtonText: "Add Map",
     
+    auth: null,
     
     /** api: method[addActions]
      */
@@ -73,7 +74,8 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
                       //
                       // SAVE MAP
                       //
-                      this.metadataDialog(configStr);                      
+                      this.metadataDialog(configStr); 
+                      var auth = this.auth;
                   }else{
                       //
                       // UPDATE MAP
@@ -82,8 +84,8 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
                       //var url = geoStoreBaseURL + "data/" + this.target.mapId;
                       var method = 'PUT';
                       var contentType = 'application/json';
-                      
-                      this.save(url, method, contentType, configStr);
+                      var auth = this.auth;
+                      this.save(url, method, contentType, configStr, auth);
                   }
             },
             scope: this
@@ -94,13 +96,10 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
         return actions;
     },
     
-    save: function(url, method, contentType, configStr){    
+    save: function(url, method, contentType, configStr, auth){    
         var mask = new Ext.LoadMask(Ext.getBody(), {msg:"Please wait..."});
         mask.show();
-        
-        // TODO: to fix
-        var auth = 'Basic ' + Base64.encode('pinco:pinco');
-        
+
         Ext.Ajax.request({
            url: url,
            method: method,
@@ -220,8 +219,8 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
                             //var url = geoStoreBaseURL + "resources";
                             var method = 'POST';
                             var contentType = 'text/xml';              
-                                  
-                            this.save(url, method, contentType, resourceXML);
+                            var auth = this.auth
+                            this.save(url, method, contentType, resourceXML, auth);
                             
                             win.destroy(); 
                         }
