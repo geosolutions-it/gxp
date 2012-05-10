@@ -28,12 +28,8 @@ Ext.namespace("gxp.plugins");
  */
 gxp.plugins.GeoReferences = Ext.extend(gxp.plugins.Tool, {
     
-    /** api: ptype = gxp_zoomtoextent */
+    /** api: ptype = gxp_georeferences */
     ptype: "gxp_georeferences",
-    
-    /** api: config[buttonText]
-     *  ``String`` Text to show next to the zoom button
-     */
 
     /** api: config[initialText]
      *  ``String``
@@ -64,14 +60,14 @@ gxp.plugins.GeoReferences = Ext.extend(gxp.plugins.Tool, {
     /** api: method[addActions]
      */
     addActions: function() {
-        var geocodingStore = new Ext.data.ArrayStore({
+        var georeferencesStore = new Ext.data.ArrayStore({
             fields: ['name', 'geometry'],
             data :  this.target.georeferences
         });
 
         var map = this.target.mapPanel.map;
-        var geocodingSelector = new Ext.form.ComboBox({
-            store: geocodingStore,
+        var georeferencesSelector = new Ext.form.ComboBox({
+            store: georeferencesStore,
             displayField: 'name',
             typeAhead: true,
             mode: 'local',
@@ -91,7 +87,7 @@ gxp.plugins.GeoReferences = Ext.extend(gxp.plugins.Tool, {
             }
         });
         
-        var actions = [geocodingSelector];
+        var actions = [georeferencesSelector];
         return gxp.plugins.GeoReferences.superclass.addActions.apply(this, [actions]);
     }
         
