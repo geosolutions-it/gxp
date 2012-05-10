@@ -12,7 +12,7 @@
 
 /** api: (define)
  *  module = gxp.plugins
- *  class = RemoveOverlays
+ *  class = saveDefaultContext
  */
 
 /** api: (extends)
@@ -21,13 +21,13 @@
 Ext.namespace("gxp.plugins");
 
 /** api: constructor
- *  .. class:: RemoveLayer(config)
+ *  .. class:: saveDefaultContext(config)
  *
- *    Plugin for removing all overlays from the map.
+ *    Plugin for Save Context Map as geostore resource.
  */
 gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
-    id: "id_saveDefaultContext",
-    /** api: ptype = gxp_removeoverlays */
+
+    /** api: ptype = gxp_saveDefaultContext */
     ptype: "gxp_saveDefaultContext",
     
     /** api: config[saveDefaultContextMenuText]
@@ -55,6 +55,9 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
      */
     addResourceButtonText: "Add Map",
     
+    /** api: config[auth]
+     *  ``String``
+     */
     auth: null,
     
     /** api: method[addActions]
@@ -75,7 +78,6 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
                       // SAVE MAP
                       //
                       this.metadataDialog(configStr); 
-                      var auth = this.auth;
                   }else{
                       //
                       // UPDATE MAP
@@ -219,7 +221,7 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
                             //var url = geoStoreBaseURL + "resources";
                             var method = 'POST';
                             var contentType = 'text/xml';              
-                            var auth = this.auth
+                            var auth = this.auth;
                             this.save(url, method, contentType, resourceXML, auth);
                             
                             win.destroy(); 
