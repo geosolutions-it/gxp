@@ -75,7 +75,8 @@ gxp.plugins.GeoReferences = Ext.extend(gxp.plugins.Tool, {
             triggerAction: 'all',
             emptyText: this.initialText,
             selectOnFocus:true,
-            editable: false,
+            editable: true,
+            resizable: true,
             listeners: {
                 select: function(cb, record, index) {
                     var bbox = new OpenLayers.Bounds.fromString(record.get('geometry'));

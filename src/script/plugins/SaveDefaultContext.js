@@ -38,7 +38,7 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
     /** api: config[saveDefaultContextActionTip]
      *  ``String``
      */
-    saveDefaultContextActionTip: "Save current context as default one",
+    saveDefaultContextActionTip: "Save Map context",
 	
     /** api: config[contextSaveSuccessString]
      *  ``String``
