@@ -59,7 +59,12 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
      *  ``String``
      */
     auth: null,
-    
+    /**
+    * Property: contextMsg
+    * {string} string to add in loading message
+    * 
+    */
+    contextMsg: 'Loading...',
     /** api: method[addActions]
      */
     addActions: function() {
@@ -173,7 +178,7 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
     },
     
     save: function(url, method, contentType, configStr, auth){    
-        var mask = new Ext.LoadMask(Ext.getBody(), {msg:"Please wait..."});
+        var mask = new Ext.LoadMask(Ext.getBody(), {msg: this.contextMsg});
         mask.show();
 
         Ext.Ajax.request({
