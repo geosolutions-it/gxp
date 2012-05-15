@@ -228,6 +228,8 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
            },
            failure:  function(response, opts){
               mask.hide();
+			  this.auth = null;
+			  
               Ext.Msg.show({
                  title: this.contextSaveFailString,
                  msg: response.statusText + "(status " + response.status + "):  " + response.responseText,
