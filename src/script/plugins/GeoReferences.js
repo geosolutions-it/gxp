@@ -12,7 +12,7 @@
 
 /** api: (define)
  *  module = gxp.plugins
- *  class = FDHGeoCoder
+ *  class = GeoReferences
  */
 
 /** api: (extends)
@@ -21,19 +21,15 @@
 Ext.namespace("gxp.plugins");
 
 /** api: constructor
- *  .. class:: FDHGeoCoder(config)
+ *  .. class:: GeoReferences(config)
  *
  *    Provides an action for zooming to an extent.  If not configured with a 
  *    specific extent, the action will zoom to the map's visible extent.
  */
-gxp.plugins.FDHGeoCoder = Ext.extend(gxp.plugins.Tool, {
+gxp.plugins.GeoReferences = Ext.extend(gxp.plugins.Tool, {
     
-    /** api: ptype = gxp_zoomtoextent */
-    ptype: "gxp_mapstoregeocoder",
-    
-    /** api: config[buttonText]
-     *  ``String`` Text to show next to the zoom button
-     */
+    /** api: ptype = gxp_georeferences */
+    ptype: "gxp_georeferences",
 
     /** api: config[initialText]
      *  ``String``
@@ -45,35 +41,33 @@ gxp.plugins.FDHGeoCoder = Ext.extend(gxp.plugins.Tool, {
      *  ``String``
      *  Text for zoom menu item (i18n).
      */
-    menuText: "FDH Geo Coding",
+    menuText: "Georeferences",
 
     /** api: config[tooltip]
      *  ``String``
      *  Text for zoom action tooltip (i18n).
      */
-    tooltip: "FDH Geo Coding",
+    tooltip: "Georeferences",
     
-    data:[],
+    georeferences:[],
     
     /** private: method[constructor]
      */
     constructor: function(config) {
-        gxp.plugins.FDHGeoCoder.superclass.constructor.apply(this, arguments);
+        gxp.plugins.GeoReferences.superclass.constructor.apply(this, arguments);
     },
 
     /** api: method[addActions]
      */
     addActions: function() {
-        this.data = this.target.geocodingData;
-        
-        var geocodingStore = new Ext.data.ArrayStore({
+        var georeferencesStore = new Ext.data.ArrayStore({
             fields: ['name', 'geometry'],
-            data :  this.data
+            data :  this.target.georeferences
         });
 
         var map = this.target.mapPanel.map;
-        var geocodingSelector = new Ext.form.ComboBox({
-            store: geocodingStore,
+        var georeferencesSelector = new Ext.form.ComboBox({
+            store: georeferencesStore,
             displayField: 'name',
             typeAhead: true,
             mode: 'local',
@@ -81,23 +75,23 @@ gxp.plugins.FDHGeoCoder = Ext.extend(gxp.plugins.Tool, {
             triggerAction: 'all',
             emptyText: this.initialText,
             selectOnFocus:true,
-            editable: false,
+            editable: true,
+            resizable: true,
             listeners: {
                 select: function(cb, record, index) {
                     var bbox = new OpenLayers.Bounds.fromString(record.get('geometry'));
                     bbox = bbox.transform(
                         new OpenLayers.Projection("EPSG:4326"),
-                        new OpenLayers.Projection(map.projection)
-                    );
+                        new OpenLayers.Projection(map.projection));
                     map.zoomToExtent(bbox);
                 }
             }
         });
         
-        var actions = [geocodingSelector];
-        return gxp.plugins.FDHGeoCoder.superclass.addActions.apply(this, [actions]);
+        var actions = [georeferencesSelector,'->'];
+        return gxp.plugins.GeoReferences.superclass.addActions.apply(this, [actions]);
     }
         
 });
 
-Ext.preg(gxp.plugins.FDHGeoCoder.prototype.ptype, gxp.plugins.FDHGeoCoder);
+Ext.preg(gxp.plugins.GeoReferences.prototype.ptype, gxp.plugins.GeoReferences);
