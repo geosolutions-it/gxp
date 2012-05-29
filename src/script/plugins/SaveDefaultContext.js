@@ -239,7 +239,7 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
            }
         }); 
     },
-    
+
     metadataDialog: function(configStr){
         var enableBtnFunction = function(){
             if(this.getValue() != "")
@@ -302,13 +302,35 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
                             var mapName = Ext.getCmp("diag-text-field").getValue();        
                             var mapDescription = Ext.getCmp("diag-text-description").getValue(); 
                             
-                            var resourceXML = '<Resource><description>' + mapDescription + '</description><metadata></metadata><name>' + mapName + '</name><category><name>MAP</name></category><store><data><![CDATA[ ' + configStr + ' ]]></data></store></Resource>';
+							var auth = this.auth;
+							
+							var owner = Base64.decode(auth.split(' ')[1]);
+							owner = owner.split(':')[0];
+                            var resourceXML = 
+								'<Resource>' +
+									'<Attributes>' +
+										'<attribute>' +
+											'<name>owner</name>' +
+											'<type>STRING</type>' +
+											'<value>' + owner + '</value>' +
+										'</attribute>' +
+									'</Attributes>' +
+									'<description>' + mapDescription + '</description>' +
+									'<metadata></metadata>' +
+									'<name>' + mapName + '</name>' +
+									'<category>' +
+										'<name>MAP</name>' +
+									'</category>' +
+									'<store>' +
+										'<data><![CDATA[ ' + configStr + ' ]]></data>' +
+									'</store>' +
+								'</Resource>';
                             
                             var url = proxy + geoStoreBaseURL + "resources";
                             //var url = geoStoreBaseURL + "resources";
                             var method = 'POST';
                             var contentType = 'text/xml';              
-                            var auth = this.auth;
+                            
                             this.save(url, method, contentType, resourceXML, auth);
                             
                             win.destroy(); 
