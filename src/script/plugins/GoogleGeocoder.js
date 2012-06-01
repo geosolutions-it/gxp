@@ -43,6 +43,28 @@ gxp.plugins.GoogleGeocoder = Ext.extend(gxp.plugins.Tool, {
      */
     updateField: "viewport",
     
+    /** api: config[addMarkerTooltip]
+     *  ``String``
+     *  tooltip for addMarker button
+     */
+    addMarkerTooltip: "Remove Marker",
+
+    /** api: config[markerName]
+     *  ``String``
+     *  tooltip for addMarker button
+     */
+    markerName: "Marker",
+    
+    pointRadiusMarkers: 14,
+    
+    externalGraphicMarkers: 'theme/app/img/markers/star_red.png',
+    
+    backgroundGraphicMarkers: 'theme/app/img/markers/markers_shadow.png',
+    
+    backgroundXOffsetMarkers: -7,
+    
+    backgroundYOffsetMarkers: -7,
+    
     init: function(target) {
 
         var combo = new gxp.form.GoogleGeocoderComboBox(Ext.apply({
@@ -51,6 +73,19 @@ gxp.plugins.GoogleGeocoder = Ext.extend(gxp.plugins.Tool, {
                 scope: this
             }
         }, this.outputConfig));
+        
+        // remove marker added by google geocoder plugin
+        var removeMarkerBtn = new Ext.Button({
+            tooltip: this.addMarkerTooltip,
+            handler: function() {
+                var markerLyr = app.mapPanel.map.getLayersByName(this.markerName);  
+                if (markerLyr.length){
+                    app.mapPanel.map.removeLayer(markerLyr[0]);
+                }
+            },
+            scope: this,
+            iconCls: "icon-removemarkers"
+        });
         
         var bounds = target.mapPanel.map.restrictedExtent;
         if (bounds && !combo.bounds) {
@@ -64,6 +99,7 @@ gxp.plugins.GoogleGeocoder = Ext.extend(gxp.plugins.Tool, {
             });
         }
         this.combo = combo;
+        this.removeMarkerBtn = removeMarkerBtn;
         
         return gxp.plugins.GoogleGeocoder.superclass.init.apply(this, arguments);
 
@@ -72,7 +108,7 @@ gxp.plugins.GoogleGeocoder = Ext.extend(gxp.plugins.Tool, {
     /** api: method[addOutput]
      */
     addOutput: function(config) {
-        return gxp.plugins.GoogleGeocoder.superclass.addOutput.call(this, this.combo);
+        return gxp.plugins.GoogleGeocoder.superclass.addOutput.call(this, ['->','-',this.removeMarkerBtn,'-',this.combo]);
     },
     
     /** private: method[onComboSelect]
@@ -85,8 +121,48 @@ gxp.plugins.GoogleGeocoder = Ext.extend(gxp.plugins.Tool, {
                 new OpenLayers.Projection("EPSG:4326"),
                 map.getProjectionObject()
             );
+            map.getLayersByName('Google Hybrid')[0].setVisibility(true);
             if (location instanceof OpenLayers.Bounds) {
-                map.zoomToExtent(location, true);
+                // Set the z-indexes of both graphics to make sure the background
+                // graphics stay in the background
+                var SHADOW_Z_INDEX = 10;
+                var MARKER_Z_INDEX = 11;
+                
+                // allow testing of specific renderers via "?renderer=Canvas", etc
+                var renderer = OpenLayers.Util.getParameters(window.location.href).renderer;
+                renderer = (renderer) ? [renderer] : OpenLayers.Layer.Vector.prototype.renderers;
+                
+                // Sets the style for the markers
+                var styleMarkers = new OpenLayers.StyleMap({
+                    pointRadius: this.pointRadiusMarkers,
+                    externalGraphic: this.externalGraphicMarkers,
+                    backgroundGraphic: this.backgroundGraphicMarkers,
+                    backgroundXOffset: this.backgroundXOffsetMarkers,
+                    backgroundYOffset: this.backgroundYOffsetMarkers,
+                    graphicZIndex: MARKER_Z_INDEX,
+                    backgroundGraphicZIndex: SHADOW_Z_INDEX
+                });
+                
+                var center = location.getCenterLonLat();
+                var points = new OpenLayers.Geometry.Point(center.lon,center.lat);
+                var markers_feature = new OpenLayers.Feature.Vector(points);
+                var markers = new OpenLayers.Layer.Vector( this.markerName, {
+                                        styleMap: styleMarkers,
+                                        displayInLayerSwitcher: false,
+                                        rendererOptions: {yOrdering: true},
+                                        renderers: renderer
+                                    });
+                var markerLyr = map.getLayersByName(this.markerName);  
+                if (markerLyr.length){
+                    map.removeLayer(markerLyr[0]);
+                    map.addLayer(markers);
+                    markers.addFeatures(markers_feature);
+                    map.zoomToExtent(location, true);
+                }else {
+                    map.addLayer(markers);
+                    markers.addFeatures(markers_feature);
+                    map.zoomToExtent(location, true);
+                }
             } else {
                 map.setCenter(location);
             }
