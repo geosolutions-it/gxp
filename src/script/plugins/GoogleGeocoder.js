@@ -47,7 +47,7 @@ gxp.plugins.GoogleGeocoder = Ext.extend(gxp.plugins.Tool, {
      *  ``String``
      *  tooltip for addMarker button
      */
-    addMarkerTooltip: "Remove Marker",
+    addMarkerTooltip: "Reset Marker",
 
     /** api: config[markerName]
      *  ``String``
@@ -82,6 +82,7 @@ gxp.plugins.GoogleGeocoder = Ext.extend(gxp.plugins.Tool, {
                 if (markerLyr.length){
                     app.mapPanel.map.removeLayer(markerLyr[0]);
                 }
+                this.combo.reset();
             },
             scope: this,
             iconCls: "icon-removemarkers"
