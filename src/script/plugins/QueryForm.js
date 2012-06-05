@@ -194,11 +194,9 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
                             if(combo.getValue() == 'Feature' && schema){
                                 queryForm.attributeFieldset.setDisabled(false);
                                 queryForm.attributeFieldset.expand(true);
-                                //queryForm.attributeFieldset.show();
                             }else{
                                 queryForm.attributeFieldset.setDisabled(true);
                                 queryForm.attributeFieldset.collapse(true);
-                                //queryForm.attributeFieldset.hide();
                             }
                         }
                     }
@@ -212,32 +210,13 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
                     minValue: 5,
                     maxValue: 100,
                     allowDecimals: false
-                    /*listeners: {
-                        	beforechange: function(field, newValue, oldValue){
-                        	    if(!field.isValid())
-                                  return false;
-                        	}
-                    }*/
                 }, {
 				    xtype: "label",
 					style:"color:red; font-size:10px",
 					ref: "../baseLabel",
 					text: ""
 				}]
-            },/*{
-                xtype: "fieldset",
-                ref: "spatialFieldset",
-                title: this.queryByLocationText,
-                checkboxToggle: true,
-                items: [{
-                    xtype: "textfield",
-                    ref: "../extent",
-                    anchor: "100%",
-                    fieldLabel: this.currentTextText,
-                    value: this.getFormattedMapExtent(),
-                    readOnly: true
-                }]
-            },*/{
+            },{
                 xtype: "fieldset",
                 ref: "spatialFieldset",
                 title: this.queryByLocationText,
@@ -384,7 +363,6 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
 									filters[0]
 								);
                             }else
-                                //mf = this.maxFeatures;
 								Ext.Msg.show({
 									title: "Max Features",
 									msg: "MaxFeature value is null or incorrect !",
@@ -416,20 +394,16 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
         
         if (queryForm) {
             this.target.tools[this.featureManager].on("layerchange", function(mgr, rec, schema) {
-                //queryForm.query.setDisabled(!schema);      
                 if(queryForm.type.getValue() == 'Feature' && schema){
                     queryForm.attributeFieldset.setDisabled(!schema);
-                    //queryForm.attributeFieldset.show();
                 }else{
                     queryForm.attributeFieldset.setDisabled(true);
-                    //queryForm.attributeFieldset.hide();
                 }
             }, this);
         }
         
         var addFilterBuilder = function(mgr, rec, schema) {
             queryForm.attributeFieldset.removeAll();
-            //queryForm.setDisabled(!schema);
             if (schema) {
                 queryForm.attributeFieldset.add({
                     xtype: "gxp_filterbuilder",
@@ -495,11 +469,6 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
             
         return queryForm;
     },
-    
-    /*getFormattedMapExtent: function() {
-        var extent = this.target.mapPanel.map.getExtent();
-        return extent && extent.toArray().join(", ");
-    },*/
     
     /** private: method[populateSpatialForm]
      *  :arg map: ``Object``

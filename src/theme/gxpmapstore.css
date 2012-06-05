@@ -8,3 +8,19 @@
 .aoi-button{
     background-image: url(img/silk/shape_square.png) !important;
 }
+
+.icon-attribute-appl{
+	background-image: url(img/silk/shape_square.png) !important;
+}
+
+.icon-reload-layers{
+	background-image: url(img/silk/layers.png) !important;
+}
+
+.icon-attribute-apply{
+	background-image: url(img/accept.png) !important;
+}
+
+.icon-attribute-reset{
+	background-image: url(img/decline.png) !important;
+}
