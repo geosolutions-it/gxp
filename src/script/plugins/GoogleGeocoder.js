@@ -124,7 +124,7 @@ gxp.plugins.GoogleGeocoder = Ext.extend(gxp.plugins.Tool, {
             );
 			var bgLayer = map.getLayersByName('Google Hybrid')[0];
 			if(bgLayer){
-				bgLayer.setVisibility(true);
+				bgLayer.setVisibility(true); 
 			}
             if (location instanceof OpenLayers.Bounds) {
                 // Set the z-indexes of both graphics to make sure the background
