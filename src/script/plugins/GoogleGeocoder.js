@@ -122,7 +122,10 @@ gxp.plugins.GoogleGeocoder = Ext.extend(gxp.plugins.Tool, {
                 new OpenLayers.Projection("EPSG:4326"),
                 map.getProjectionObject()
             );
-            map.getLayersByName('Google Hybrid')[0].setVisibility(true);
+			var bgLayer = map.getLayersByName('Google Hybrid')[0];
+			if(bgLayer){
+				bgLayer.setVisibility(true);
+			}
             if (location instanceof OpenLayers.Bounds) {
                 // Set the z-indexes of both graphics to make sure the background
                 // graphics stay in the background
