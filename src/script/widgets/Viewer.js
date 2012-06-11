@@ -539,7 +539,10 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
             var portalContainer = Ext.getCmp(this.renderToTab);
             portalContainer.add(this.portal);
             portalContainer.doLayout();
-            portalContainer.setActiveTab(0);
+			
+            if(portalContainer.getXType() == "tabpanel"){
+				portalContainer.setActiveTab(0);
+			}
         }
         
         this.fireEvent("portalready");
