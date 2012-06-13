@@ -281,6 +281,24 @@
 .x-btn .gxp-icon-filebrowse { 
     background-image: url(img/silk/folder.png);
 }
+/* gxp_selectcountries icon */
+.x-btn .gxp-icon-selectcountries{
+    background-image: url(img/silk/add.png);
+}
+
+/* gxp_removecountries icon */
+.x-btn .gxp-icon-removeallcountries, .x-menu-item .gxp-icon-removeallcountries {
+    background-image: url(img/geosilk/layers_delete.png);
+}
+/* gxp_computestats */
+.x-btn .gxp-icon-computestats{
+     background-image: url(img/silk/cog.png);
+
+}
+/* item_deleter */
+.extensive-remove{
+	background-image: url(img/silk/delete.png);
+}
 
 /* ux.FileUploadField */
 .x-form-file-wrap {
