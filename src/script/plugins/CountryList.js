@@ -154,7 +154,7 @@ gxp.plugins.CountryList = Ext.extend(gxp.plugins.Tool, {
 						itemdeleter
 						
 					],
-					fields: new gxp.data.GBoundariesRecord(),
+					fields: new gxp.data.FraDataEntry()
 					
 			}),
 			

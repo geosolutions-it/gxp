@@ -188,20 +188,22 @@ gxp.plugins.SelectCountries = Ext.extend(gxp.plugins.Tool, {
      * :arg text: ``String`` Body text.
      */
     addRecord: function(evt, features) {
-        //get Countries Tool
-		var countryList=null;
-		var attributelist= null;
+
+		var data =new Array();
+		var dataEntry ,country;
 		for (index in evt.features){
 			//Country FeatureMember in the GridPanel Store
 			if (evt.features[index].fid && evt.features[index].fid.indexOf("gboundaries")!=-1){
-				var country = new gxp.data.GBoundariesRecord(
-					evt.features[index].attributes
-				);
-				this.countryList.store.add(country);
+				country = evt.features[index].attributes;	
+			}else if(evt.features[index].fid && evt.features[index].fid.indexOf("fra")!=-1){
+				data.push(evt.features[index].attributes);
 			}
 		}
-		
-		
+		if(country!=null){
+			country.data=data;
+			dataEntry=new gxp.data.FraDataEntry(country);
+			this.countryList.store.add(dataEntry);
+		}
 		
 		
 		

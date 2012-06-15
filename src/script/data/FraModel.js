@@ -38,6 +38,18 @@ gxp.data.GBoundariesRecord = Ext.data.Record.create([
 	{name: 'REGION_' }
 ]);
 
+gxp.data.FraDataEntry = Ext.data.Record.create([
+{name: 'ADM0NAME' },
+	{name: 'ADM0_CODE' },
+	{name: 'CONTINENT_' },
+	{name: 'COUNT' },
+	{name: 'EXPIRY_Y' },
+	{name: 'LAST_UPD' },
+	{name: 'REGION_' },
+	{name: 'data' }
+
+])
+
 /**
   * Fra Visible attributes
   */
@@ -51,7 +63,7 @@ gxp.data.VisibleAttributeModel=[
 			 {name: 'forest_belowground_biomass', label: 'forest_belowground_biomass' },
 			 {name: 'forest_carbon_aglb', label: 'forest_carbon_aglb' },
 			 {name: 'forest_growing_stock', label: 'forest_growing_stock' },
-			 {name: 'gaulcode', label: 'gaulcode' },
+			
 			 {name: 'inland_water_area', label: 'inland_water_area' },
 			 {name: 'other_land_area', label: 'other_land_area' },
 			 {name: 'other_wooded_land_aboveground_biomass', label: 'other_wooded_land_aboveground_biomass' },
@@ -62,7 +74,7 @@ gxp.data.VisibleAttributeModel=[
 ];
 
 
-gxp.data.fraAttributeModel = gxp.data.VisibleAttributeModel.concat([{name: 'year', label: 'Year'}]);
+gxp.data.fraAttributeModel = gxp.data.VisibleAttributeModel.concat([{name: 'year', label: 'Year'}, {name: 'gaulcode', label: 'gaulcode' }]);
 
 
 gxp.data.fraRecord = Ext.data.Record.create(gxp.data.fraAttributeModel);
