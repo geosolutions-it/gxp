@@ -283,23 +283,29 @@
 }
 /* gxp_selectcountries icon */
 .x-btn .gxp-icon-selectcountries{
-    background-image: url(img/silk/add.png);
+    background-image: url(img/silk/world_add.png);
 }
 
 /* gxp_removecountries icon */
 .x-btn .gxp-icon-removeallcountries, .x-menu-item .gxp-icon-removeallcountries {
-    background-image: url(img/geosilk/layers_delete.png);
+    background-image: url(img/silk/world_delete.png);
 }
 /* gxp_computestats */
 .x-btn .gxp-icon-computestats{
-     background-image: url(img/silk/cog.png);
+     background-image: url(img/silk/chart_bar.png);
 
 }
 /* item_deleter */
 .extensive-remove{
 	background-image: url(img/silk/delete.png);
 }
-
+/* chart icon */
+.chart-icon{
+	background-image: url(img/silk/chart_bar.png);
+}
+.chart-edit-icon{
+	background-image: url(img/silk/chart_bar_edit.png);
+}
 /* ux.FileUploadField */
 .x-form-file-wrap {
     position: relative;

@@ -69,7 +69,7 @@ gxp.plugins.CountryList = Ext.extend(gxp.plugins.Tool, {
                         node.select();
                     }
                 });
-                                
+                        
                 if (record === target.selectedLayer) {
                     node.on("rendernode", function() {
                         node.select();
@@ -161,10 +161,6 @@ gxp.plugins.CountryList = Ext.extend(gxp.plugins.Tool, {
 			
 			sm: itemdeleter
 				
-				
-				
-
-			
         }, config || {});
          
         var countryList = gxp.plugins.CountryList.superclass.addOutput.call(this, config);

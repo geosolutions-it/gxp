@@ -29,10 +29,11 @@ gxp.data.FraDataEntry = Ext.data.Record.create([
   */
   
 gxp.data.VisibleAttributeModel=[
-			 {name: 'forest_aboveground_biomass',label:'Forest Aboveground Biomass' },
+			 {name: 'forest_area_primary', label: 'Forest Area Primary'},
+			 {name: 'forest_area_planted', label: 'Forest Area Planted' },
 			 {name: 'forest_area2', label: 'forest Area 2'},
-			 {name: 'forest_area_planted', label: 'Forest Area_Planted' },
-			 {name: 'forest_area_primary', label: 'Forest Area Primary' },
+			 {name: 'forest_aboveground_biomass',label:'Forest Aboveground Biomass'},
+
 			 {name: 'forest_area_protectedareas', label: 'Forest Area Protected Areas' },
 			 {name: 'forest_belowground_biomass', label: 'Forest Belowground Biomass' },
 			 {name: 'forest_carbon_aglb', label: 'Forest Carbon aglb' },

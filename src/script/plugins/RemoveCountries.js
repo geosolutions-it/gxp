@@ -48,7 +48,13 @@ gxp.plugins.RemoveCountries = Ext.extend(gxp.plugins.Tool, {
     addActions: function() {
          
         var apptarget = this.target;
-
+		for(var tool in this.target.tools){
+            if(this.target.tools[tool].ptype == "gxp_countrylist"){
+                this.countryList=this.target.tools[tool];
+				
+            }
+        }
+		
         var actions = gxp.plugins.RemoveCountries.superclass.addActions.apply(this, [{
             menuText: this.removeMenuText,
             iconCls: "gxp-icon-removeallcountries",
@@ -56,29 +62,21 @@ gxp.plugins.RemoveCountries = Ext.extend(gxp.plugins.Tool, {
             disabled: true,
             tooltip: this.removeActionTip,
             handler: function() {
-                
-                //TODO
-                    //this.target.mapPanel.layers.remove(record);
-                    apptarget.modified = true;
-                    //modified = true;
-					
-                
+				this.countryList.store.removeAll();             
             },
             scope: this
         }]);
-        var removeLayerAction = actions[0];
-
-        
-        //TODO event store change 
+        var removeCountriesAction = actions[0];
 		
-        /* this.target.mapPanel.layers.on({
-            "add": enforceOne,
-            "remove": function(store){
-                removeLayerAction.setDisabled(true);
-            }
-        });
-		*/
-        
+		this.countryList.store.on({
+			add: function(store){
+				removeCountriesAction.setDisabled(false);
+			},
+			remove: function(store){
+				removeCountriesAction.setDisabled(store.getCount()<=0);
+			}
+		});
+
         return actions;
     }
         

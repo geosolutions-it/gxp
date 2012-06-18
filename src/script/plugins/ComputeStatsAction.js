@@ -54,7 +54,31 @@ gxp.plugins.ComputeStatsAction = Ext.extend(gxp.plugins.Tool, {
             handler: this.actionHandler,
             scope: this
         }]);
-        
+		var computeStatAction=actions[0];
+		computeStatAction.setDisabled(true);
+        this.countryList.store.on({
+			add:function(store){
+				var disabled = store.getCount()<=0 || this.attributeList.getSelectionModel().getCount() <=0;
+				computeStatAction.setDisabled(disabled);
+			},
+			remove:function(store){
+				var disabled = store.getCount()<=0 || this.attributeList.getSelectionModel().getCount() <=0;
+				computeStatAction.setDisabled(disabled);
+			},
+			clear:function(store){
+				var disabled = store.getCount()<=0 || this.attributeList.getSelectionModel().getCount() <=0;
+				computeStatAction.setDisabled(disabled);
+			},
+			scope:this
+		});
+		this.attributeList.getSelectionModel().on({
+			selectionchange : function( selectionModel){
+				var disabled = this.countryList.store.getCount()<=0 ||selectionModel.getCount() <=0;
+				computeStatAction.setDisabled(disabled);
+			},
+			scope:this
+		
+		});
         return actions;
     },
 	/**
@@ -70,32 +94,39 @@ gxp.plugins.ComputeStatsAction = Ext.extend(gxp.plugins.Tool, {
 		var statElements= this.generateDataEntries(options.selectedCountries,options.selectedAttributes);
 		if(statElements==null){return};
 		var groupProperty =options.groupProperty;
-		var chartPanels = this.generateAllPanels(statElements,options);
-		this.win = new Ext.Window({
+		var tabPanel = Ext.getCmp(this.apptarget.renderToTab);
+		this.tab = new Ext.Panel({
 			//width: 900,
-			height: 500,
+			//height: 532,
+			//width:1100,
+			closable:true,
 			title: this.computeStatsActionDialogTitle,
-			constrainHeader: true,
-			autoScroll:true,
-			renderTo: this.apptarget.mapPanel.body,
+			//constrainHeader: true,
+			bodyStyle:{
+						align:'center',
+						margin:'auto' 
+					},
+			autoScroll:true,		
+			iconCls:'chart-icon',
 			items: [
 				new Ext.Panel({
+					
 					layout:'table',
-					autoScroll:true,
-					defaults: {
-						// applied to each contained panel
-						bodyStyle:'padding:20px'
-					},
+					border:false,
+					
 					layoutConfig: {
 						// The total column count must be specified here
 						columns: 2
 					},
-					items: chartPanels
+					items: this.generateAllPanels(statElements,options)
+					
 					
 				})
 			]
 		});
-		this.win.show();
+		tabPanel.add(this.tab);
+		tabPanel.setActivePanel(this.tab);
+		//this.win.show();
 	},
 	/**
 	 * getOptions: returns options for countries and attributes
@@ -210,19 +241,62 @@ gxp.plugins.ComputeStatsAction = Ext.extend(gxp.plugins.Tool, {
 		
 		return new Ext.Panel({
 			
-			height:500,
-			width:500,
+			height:550,
+			width:600,
 			title: title,
 			
+			listeners: {
+				afterrender: function() {
+				  this.getEl().unmask();
+				},
+				render: function(){
+					this.getEl().mask();
+				}
+			},
 			items: {
 				xtype: 'stackedcolumnchart',
 				store: store,
 				xField: options.xField,
-				autoScroll :true,
 				yAxis: new Ext.chart.NumericAxis({
-					stackingEnabled: options.stackCountries,
+					stackingEnabled: options.stackCountries
+					
+					
 				}),
-				series: series
+				xAxis:  new Ext.chart.CategoryAxis({}),
+				series: series,
+				 extraStyle: {
+				   xAxis: {
+						labelRotation: -45
+					}
+				},
+				chartStyle: {
+					padding: 10,
+					animationEnabled: true,
+					font: {
+						name: 'Tahoma',
+						color: 0x444444,
+						size: 11
+					},
+					dataTip: {
+						padding: 5,
+						border: {
+							color: 0x99bbe8,
+							size:1
+						},
+						background: {
+							color: 0xDAE7F6,
+							alpha: .8
+						},
+						font: {
+							name: 'Tahoma',
+							color: 0x15428B,
+							size: 10,
+							bold: true
+						}
+					}
+				}
+				
+				
 			}
 		});
 	},
@@ -235,7 +309,6 @@ gxp.plugins.ComputeStatsAction = Ext.extend(gxp.plugins.Tool, {
 			for(var name in statElements[index]){
 				var present =false;
 				for(var i=0;i< fields.length;i++){
-					
 					if(fields[i]==name){
 						present=true;
 					}
@@ -258,11 +331,10 @@ gxp.plugins.ComputeStatsAction = Ext.extend(gxp.plugins.Tool, {
 		var tmp = {};
 		for (var i = 0 ; i<statElements.length ; i++){
 			var value = statElements[i][prop];
-			if(tmp[value]){
-				tmp[value].push(statElements[i]);
-			}else{
+			if(!tmp[value]){
 				tmp[value]= new Array();
 			}
+			tmp[value].push(statElements[i]);
 		}
 		for(var elements in tmp){
 			panels.push(this.generateChartPanel(tmp[elements],options,elements));
