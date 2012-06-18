@@ -134,7 +134,8 @@ gxp.plugins.CountryList = Ext.extend(gxp.plugins.Tool, {
 			store: this.store, 
 			id: 'countryListGrid',
             border: false,
-			autoHeight:true,
+			
+			autoScroll:true,
 			enableHdMenu:false,
 			viewConfig: {
 				
