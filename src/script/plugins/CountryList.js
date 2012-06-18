@@ -138,7 +138,7 @@ gxp.plugins.CountryList = Ext.extend(gxp.plugins.Tool, {
 			enableHdMenu:false,
 			viewConfig: {
 				
-				forceFit: true,
+				forceFit: true
 				//Return CSS class to apply to rows depending upon data values
 				
 			},
@@ -150,7 +150,7 @@ gxp.plugins.CountryList = Ext.extend(gxp.plugins.Tool, {
 						sortable: true
 					},
 					columns: [
-						{id: 'country', header: 'Country',  sortable: true, dataIndex: 'ADM0NAME',},
+						{id: 'country', header: 'Country',  sortable: true, dataIndex: 'ADM0NAME'},
 						itemdeleter
 						
 					],
