@@ -51,22 +51,14 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 		'NATO TOP SECRET'						
 	],
 	
-	/*defaultBuilder: {
-		xtype: "gxp_idafilterbuilder",
+	defaultBuilder: {
 		// The attributes conrespont to the IDA raste layers (SPM + Habitat)
 		// TODO - If/When  possible make it as remote (store/reader) 
-		attributes: [
-			"bathymetry",
-			"dem_slope",
-			"dem_aspect",
-			"distance_1000m",
-			"CHL_spring_2007",
-			"CHL_spring_2008",
-			"CHL_spring_2009"
-		],
+		baseURL: "http://localhost:8080/",
+		proxy: "/proxy/?url=",
 		allowBlank: true,
 		allowGroups: true
-	},*/
+	},
     
     /** private: method[constructor]
      *  :arg config: ``Object``
@@ -78,7 +70,7 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
     /** private: method[addOutput]
      *  :arg config: ``Object``
      */
-    addOutput: function(config) {
+    addOutput: function(config) {		
 		Ext.form.Field.prototype.msgTarget = 'side';
 		Ext.ux.form.FieldPanel.prototype.msgTarget = 'side';
 		
@@ -107,6 +99,7 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 		var settings = new Ext.form.FieldSet({
                 title: this.settingsTitle,
                 autoHeight: true,
+				//autoWidth: true,
 				labelWidth: 80,
                 items: [{
 						xtype: 'textfield',
@@ -135,26 +128,18 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 				}]
 		});
 		
-		var filterBuilder = new gxp.IDAFilterBuilder({
-					// The attributes conrespond to the IDA raste layers (SPM + Habitat)
-					// TODO - If/When  possible make it as remote (store/reader) 
-					attributes: [
-						"bathymetry",
-						"dem_slope",
-						"dem_aspect",
-						"distance_1000m",
-						"CHL_spring_2007",
-						"CHL_spring_2008",
-						"CHL_spring_2009"
-					],
-					allowBlank: true,
-					allowGroups: true
-		});
+		var params = this.defaultBuilder;
+		params.proxy = this.target.riskData.urlParameters.proxy ? this.target.riskData.urlParameters.proxy : this.target.proxy;
+		if(this.target.riskData.urlParameters.capabilitiesURL)
+			params.baseURL = this.target.riskData.urlParameters.capabilitiesURL;
+		if(this.target.riskData.coveragesSettings)
+			params.coveragesSettings = this.target.riskData.coveragesSettings;
+		
+		var filterBuilder = new gxp.IDAFilterBuilder(params);
 		
 		var filter = new Ext.form.FieldSet({
 			title: this.filterTitle,
 			autoHeight: true,
-			labelWidth: 80,
 			maxNumberOfGroups: 2,
 			items: [
 				filterBuilder
@@ -170,7 +155,7 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 	
         var cpanel = new Ext.Panel({
             border: false,
-            layout: "fit",
+			bodyStyle: "padding: 5px",
             disabled: false,
             title: this.title,
 			bbar: [
@@ -178,6 +163,13 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 					text: this.reloadLayerText,
 					iconCls: "icon-reload-layers",
 					handler: function(){
+					    //
+						// Find sub components by type and reload the combo store on the fly. 
+						//
+						var filterFields = filter.findByType("gxp_idafilterfield");
+						for(var i=0; i<filterFields.length; i++){
+							filterFields[i].items.get(0).store.reload();
+						}
 					}
 				},
 					'->',
@@ -188,37 +180,36 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 					handler: function(){
 						var f = filterBuilder.getFilter();
 						
-						var filterFormat = new OpenLayers.Format.Filter();
-						var filterOGC = filterFormat.write(f);  
-										
-						var xmlFormat = new OpenLayers.Format.XML();                  
-						filterOGC = xmlFormat.write(filterOGC);
-						
-					    alert(filterOGC);
+						if(f){
+							var filterFormat = new OpenLayers.Format.Filter();
+							var filterOGC = filterFormat.write(f);  
+											
+							var xmlFormat = new OpenLayers.Format.XML();                  
+							filterOGC = xmlFormat.write(filterOGC);
+							
+							alert(filterOGC);
+						}else{
+							Ext.Msg.show({
+								title: "Filter Apply",
+								msg: "Your filter is empty or not properly formatted!",
+								buttons: Ext.Msg.OK,
+								icon: Ext.Msg.INFO
+							});
+						}
 					}
 				},{
 					text: this.resetText,
 					iconCls: "icon-attribute-reset",
 					scope: this,
 					handler: function(){
+					    filterBuilder.cleanFilter();
 						filter.removeAll();
-						filter.add({
-							xtype: "gxp_idafilterbuilder",
-							// The attributes conrespont to the IDA raste layers (SPM + Habitat)
-							// TODO - If/When  possible make it as remote (store/reader) 
-							attributes: [
-								"bathymetry",
-								"dem_slope",
-								"dem_aspect",
-								"distance_1000m",
-								"CHL_spring_2007",
-								"CHL_spring_2008",
-								"CHL_spring_2009"
-							],
-							allowBlank: true,
-							allowGroups: true
-						});
+						
+						filterBuilder = new gxp.IDAFilterBuilder(this.defaultBuilder);
+						
+						filter.add(filterBuilder);
 						filter.doLayout();
+						
 						form.getForm().reset();
 					}
 				}

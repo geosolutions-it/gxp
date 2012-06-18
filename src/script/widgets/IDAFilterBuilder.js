@@ -87,7 +87,7 @@ gxp.IDAFilterBuilder = Ext.extend(Ext.Container, {
      */
     allowGroups: true,
 	
-	maxNumberOfConditions: 4,
+	maxNumberOfConditions: 2,
 	
 	/** Start i18n */
     addConditionText: "add condition",
@@ -114,6 +114,7 @@ gxp.IDAFilterBuilder = Ext.extend(Ext.Container, {
         
         this.items = [{
             xtype: "container",
+			//autoScroll: true,
             layout: "form",
             defaults: {anchor: "100%"},
             hideLabels: true,
@@ -220,7 +221,7 @@ gxp.IDAFilterBuilder = Ext.extend(Ext.Container, {
                             break;
                         }
                     } else if(!child || child.type === null ||
-                              child.property === null || child.value === null) {
+                              child.property === null || child.value === null || child.upperBoundary === null || child.lowerBoundary === null) {
                         filter = false;
                         break;
                     }
@@ -228,7 +229,7 @@ gxp.IDAFilterBuilder = Ext.extend(Ext.Container, {
             }
         } else {
             if(!filter || filter.type === null || filter.property === null ||
-               filter.value === null) {
+               filter.value === null || filter.upperBoundary === null || filter.lowerBoundary === null) {
                 filter = false;
             }
         }
@@ -398,9 +399,12 @@ gxp.IDAFilterBuilder = Ext.extend(Ext.Container, {
 		if(type && filter){
 			var newChild = this.newRow({
 				xtype: type,
+				baseURL: this.baseURL,  // new custom field
+				coveragesSettings: this.coveragesSettings, // new custom field
+				proxy: this.proxy, // new custom field 
 				filter: filter,
 				columnWidth: 1,
-				attributes: this.attributes,
+				coverages: this.coverages,
 				allowBlank: this.allowBlank,
 				customizeFilterOnInit: group && false,
 				listeners: {
@@ -524,6 +528,9 @@ gxp.IDAFilterBuilder = Ext.extend(Ext.Container, {
             var fieldCfg = {
                 xtype: "gxp_idafilterfield",
                 allowBlank: this.allowBlank,
+			    baseURL: this.baseURL,  // new custom field
+				coveragesSettings: this.coveragesSettings, // new custom field
+				proxy: this.proxy, // new custom field 
                 columnWidth: 1,
                 filter: grandchild,
                 attributes: this.attributes,
