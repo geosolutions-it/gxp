@@ -69,11 +69,10 @@ gxp.plugins.ComputeStatsAction = Ext.extend(gxp.plugins.Tool, {
 		var options =this.getOptions();
 		var statElements= this.generateDataEntries(options.selectedCountries,options.selectedAttributes);
 		if(statElements==null){return};
-		var groupProperty ="attributeLabel";
+		var groupProperty =options.groupProperty;
 		var chartPanels = this.generateAllPanels(statElements,options);
-		//var chartPanel = this.generateChartPanel(statElements,options);
 		this.win = new Ext.Window({
-			width: 800,
+			//width: 900,
 			height: 500,
 			title: this.computeStatsActionDialogTitle,
 			constrainHeader: true,
@@ -105,18 +104,31 @@ gxp.plugins.ComputeStatsAction = Ext.extend(gxp.plugins.Tool, {
 	 * ret.selectedAttributes
 	 */
 	getOptions: function(){
-		
+		//selected Countrires
 		var selectedCountries= new Array();
 		this.countryList.store.each(function(record){
 			this.push(record);
 			
 		},selectedCountries );
-		
+		//selected Attributes
 		var selectedAttributes = this.attributeList.getSelectionModel().getSelections();
+
+		//Options
+		var optmenu = Ext.getCmp('chartOptionMenu');
+		
+		var stackCountries = optmenu.get('stackCountriesOption').checked;
+		var groupAttribute =  optmenu.get('groupByAttributeOption').checked;
+		var groupyear =  optmenu.get('groupByYearOption').checked;
+		
+		var groupProperty = groupyear==true ? 'year' : 'attributeLabel';
+		var xField = groupyear==false ? 'year' : 'attributeLabel';
+		
 		return {
-			selectedCountries: selectedCountries,
+			selectedCountries:	selectedCountries,
 			selectedAttributes: selectedAttributes,
-			groupProperty:'attributeLabel' //TODO make it selectable
+			groupProperty:		groupProperty, 
+			stackCountries:		stackCountries,
+			xField:				xField 
 		}
 	},
 	
@@ -160,7 +172,7 @@ gxp.plugins.ComputeStatsAction = Ext.extend(gxp.plugins.Tool, {
 							attributeMap[ data[yearEntry].year+'' ]={
 								year: data[yearEntry].year,
 								attributeName: attributeName,
-								attributeLabel: attributeLabel,
+								attributeLabel: attributeLabel
 							}
 						}
 						//add entry for the entry for this country/attribute
@@ -177,13 +189,13 @@ gxp.plugins.ComputeStatsAction = Ext.extend(gxp.plugins.Tool, {
 			return statElements;
 	},
 	
-	generateChartPanel : function(statElements,selected,title){
+	generateChartPanel : function(statElements,options,title){
 		//create series
 		var series =new Array();
-		for(var index=0; index<selected.selectedCountries.length;index++){
+		for(var index=0; index<options.selectedCountries.length;index++){
 			series.push({
-				 yField: selected.selectedCountries[index].get("ADM0NAME"),
-				 displayName: selected.selectedCountries[index].get("ADM0NAME")
+				 yField: options.selectedCountries[index].get("ADM0NAME"),
+				 displayName: options.selectedCountries[index].get("ADM0NAME")
 			});
 		
 		}
@@ -198,17 +210,17 @@ gxp.plugins.ComputeStatsAction = Ext.extend(gxp.plugins.Tool, {
 		
 		return new Ext.Panel({
 			
-			height:400,
-			width:400,
+			height:500,
+			width:500,
 			title: title,
 			
 			items: {
 				xtype: 'stackedcolumnchart',
 				store: store,
-				xField: 'year',
+				xField: options.xField,
 				autoScroll :true,
 				yAxis: new Ext.chart.NumericAxis({
-					stackingEnabled: true,
+					stackingEnabled: options.stackCountries,
 				}),
 				series: series
 			}
