@@ -160,6 +160,11 @@ gxp.plugins.SelectCountries = Ext.extend(gxp.plugins.Tool, {
 								//TODO notify the user (?)
 						}
 						
+						this.loadMask.hide();
+					},
+					beforegetfeatureinfo: function(){
+						this.loadMask = new Ext.LoadMask('countries',{msg:'Loading data...'});
+						this.loadMask.show();
 					},
 					scope: this
 				}
