@@ -80,12 +80,22 @@ WCSCapabilitiesReader = Ext.extend(Ext.data.DataReader, {
 		}
 		
 		var contents = data.getElementsByTagName("wcs:Contents")[0];
+		
+		if(!contents || contents == null){
+			contents = data.getElementsByTagName('Contents')[0];
+		}
+		
 		contents = contents.childNodes;
 		
 		var records = [];
 		
 		for(var i=0; i<contents.length; i++){
 		    var coverage = contents[i].getElementsByTagName("wcs:Identifier")[0];
+			
+			if(!coverage || coverage == null){
+				coverage = contents[i].getElementsByTagName('Identifier')[0];
+			}
+		
 			var name = this.meta.format.getChildValue(coverage);
 			
 		    var record = new Ext.data.Record({
