@@ -29,7 +29,8 @@ gxp.plugins.ComputeStatsAction = Ext.extend(gxp.plugins.Tool, {
     
     /** api: ptype = gxp_computestats */
     ptype: "gxp_computestats",
-
+	
+	computeStatisticsActionText: "Compute Statistics",
     computeStatsActionDialogTitle: "Statistics",
     /** 
      * api: method[addActions]
@@ -43,12 +44,14 @@ gxp.plugins.ComputeStatsAction = Ext.extend(gxp.plugins.Tool, {
 				
             }
         }
+		this.lastTabNumber= 1;
 		this.attributeList =Ext.getCmp("attributeList");
 		
         var actions = gxp.plugins.ComputeStatsAction.superclass.addActions.apply(this, [{
             menuText: this.computeStatsActionActionTipMenuText,
             iconCls: "gxp-icon-computestats",
-			text: "Compute Statistics",
+			text: this.computeStatisticsActionText,
+			id: 'computeStatisticsButton',
             disabled: false,
             tooltip: this.computeStatsActionActionTip,
             handler: this.actionHandler,
@@ -95,22 +98,18 @@ gxp.plugins.ComputeStatsAction = Ext.extend(gxp.plugins.Tool, {
 		if(statElements==null){return};
 		var groupProperty =options.groupProperty;
 		var tabPanel = Ext.getCmp(this.apptarget.renderToTab);
-		this.tab = new Ext.Panel({
-			//width: 900,
-			//height: 532,
-			//width:1100,
+		var tab = new Ext.Panel({
 			closable:true,
-			title: this.computeStatsActionDialogTitle,
+			title: this.computeStatsActionDialogTitle +" "+this.lastTabNumber,
 			//constrainHeader: true,
-			bodyStyle:{
-						align:'center',
-						margin:'auto' 
-					},
+			
 			autoScroll:true,		
 			iconCls:'chart-icon',
+			layout:'border',
 			items: [
 				new Ext.Panel({
-					
+					region:'center',
+					autoScroll: true,
 					layout:'table',
 					border:false,
 					
@@ -124,8 +123,10 @@ gxp.plugins.ComputeStatsAction = Ext.extend(gxp.plugins.Tool, {
 				})
 			]
 		});
-		tabPanel.add(this.tab);
-		tabPanel.setActivePanel(this.tab);
+		
+		tabPanel.add(tab);
+		tabPanel.setActiveTab(tab);
+		this.lastTabNumber++;
 		//this.win.show();
 	},
 	/**
@@ -240,9 +241,9 @@ gxp.plugins.ComputeStatsAction = Ext.extend(gxp.plugins.Tool, {
 		});
 		
 		return new Ext.Panel({
-			
+			closable:true,
 			height:550,
-			width:600,
+			width:650,
 			title: title,
 			
 			listeners: {

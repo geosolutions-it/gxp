@@ -42,7 +42,18 @@ gxp.plugins.RemoveCountries = Ext.extend(gxp.plugins.Tool, {
      *  Text for remove action tooltip (i18n).
      */
     removeActionTip: "Remove All Countries",
-    
+	
+	/** api: config[removeActionConfirmTitle]
+     *  ``String``
+     *  Text for remove action confirm window title (i18n).
+     */
+    removeActionConfirmTitle : 'Remove All Countries?',
+	/** api: config[removeActionConfirmText]
+     *  ``String``
+     *  Text for remove action confirm window (i18n).
+     */
+	removeActionConfirmText : 'Do you want to remove all the selected countries?',
+	
     /** api: method[addActions]
      */
     addActions: function() {
@@ -58,11 +69,23 @@ gxp.plugins.RemoveCountries = Ext.extend(gxp.plugins.Tool, {
         var actions = gxp.plugins.RemoveCountries.superclass.addActions.apply(this, [{
             menuText: this.removeMenuText,
             iconCls: "gxp-icon-removeallcountries",
-			text: "Remove All",
+			text: this.removeMenuText,
             disabled: true,
             tooltip: this.removeActionTip,
             handler: function() {
-				this.countryList.store.removeAll();             
+				Ext.Msg.show({
+					title:this.removeActionConfirmTitle,
+					msg: this.removeActionConfirmText,
+					buttons:  Ext.Msg.OKCANCEL,
+					icon: Ext.MessageBox.WARNING,
+					fn: function(){
+						this.countryList.store.removeAll();   
+					},
+					scope:this
+				   
+				});
+				
+				          
             },
             scope: this
         }]);
@@ -74,7 +97,10 @@ gxp.plugins.RemoveCountries = Ext.extend(gxp.plugins.Tool, {
 			},
 			remove: function(store){
 				removeCountriesAction.setDisabled(store.getCount()<=0);
-			}
+			},
+			clear: function(store){
+				removeCountriesAction.setDisabled(store.getCount()<=0);
+			},
 		});
 
         return actions;

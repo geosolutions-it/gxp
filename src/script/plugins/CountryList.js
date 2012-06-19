@@ -35,7 +35,7 @@ gxp.plugins.CountryList = Ext.extend(gxp.plugins.Tool, {
      *  ``String`` The name of the default group, i.e. the group that will be
      *  used when none is specified. Defaults to ``default``.
      */
-    defaultGroup: "default",
+    countryText: "Country",
 
 	/**
 	*/
@@ -151,7 +151,7 @@ gxp.plugins.CountryList = Ext.extend(gxp.plugins.Tool, {
 						sortable: true
 					},
 					columns: [
-						{id: 'country', header: 'Country',  sortable: true, dataIndex: 'ADM0NAME'},
+						{id: 'country', header: this.countryText,  sortable: true, dataIndex: 'ADM0NAME'},
 						itemdeleter
 						
 					],

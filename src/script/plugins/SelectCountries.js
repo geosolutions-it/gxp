@@ -61,7 +61,7 @@ gxp.plugins.SelectCountries = Ext.extend(gxp.plugins.Tool, {
      */
     popupTitle: "Enable Selection of countries",
     
-
+	loadingMaskText: 'Loading data...',
      
     /**
 	 * Returns an array from an array of objects. the re
@@ -151,9 +151,9 @@ gxp.plugins.SelectCountries = Ext.extend(gxp.plugins.Tool, {
 				vendorParams: this.vendorParams,
 				eventListeners: {
 					getfeatureinfo: function(evt) {
-						
+						//check wfsFeatureCollection is present
 						var match = evt.text.match(/<wfs:FeatureCollection[^>]*>([\s\S]*)<\/wfs:FeatureCollection>/);
-						
+						//add the record
 						if (match && !match[1].match(/^\s*$/)) {
 							this.addRecord(evt);
 						}else{
@@ -163,7 +163,9 @@ gxp.plugins.SelectCountries = Ext.extend(gxp.plugins.Tool, {
 						this.loadMask.hide();
 					},
 					beforegetfeatureinfo: function(){
-						this.loadMask = new Ext.LoadMask('countries',{msg:'Loading data...'});
+						//show loading mask
+						Ext.getCmp('computeStatisticsButton').setDisabled(true);
+						this.loadMask = new Ext.LoadMask('countries',{msg:this.loadingMaskText});
 						this.loadMask.show();
 					},
 					scope: this
@@ -196,6 +198,7 @@ gxp.plugins.SelectCountries = Ext.extend(gxp.plugins.Tool, {
 
 		var data =new Array();
 		var dataEntry ,country;
+		//generate entry
 		for (index in evt.features){
 			//Country FeatureMember in the GridPanel Store
 			if (evt.features[index].fid && evt.features[index].fid.indexOf("gboundaries")!=-1){
@@ -204,10 +207,15 @@ gxp.plugins.SelectCountries = Ext.extend(gxp.plugins.Tool, {
 				data.push(evt.features[index].attributes);
 			}
 		}
+		//add to the store
 		if(country!=null){
 			country.data=data;
-			dataEntry=new gxp.data.FraDataEntry(country);
-			this.countryList.store.add(dataEntry);
+			dataEntry=new gxp.data.FraDataEntry(country,country["ADM0_CODE"]);
+			if(!this.countryList.store.getById(country["ADM0_CODE"])){
+				this.countryList.store.add(dataEntry,country["ADM0_CODE"]);
+			}else{
+				Ext.getCmp('computeStatisticsButton').setDisabled(this.countryList.store.getCount()<=0);
+			}
 		}
 		
 		
