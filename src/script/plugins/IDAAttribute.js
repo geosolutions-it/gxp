@@ -99,7 +99,6 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 		var settings = new Ext.form.FieldSet({
                 title: this.settingsTitle,
                 autoHeight: true,
-				//autoWidth: true,
 				labelWidth: 80,
                 items: [{
 						xtype: 'textfield',
@@ -127,6 +126,15 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 						value: 'ALL'
 				}]
 		});
+		settings.getMetadata = function(){
+			var meta = {};
+			
+			meta.name = this.items.get(0).getValue();
+			meta.color = this.items.get(1).getValue();
+			meta.classify = this.items.get(2).getValue();
+			
+			return meta;
+		};
 		
 		var params = this.defaultBuilder;
 		params.proxy = this.target.riskData.urlParameters.proxy ? this.target.riskData.urlParameters.proxy : this.target.proxy;
@@ -188,6 +196,7 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 							filterOGC = xmlFormat.write(filterOGC);
 							
 							alert(filterOGC);
+							//var meta = settings.getMetadata(); // to JOIN in the request
 						}else{
 							Ext.Msg.show({
 								title: "Filter Apply",

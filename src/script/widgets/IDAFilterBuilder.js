@@ -220,16 +220,14 @@ gxp.IDAFilterBuilder = Ext.extend(Ext.Container, {
                             filter = child;
                             break;
                         }
-                    } else if(!child || child.type === null ||
-                              child.property === null || child.value === null || child.upperBoundary === null || child.lowerBoundary === null) {
+                    } else if(!child || child.type === null || child.property === null/* || child.value == null || child.upperBoundary === null || child.lowerBoundary === null*/) {
                         filter = false;
                         break;
                     }
                 }
             }
-        } else {
-            if(!filter || filter.type === null || filter.property === null ||
-               filter.value === null || filter.upperBoundary === null || filter.lowerBoundary === null) {
+        } else { 
+            if(!filter || filter.type === null || filter.property === null/* || filter.value == null || filter.upperBoundary === null || filter.lowerBoundary === null*/) {
                 filter = false;
             }
         }

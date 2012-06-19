@@ -178,12 +178,23 @@ gxp.form.IDAFilterField = Ext.extend(Ext.form.CompositeField, {
 			if(this.items.get(1).getValue() != ".."){
 				this.slider.setMinValue(min);
 				this.slider.setMaxValue(max);
+				
+				if((max - min) == 1){
+					this.slider.decimalPrecision = 2;
+				}
+				
 				this.items.get(2).setValue(min);
 				this.items.get(3).reset();
+				
+				
 			}else{
 				this.multislider.setMaxValue(max);
 				this.multislider.setMinValue(min);
 				this.multislider.values = [min, max];
+				
+			    if((max - min) == 1){
+					this.multislider.decimalPrecision = 2;
+				}
 				
 				this.items.get(2).setValue(min);
 				this.items.get(3).setValue(max);
@@ -191,6 +202,7 @@ gxp.form.IDAFilterField = Ext.extend(Ext.form.CompositeField, {
 		}else{
 			this.slider.setMinValue(min);
 			this.slider.setMaxValue(max);
+
 			this.items.get(2).setValue(min);
 		}
 	},
@@ -201,7 +213,6 @@ gxp.form.IDAFilterField = Ext.extend(Ext.form.CompositeField, {
      */
     createFilterItems: function() {
         this.slider = new Ext.Slider({
-			//anchor: "100%",
 			disabled: true,
 			minValue: 0,
 			maxValue: 250,	
@@ -291,9 +302,7 @@ gxp.form.IDAFilterField = Ext.extend(Ext.form.CompositeField, {
 							//
 							// This define the startup setting
 							//
-							if(!this.items.get(2).getValue()){
-								this.setSlider();	
-							}
+							this.setSlider();	
 							this.slider.fireEvent("change", this.slider, this.slider.getValue());							
 						}
 						
