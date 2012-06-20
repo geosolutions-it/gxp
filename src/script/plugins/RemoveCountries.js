@@ -100,7 +100,7 @@ gxp.plugins.RemoveCountries = Ext.extend(gxp.plugins.Tool, {
 			},
 			clear: function(store){
 				removeCountriesAction.setDisabled(store.getCount()<=0);
-			},
+			}
 		});
 
         return actions;
