@@ -78,8 +78,10 @@ gxp.plugins.RemoveCountries = Ext.extend(gxp.plugins.Tool, {
 					msg: this.removeActionConfirmText,
 					buttons:  Ext.Msg.OKCANCEL,
 					icon: Ext.MessageBox.WARNING,
-					fn: function(){
-						this.countryList.store.removeAll();   
+					fn: function(btnid){
+						if(btnid=="ok"){
+							this.countryList.store.removeAll(); 
+						}						
 					},
 					scope:this
 				   
