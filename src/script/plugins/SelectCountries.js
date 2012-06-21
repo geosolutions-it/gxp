@@ -95,7 +95,7 @@ gxp.plugins.SelectCountries = Ext.extend(gxp.plugins.Tool, {
 		var propertyNameList="()(";
 		var gboundariesAllowedValues =this.objectToAttributeArray(gxp.data.GBoundariesModel,'name');
 		var  fra1AllowedProperties = this.objectToAttributeArray(gxp.data.fraAttributeModel, 'name');
-		propertyNameList+=fra1AllowedProperties.concat()+")("+gboundariesAllowedValues.concat()+")";
+		propertyNameList+=gboundariesAllowedValues.concat()+")("+fra1AllowedProperties.concat()+")";
         this.vendorParams={
 			propertyName: propertyNameList
 		};
