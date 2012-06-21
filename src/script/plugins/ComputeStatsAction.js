@@ -32,6 +32,8 @@ gxp.plugins.ComputeStatsAction = Ext.extend(gxp.plugins.Tool, {
 	
 	computeStatisticsActionText: "Compute Statistics",
     computeStatsActionDialogTitle: "Statistics",
+	computeStatsNoDataWarnText : "There are not enough data for the selected countries to generate charts.",
+	computeStatsNoDataWarnTitle : "Not enough data.",
     /** 
      * api: method[addActions]
      */
@@ -95,7 +97,22 @@ gxp.plugins.ComputeStatsAction = Ext.extend(gxp.plugins.Tool, {
 		}
 		var options =this.getOptions();
 		var statElements= this.generateDataEntries(options.selectedCountries,options.selectedAttributes);
-		if(statElements==null){return};
+		if(statElements==null || statElements.length  <=0){
+			Ext.Msg.show({
+					title:this.computeStatsNoDataWarnTitle
+,
+					msg: this.computeStatsNoDataWarnText,
+					buttons:  Ext.Msg.OK,
+					icon: Ext.MessageBox.WARNING,
+					
+					scope:this
+				   
+				});
+			
+			return;
+		
+		
+		};
 		var groupProperty =options.groupProperty;
 		var tabPanel = Ext.getCmp(this.apptarget.renderToTab);
 		var tab = new Ext.Panel({
