@@ -226,7 +226,7 @@ gxp.plugins.ComputeStatsAction = Ext.extend(gxp.plugins.Tool, {
 						}
 						//add entry for the entry for this country/attribute
 						
-						attributeMap[ data[yearEntry].year+''][country.get("ADM0NAME")] = data[yearEntry][attributeName];
+						attributeMap[ data[yearEntry].year+''][country.get("ADM0NAME").split(' ').join('')] = data[yearEntry][attributeName];
 					}
 				}
 				
@@ -243,7 +243,7 @@ gxp.plugins.ComputeStatsAction = Ext.extend(gxp.plugins.Tool, {
 		var series =new Array();
 		for(var index=0; index<options.selectedCountries.length;index++){
 			series.push({
-				 yField: options.selectedCountries[index].get("ADM0NAME"),
+				 yField: options.selectedCountries[index].get("ADM0NAME").split(' ').join(''),
 				 displayName: options.selectedCountries[index].get("ADM0NAME")
 			});
 		
