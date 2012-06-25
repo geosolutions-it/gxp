@@ -24,3 +24,19 @@
 .icon-attribute-reset{
 	background-image: url(img/decline.png) !important;
 }
+
+.spm-create-button {
+	background-image: url(img/geosilk/cursor.png) !important;
+}
+
+.spm-btn-bottom {
+	position: relative;
+	top:5px;
+	padding:5px;
+}
+
+.spm-center  {
+	text-align: center;
+	margin: 0 auto;
+	padding: 0 auto;
+}
