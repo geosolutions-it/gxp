@@ -260,6 +260,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 						text: this.applyText,
 						handler: function(){
 							//TODO
+							alert("Yet to be implemented");
 						}
 					},
 					{
@@ -322,7 +323,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
         
         var spmPanel = gxp.plugins.IDASpm.superclass.addOutput.call(this, config);
 
-        Ext.getCmp("idacontrol").setActiveTab(cpanel);
+        //Ext.getCmp("idacontrol").setActiveTab(cpanel);
         
         return spmPanel;
     },
