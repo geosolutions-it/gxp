@@ -138,6 +138,20 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
     featureLabel: "Max Features",
 	spatialLabelText: "Without setting a ROI you query the entire set of data in the current Map extent.",
 	featureLabelText: "With an high number of features the server can take a long time to respond. Limit your search!",
+	spmText:"SPM",
+	sourcedepthLabel : "Source Depth (m)",
+	sourcefrequencyLabel : 'Source Frequency (kHz)',
+	sourcepressurelevelLabel : 'Source Pressure Level (dB)',
+	modelnameLabel : 'Model Name',
+	seasonLabelText: 'Season',
+	securityLevelLabelText : 'Security Level',
+	allText: 'All',
+	springText : "Spring",
+	winterText : "Winter",
+	fallText : "Fall",
+	summerText : "Summer",
+	modelRunDateText:'Model Run Date',
+	modelEndDateText:'Model End Date',
     // End i18n.
     
     spatialFilterOptions: {
@@ -146,6 +160,14 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
             latMax: 180,
             latMin: -180
     },
+	securityLevels: [
+		this.allText,
+		'NATO UNCLASSIFIED','NATO UNCLASSIFIED',
+		'NATO RESTRICTED','NATO RESTRICTED',
+		'NATO CONFIDENTIAL','NATO CONFIDENTIAL',
+		'NATO SECRET','NATO SECRET',
+		'NATO TOP SECRET','NATO TOP SECRET'
+	],
     
     maxFeatures: 20,
         
@@ -167,6 +189,7 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
             border: false,
             bodyStyle: "padding: 5px",
             layout: "form",
+			xtype:"form",
             autoScroll: true,
             items: [{
                 xtype: "fieldset",
@@ -178,7 +201,7 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
                             "SPM",
                             "Feature"
                     ],
-                    value: "SPM",
+                    value:  "SPM",
                     ref: "../type",
                     anchor: "50%",
                     fieldLabel: this.typeLabel,
@@ -198,6 +221,10 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
                                 queryForm.attributeFieldset.setDisabled(true);
                                 queryForm.attributeFieldset.collapse(true);
                             }
+							// panel visiblity
+							var featureSelected=(combo.getValue() == 'Feature');
+							queryForm.attributeFieldset.setVisible(featureSelected);
+							queryForm.spmFieldSet.setVisible(!featureSelected);
                         }
                     }
                 }, {
@@ -255,11 +282,173 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
                 xtype: "fieldset",
                 ref: "attributeFieldset",
                 disabled: true,
-                hidden: false,
+                hidden: true,
                 title: this.queryByAttributesText,
                 collapsed: true,
                 checkboxToggle: true
-            }],
+            },{
+				xtype: "fieldset",
+				ref: "spmFieldSet",
+				hidden:false,
+				layout:'form',
+				title:this.spmText,
+				collapsed: false,
+				autoWidth:true,
+				items: [
+					new Ext.form.ComboBox({
+						width:210,
+						allowBlank: false,
+						forceSelection: true,
+						editable: false,
+						triggerAction: 'all',
+						lazyRender:true,
+						fieldLabel:this.seasonLabelText,
+						mode: 'local',
+						store: [
+								this.allText,
+								this.springText,
+								this.summerText,
+								this.fallText,
+								this.winterText
+						],
+						valueField: 'myId',
+						displayField: 'displayText',
+						value:  this.allText
+					}),
+					new Ext.form.ComboBox({
+						width:210,
+						allowBlank: false,
+						forceSelection: true,
+						editable: false,
+						triggerAction: 'all',
+						lazyRender:true,
+						fieldLabel: this.securityLevelLabelText,
+						mode: 'local',
+						store:  this.securityLevels,
+						valueField: 'myId',
+						value: this.allText,
+						displayField: 'displayText'
+					}),
+					{
+						fieldLabel: this.sourcedepthLabel,
+						name: 'sourcedepth',
+						xtype: 'numberfield',
+						width:210
+
+					},{
+						fieldLabel: this.sourcefrequencyLabel,
+						name: 'sourcefrequency',
+						xtype: 'numberfield',
+						width:210
+
+					},{
+						fieldLabel: this.sourcepressurelevelLabel,
+						name: 'sourcepressurelevel',
+						xtype: 'numberfield',
+						width:210
+
+					}, {
+						fieldLabel: this.modelnameLabel,
+						name: 'modelname',
+						xtype: 'textfield',
+						width:210
+
+					},
+					
+					{
+						xtype: 'compositefield',
+						fieldLabel: this.modelRunDateText,
+						defaults:{
+							
+						},
+						items:[
+							{
+								name: 'modelrundate',
+								xtype: 'datefield',
+								width:110
+							},{
+								name:'modelrunhour',
+								xtype: 'combo',
+								editable:false,
+								forceSelection:true,
+								triggerAction: "all",
+								width:40,
+								
+								value:00,
+								store: [00,01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
+
+							},{xtype: 'displayfield', value: ':'},{
+								name:'modelrunmin',
+								xtype: 'combo',
+								editable:false,
+								forceSelection:true,
+								triggerAction: "all",
+								width:40,
+								
+								value:00,
+								store: [00,01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,
+										30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59]
+
+							},{
+								xtype:'button',
+								iconCls:'icon-attribute-reset',
+								handler:function(){
+									queryForm.getForm().findField("modelrundate").setValue("");
+									queryForm.getForm().findField("modelrunhour").setValue("");
+									queryForm.getForm().findField("modelrunmin").setValue("");
+								}
+							}
+						]
+					},
+					{
+						fieldLabel: this.modelEndDateText,
+						xtype: 'compositefield',
+						items:[
+							{
+								name: 'modelenddate',
+								xtype: 'datefield',
+								width:110
+
+							},{
+								name:'modelendhour',
+								xtype: 'combo',
+								editable:false,
+								forceSelection:true,
+								triggerAction: "all",
+								width:40,
+								
+								value:00,
+								store: [00,01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
+
+							},{xtype: 'displayfield', value: ':'},{
+								name:'modelendmin',
+								xtype: 'combo',
+								editable:false,
+								forceSelection:true,
+								triggerAction: "all",
+								width:40,
+								
+								value:00,
+								store: [00,01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,
+										30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59]
+
+							},{
+								xtype:'button',
+								iconCls:'icon-attribute-reset',
+								handler:function(){
+									queryForm.getForm().findField("modelenddate").setValue("");
+									queryForm.getForm().findField("modelendhour").setValue("");
+									queryForm.getForm().findField("modelendmin").setValue("");
+									
+								}
+							}
+						]
+					}
+
+				]
+			}
+				
+			],
             bbar: ["->", {
                 text: this.cancelButtonText,
                 ref: "cancel",
@@ -297,12 +486,20 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
                     //
                     // Cleaning the Feature grid
                     //
-                    featureManager.featureStore.removeAll();
-                    
+					if(featureManager && featureManager.featureStore){
+						featureManager.featureStore.removeAll();
+                    }
                     if(queryForm.type.getValue() != 'Feature' || !featureManager.schema){
                         queryForm.attributeFieldset.setDisabled(true);
                         queryForm.attributeFieldset.collapse(true);
                     }
+					queryForm.getForm().reset();
+					// panel visiblity
+					
+					var featureSelected=(queryForm.type.getValue() == 'Feature');
+					queryForm.attributeFieldset.setVisible(featureSelected);
+					queryForm.spmFieldSet.setVisible(!featureSelected);
+					
                 }
             }, {
                 text: this.queryActionText,
