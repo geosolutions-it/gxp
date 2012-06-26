@@ -24,7 +24,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 	
 	// start i18n
     title: "SPM Create",
-	createText: "create",
+	pointSelectionButtonLabel: '',
 	springText : "Spring",
 	winterText : "Winter",
 	fallText : "Fall",
@@ -35,7 +35,6 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 	sourcefrequencyLabel : 'Source Frequency (kHz)',
 	sourcepressurelevelLabel : 'Source Pressure Level (dB)',
 	modelnameLabel : 'Model Name',
-	pointSelectionButtonLabel: '',
 	pointSelectionButtionTip: 'Enable Point Selection',
 	seasonLabelText: 'Season',
 	securityLevelLabelText : 'Security Level',
@@ -51,11 +50,11 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
             latMin: -180
     },
 	securityLevels: [
-		['NATO UNCLASSIFIED','NATO UNCLASSIFIED'],
-		['NATO RESTRICTED','NATO RESTRICTED'],
-		['NATO CONFIDENTIAL','NATO CONFIDENTIAL'],
-		['NATO SECRET','NATO SECRET'],
-		['NATO TOP SECRET','NATO TOP SECRET']
+		'NATO UNCLASSIFIED',
+		'NATO RESTRICTED','NATO RESTRICTED',
+		'NATO CONFIDENTIAL','NATO CONFIDENTIAL',
+		'NATO SECRET','NATO SECRET',
+		'NATO TOP SECRET','NATO TOP SECRET'
 	],
 	
     /** private: method[constructor]
@@ -125,28 +124,26 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 			layoutConfig: {
                 columns: 3,
 				tableAttrs: {
-				style: {
-					width: '100%',
-					margin: '0 auto',
-					
+					style: {
+						width: '100%',
+						margin: '0 auto'
+						
+					}
 				}
-			},	
             },
 			bodyStyle: 'text-align:center;margin:0 auto;table-layout:auto',
-			//defaultType: 'numberfield',
-			
 			bodyCssClass: 'spm-center',			
 			items: [
 				{
-						layout: 'form',
-						bodyStyle:'float:left;',
-						items: [this.latitudeField]
-					
-				},this.pointSelectionButton,
+					layout: 'form',
+					bodyStyle:'float:left;',
+					items: [this.latitudeField]
+				},
+				this.pointSelectionButton,
 				{				
-						layout: 'form',
-						bodyStyle:'float:right;',
-						items: [this.longitudeField]
+					layout: 'form',
+					bodyStyle:'float:right;',
+					items: [this.longitudeField]
 				}
 			]
 			
@@ -176,7 +173,6 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 					}, this.handlerOptions
 				);
 			}, 
-			
 			trigger: this.updateLonLat,
 			latitudeField: this.latitudeField,
 			longitudeField: this.longitudeField,
@@ -190,30 +186,22 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 		
 		// season combo
 		this.seasonCombo = new Ext.form.ComboBox({
-			width: '150px',
+			width: 150,
 			allowBlank: false,
 			forceSelection: true,
 			editable: false,
 			triggerAction: 'all',
 			lazyRender:true,
-			
 			fieldLabel:this.seasonLabelText,
 			mode: 'local',
-			store: new Ext.data.ArrayStore({
-				id: 0,
-				fields: [
-					'id',
-					'displayText'
-				],
-				data: [['Spring', this.springText], ['Summer', this.summerText],['Fall',this.fallText],['Winter',this.winterText]]
-			}),
-			valueField: 'myId',
-			displayField: 'displayText',
+			store:  [ this.springText,this.summerText,this.fallText,this.winterText],
+			
+			
 			value:  this.springText
 		});
 
 		this.securityLevelCombo=  new Ext.form.ComboBox({
-			width: '150px',
+			width: 150,
 			allowBlank: false,
 			forceSelection: true,
 			editable: false,
@@ -221,17 +209,9 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 			lazyRender:true,
 			fieldLabel: this.securityLevelLabelText,
 			mode: 'local',
-			store: new Ext.data.ArrayStore({
-				id: 0,
-				fields: [
-					'id',
-					'displayText'
-				],
-				data: this.securityLevels,
-			}),
-			valueField: 'myId',
-			value: this.securityLevels[0][1],
-			displayField: 'displayText'
+			store:  this.securityLevels,
+			
+			value: this.securityLevels[0]
 		});
 		
 		
@@ -244,12 +224,12 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 			layout:'form',
 			//autoWidth:true,
 			frame: true,
-			title: this.createText, //TODO externalize
+			autoScroll:true,
 			defaultType: 'numberfield',
 			
 			defaults:{
-				labelStyle: 'width:200px',
-				width: '150px'
+				labelStyle: 'width:170px',
+				width: 150
 				
 			 },
 			 bbar: new Ext.Toolbar({
@@ -312,6 +292,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
             border: false,
             layout: "border",
             disabled: false,
+			autoScroll:false,
             title: this.title,
 			items: [
 					
