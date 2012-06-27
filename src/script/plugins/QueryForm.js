@@ -189,7 +189,7 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
             border: false,
             bodyStyle: "padding: 5px",
             layout: "form",
-			xtype:"form",
+			xtype: "form",
             autoScroll: true,
             items: [{
                 xtype: "fieldset",
@@ -248,6 +248,7 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
                 ref: "spatialFieldset",
                 title: this.queryByLocationText,
                 autoHeight: true,
+				
                 checkboxToggle: true,
                 items: [
 					{
@@ -293,7 +294,7 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
 				layout:'form',
 				title:this.spmText,
 				collapsed: false,
-				autoWidth:true,
+				
 				items: [
 					new Ext.form.ComboBox({
 						width:210,
@@ -626,7 +627,7 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
         this.target.mapPanel.map.events.register("moveend", this, function() {
             var spatialField = queryForm.spatialFieldset;
             
-            if(spatialField){
+            if(spatialField && ! this.aoiButton.pressed){
                 var extentArray = this.target.mapPanel.map.getExtent().toArray();
                 
                 this.westField.setValue(extentArray[0]);
@@ -635,6 +636,8 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
                 this.northField.setValue(extentArray[3]); 
             }
         });
+		
+		
         
         featureManager.on({
             "beforequery": function() {
