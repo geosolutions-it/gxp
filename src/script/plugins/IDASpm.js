@@ -44,10 +44,10 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 	//end i18n
 	
 	spatialFilterOptions: {
-            lonMax: 90,
-            lonMin: -90,
-            latMax: 180,
-            latMin: -180
+            lonMax: 180,
+            lonMin: -180,
+            latMax: 90,
+            latMin: -90
     },
 	securityLevels: [
 		'NATO UNCLASSIFIED',
@@ -137,12 +137,14 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 				{
 					layout: 'form',
 					bodyStyle:'float:left;',
+					border: false,
 					items: [this.latitudeField]
 				},
 				this.pointSelectionButton,
 				{				
 					layout: 'form',
 					bodyStyle:'float:right;',
+					border: false,
 					items: [this.longitudeField]
 				}
 			]
@@ -221,14 +223,15 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 		//
 		this.spmCreateForm = new Ext.form.FormPanel({
 			region:'center',
-			layout:'form',
-			//autoWidth:true,
-			frame: true,
-			autoScroll:true,
-			defaultType: 'numberfield',
+			layout: "form",
+
 			
+			frame: false,
+			autoScroll:true,
+			
+			bodyStyle: "padding: 5px",
 			defaults:{
-				labelStyle: 'width:170px',
+				labelStyle: 'width:170px;',
 				width: 150
 				
 			 },
@@ -240,7 +243,12 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 						text: this.applyText,
 						handler: function(){
 							//TODO
-							alert("Yet to be implemented");
+							Ext.Msg.show({
+								title: "SPM Creation",
+								msg: "Not implemented yet!",
+								buttons: Ext.Msg.OK,
+								icon: Ext.Msg.INFO
+							});
 						}
 					},
 					{
@@ -265,26 +273,40 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 				},
 				*/
 				this.lonLatFieldSet,
-				this.seasonCombo,
 				{
-					fieldLabel: this.sourcedepthLabel,
-					name: 'sourcedepth',
-					allowBlank:false
-				},{
-					fieldLabel: this.sourcefrequencyLabel,
-					name: 'sourcefrequency',
-					allowBlank:false
-				},{
-					fieldLabel: this.sourcepressurelevelLabel,
-					name: 'sourcepressurelevel',
-					allowBlank:false
-				}, {
-					fieldLabel: this.modelnameLabel,
-					name: 'modelname',
-					xtype: 'textfield',
-					allowBlank:false
-				},
-				this.securityLevelCombo
+					xtype:'fieldset',
+					autoWidth:true,
+					layout:'form',
+					defaultType: 'numberfield',
+					bodyStyle:'padding:5px',
+					defaults:{				
+						width: 150	
+						
+					 },
+					items:[
+						this.seasonCombo,
+						{
+							fieldLabel: this.sourcedepthLabel,
+							name: 'sourcedepth',
+							allowBlank:false
+
+						},{
+							fieldLabel: this.sourcefrequencyLabel,
+							name: 'sourcefrequency',
+							allowBlank:false
+						},{
+							fieldLabel: this.sourcepressurelevelLabel,
+							name: 'sourcepressurelevel',
+							allowBlank:false
+						}, {
+							fieldLabel: this.modelnameLabel,
+							name: 'modelname',
+							xtype: 'textfield',
+							allowBlank:false
+						},
+						this.securityLevelCombo
+					]
+				}
 			]
         
 		});
