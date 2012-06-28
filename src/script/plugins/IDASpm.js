@@ -40,8 +40,10 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 	securityLevelLabelText : 'Security Level',
 	applyText: 'Apply',
 	resetText: 'Reset',
-	
+	settingColorTitle: 'Color',
+	settingColorTitle: 'Color',
 	//end i18n
+	
 	
 	spatialFilterOptions: {
             lonMax: 180,
@@ -57,6 +59,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 		'NATO TOP SECRET','NATO TOP SECRET'
 	],
 	
+	settingColor: 'FF0000',
     /** private: method[constructor]
      *  :arg config: ``Object``
      */
@@ -285,6 +288,13 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 					 },
 					items:[
 						this.seasonCombo,
+						 {
+							xtype: 'colorpickerfield',
+							fieldLabel: this.settingColorTitle,
+							name: this.settingColorTitle,
+							editable: false,
+							value: this.settingColor
+						},
 						{
 							fieldLabel: this.sourcedepthLabel,
 							name: 'sourcedepth',
