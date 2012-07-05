@@ -53,10 +53,10 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
     },
 	securityLevels: [
 		'NATO UNCLASSIFIED',
-		'NATO RESTRICTED','NATO RESTRICTED',
-		'NATO CONFIDENTIAL','NATO CONFIDENTIAL',
-		'NATO SECRET','NATO SECRET',
-		'NATO TOP SECRET','NATO TOP SECRET'
+		'NATO RESTRICTED',
+		'NATO CONFIDENTIAL',
+		'NATO SECRET',
+		'NATO TOP SECRET'
 	],
 	
 	settingColor: 'FF0000',
@@ -181,7 +181,8 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 			trigger: this.updateLonLat,
 			latitudeField: this.latitudeField,
 			longitudeField: this.longitudeField,
-			map:map
+			map:map,
+			spmPanel:this
 		});
 		
 		
@@ -260,6 +261,10 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 						text: this.resetText,
 						handler: function(){
 							this.spmCreateForm.getForm().reset();
+							var layer = map.getLayersByName("spm_source")[0];	
+							if(layer){
+								map.removeLayer(layer);
+							}
 						},
 						scope:this
 					}
@@ -289,7 +294,9 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 					items:[
 						this.seasonCombo,
 						 {
+							name: 'color',
 							xtype: 'colorpickerfield',
+							id: 'SPMCreateColorPicker',
 							fieldLabel: this.settingColorTitle,
 							name: this.settingColorTitle,
 							editable: false,
@@ -348,8 +355,35 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 		var lonlat = map.getLonLatFromPixel(e.xy);
 		this.latitudeField.setValue(lonlat.lat);
 		this.longitudeField.setValue(lonlat.lon);
-
+	
+		var layer = map.getLayersByName("spm_source")[0];	
+		if(layer){
+			map.removeLayer(layer);
+		}
+		var cp= Ext.getCmp("SPMCreateColorPicker");
+		var color = "#"+ cp.getValue();
+		var style = new OpenLayers.Style({
+			pointRadius: 4, // sized according to type attribute
+			graphicName: "circle",
+			
+			
+			fillColor: color,
+			strokeColor: color,
+			fillOpacity:0.5,
+			strokeWidth:2
+			
+		});
 		
+		layer = new OpenLayers.Layer.Vector("spm_source",{
+			styleMap: style
+			
+		});
+		
+		var point = new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat);	
+		var pointFeature = new OpenLayers.Feature.Vector(point);
+		layer.addFeatures([pointFeature]);
+		layer.displayInLayerSwitcher = true;
+		map.addLayer(layer);
 	}
 });
 
