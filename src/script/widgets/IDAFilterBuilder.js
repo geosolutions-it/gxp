@@ -24,6 +24,7 @@ Ext.namespace("gxp");
  */
 gxp.IDAFilterBuilder = Ext.extend(Ext.Container, {
 
+	autoWidth: false,
     /** api: config[builderTypeNames]
      *  ``Array``
      *  A list of labels for that correspond to builder type constants.
@@ -88,7 +89,7 @@ gxp.IDAFilterBuilder = Ext.extend(Ext.Container, {
     allowGroups: true,
 	
 	maxNumberOfConditions: 2,
-	
+	layout:'form',
 	/** Start i18n */
     addConditionText: "add condition",
     addGroupText: "add group",
@@ -169,6 +170,8 @@ gxp.IDAFilterBuilder = Ext.extend(Ext.Container, {
                 iconCls: "add",
                 handler: function() {
                     this.addCondition(true);
+					
+
                 },
                 scope: this
             });

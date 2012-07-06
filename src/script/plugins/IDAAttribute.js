@@ -149,6 +149,9 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 			title: this.filterTitle,
 			autoHeight: true,
 			maxNumberOfGroups: 2,
+			
+			layout:'fit',
+			autoScroll:true,
 			items: [
 				filterBuilder
 			]
@@ -156,13 +159,15 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 		
 		var form = new Ext.form.FormPanel({
 			border: false,
-			autoScroll: true,
+			width: 510,
+			autoScroll:true,
 			labelAlign: 'left',
 			items: [settings, filter]
 		});		
 	
         var cpanel = new Ext.Panel({
             border: false,
+			autoScroll: true,
 			bodyStyle: "padding: 5px",
             disabled: false,
             title: this.title,
@@ -220,6 +225,8 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 						filter.doLayout();
 						
 						form.getForm().reset();
+						filter.maxNumberOfGroups=2;
+						
 					}
 				}
 			],
