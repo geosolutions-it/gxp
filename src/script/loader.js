@@ -25,6 +25,7 @@
         "widgets/ScaleLimitPanel.js",
         "widgets/TextSymbolizer.js",
         "widgets/Viewer.js",
+		"widgets/KMLFileUploadPanel.js",
         "widgets/form/AutoCompleteComboBox.js",
         "widgets/form/ComparisonComboBox.js",
         "widgets/form/ColorField.js",
@@ -81,6 +82,7 @@
         "plugins/Print.js",
         "plugins/LoadingIndicator.js",
         "plugins/Playback.js",
+		"plugins/ImportKML.js",
         "locale/es.js",
         "locale/ca.js"
     );

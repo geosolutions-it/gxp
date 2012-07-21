@@ -289,6 +289,11 @@
     background-image: url(img/silk/shape_square_red.png);
 }
 
+/* gxp_import_kml */
+.x-btn .gxp-icon-import-kml, .x-tree-node .gxp-icon-import-kml, .gxp-icon-import-kml {
+    background-image: url(img/silk/application_get.png);
+}
+
 /* gxp_measure */
 .x-btn .gxp-icon-measure-length, .x-menu-item .gxp-icon-measure-length, .x-tree-node .gxp-icon-measure-length {
     background-image: url(img/geosilk/ruler.png) !important;
