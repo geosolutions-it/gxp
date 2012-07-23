@@ -77,13 +77,15 @@ gxp.plugins.ImportKML = Ext.extend(gxp.plugins.Tool, {
 						   bodyBorder: false,
 					       items: [ form ]
 					});		
-				form.on("uploadcomplete", function addLayer(caller, details){
+				form.on("uploadcomplete", function addLayer(caller, response){
+						// the code to access the uploaded file
+						var code = response.code;
 						// create a new layer from uploaded file
 						var kmlLayer = new OpenLayers.Layer.Vector('KML', {
 											projection: new OpenLayers.Projection("EPSG:4326"),
 											strategies: [new OpenLayers.Strategy.Fixed()],
 											protocol: new OpenLayers.Protocol.HTTP({
-												url: 'http://localhost:8080/xmlJsonTranslate/temp/Trentino.kml',
+												url: 'http://localhost:8080/FileUploader/FileUploader?code='+code,
 												format: new OpenLayers.Format.KML({
 														extractStyles: true, 
 														extractAttributes: true,

@@ -53,7 +53,7 @@ gxp.KMLFileUploadPanel = Ext.extend(Ext.FormPanel, {
      *  List of valid file extensions.  These will be used in validating the 
      *  file input value.  Default is ``[".kml"]``.
      */
-    validFileExtensions: [".kml", ".map"],
+    validFileExtensions: [".kml"],
     
     /** api: config[url]
      *  ``String``
@@ -101,13 +101,14 @@ gxp.KMLFileUploadPanel = Ext.extend(Ext.FormPanel, {
                 var form = this.getForm();
                 if (form.isValid()) {
                     form.submit({
-                        url: 'http://localhost:8080/xmlJsonTranslate/HTTPWebGISFileUpload', // 'http://localhost:8080/http_proxy/proxy/?url=http://localhost:8080/xmlJsonTranslate/HTTPWebGISFileUpload', // this.getUploadUrl(),
+                        url: 'http://localhost:8080/FileUploader/FileUploader', 
                         submitEmptyText: false,
                         waitMsg: this.waitMsgText,
                         waitMsgTarget: true,
                         reset: true,
                         scope: this,
 						failure: function(form, action){
+							console.error(action);
 							 Ext.Msg.show({
                                title: this.failedUploadingTitle,
                                msg: action.responseText,
@@ -173,8 +174,8 @@ gxp.KMLFileUploadPanel = Ext.extend(Ext.FormPanel, {
     /** private: method[handleUploadSuccess]
      */
     handleUploadSuccess: function(form, action) {
-        var details = action.response.responseText;
-        this.fireEvent("uploadcomplete", this, details);
+        var obj = Ext.decode( action.response.responseText );
+        this.fireEvent("uploadcomplete", this, obj.result);
     }
 
 });
