@@ -83,6 +83,8 @@
         "plugins/LoadingIndicator.js",
         "plugins/Playback.js",
 		"plugins/ImportKML.js",
+		"plugins/PilotNotes.js",
+		"plugins/AddGeometry.js",
         "locale/es.js",
         "locale/ca.js"
     );
