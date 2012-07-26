@@ -87,7 +87,7 @@ gxp.plugins.ImportKML = Ext.extend(gxp.plugins.Tool, {
 											projection: new OpenLayers.Projection("EPSG:4326"),
 											strategies: [new OpenLayers.Strategy.Fixed()],
 											protocol: new OpenLayers.Protocol.HTTP({
-												url: 'http://localhost:8080/FileUploader/FileUploader?code='+code,
+												url: this.target.xmlJsonTranslateService+'/FileUploader?code='+code,
 												format: new OpenLayers.Format.KML({
 														extractStyles: true, 
 														extractAttributes: true,
