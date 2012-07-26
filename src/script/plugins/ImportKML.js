@@ -66,7 +66,9 @@ gxp.plugins.ImportKML = Ext.extend(gxp.plugins.Tool, {
             handler: function() {
 	            var self = this;
 				// create an upload file form
-				var form = new gxp.KMLFileUploadPanel( );
+				var form = new gxp.KMLFileUploadPanel( {
+					xmlJsonTranslateService: this.target.xmlJsonTranslateService
+				} );
 				// open a modal window
 				var win = new Ext.Window({
 					       closable:true,

@@ -67,6 +67,7 @@ gxp.KMLFileUploadPanel = Ext.extend(Ext.FormPanel, {
         /*config.errorReader = {
             read: config.handleUploadResponse || this.handleUploadResponse.createDelegate(this)
         };*/
+		this.xmlJsonTranslateService = config.xmlJsonTranslateService;
         gxp.KMLFileUploadPanel.superclass.constructor.call(this, config);
     },
     
@@ -101,7 +102,7 @@ gxp.KMLFileUploadPanel = Ext.extend(Ext.FormPanel, {
                 var form = this.getForm();
                 if (form.isValid()) {
                     form.submit({
-                        url: 'http://localhost:8080/FileUploader/FileUploader', 
+                        url: this.xmlJsonTranslateService + '/FileUploader', 
                         submitEmptyText: false,
                         waitMsg: this.waitMsgText,
                         waitMsgTarget: true,

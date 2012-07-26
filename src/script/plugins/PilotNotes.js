@@ -44,7 +44,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
     pilotNotesTooltip: "Open drawing tools",
 
 
-    onFinish: null,
+    handler: null,
   
     
     /** private: method[constructor]
@@ -89,17 +89,19 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 							{   xtype: 'textfield',
 				                fieldLabel: 'Name',
 								width: 200,
-								readOnly: true,
+								// readOnly: true,
 				                name:'loginUsername', 
 				                allowBlank:true,
+								id:'name-textfield'
 				            },{  
 								xtype: 'textarea',
 								width: 200,
 								height: 150,
-								readOnly: true,
+								// readOnly: true,
 				                fieldLabel:'Note', 
 				                name:'loginPassword', 
-				                allowBlank:true
+				                allowBlank:true,
+								id: 'description-textfield'
 				            }
 					
 					   ]
@@ -110,8 +112,8 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 			);
 		
 		// register to listen "addgeometry"	event
-		this.target.on("addgeometry", function addGeometry(caller, callback){
-			self.onFinish = callback;
+		this.target.on("addgeometry", function addGeometry(caller, handler){
+			self.handler = handler;
 			self.enable();
 		});
 		return panel;
@@ -122,8 +124,10 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
      */
 	handleSave: function(){
 		this.disable();
-		if (this.onFinish){
-			this.onFinish(this);
+		if (this.handler){
+			var name = Ext.getCmp("name-textfield").getValue();
+			var description = Ext.getCmp("description-textfield").getValue();
+			this.handler.onSave(name, description);
 		}
 	},
 
@@ -132,8 +136,8 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
      */
 	handleCancel: function(){
 		this.disable();
-		if (this.onFinish){
-			this.onFinish(this);
+		if (this.handler){
+			this.handler.onCancel(this);
 		}
 	},
 	
