@@ -82,9 +82,10 @@
         "plugins/Print.js",
         "plugins/LoadingIndicator.js",
         "plugins/Playback.js",
-		"plugins/ImportKML.js",
+		"plugins/KMLImporter.js",
 		"plugins/PilotNotes.js",
 		"plugins/AddGeometry.js",
+		"plugins/FeatureSelector.js",
         "locale/es.js",
         "locale/ca.js"
     );

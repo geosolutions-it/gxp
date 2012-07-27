@@ -74,7 +74,7 @@ gxp.KMLFileUploadPanel = Ext.extend(Ext.FormPanel, {
     /** private: method[initComponent]
      */
     initComponent: function() {
-        
+        var self = this;
         this.items = [{
             xtype: "fileuploadfield",
             id: "file",
@@ -89,6 +89,7 @@ gxp.KMLFileUploadPanel = Ext.extend(Ext.FormPanel, {
                 "fileselected": function(cmp, value) {
                     // remove the path from the filename - avoids C:/fakepath etc.
                     cmp.setValue(value.split(/[/\\]/).pop());
+					self.filename = cmp.getValue();
                 }
             },
             validator: this.fileNameValidator.createDelegate(this)
@@ -176,7 +177,11 @@ gxp.KMLFileUploadPanel = Ext.extend(Ext.FormPanel, {
      */
     handleUploadSuccess: function(form, action) {
         var obj = Ext.decode( action.response.responseText );
-        this.fireEvent("uploadcomplete", this, obj.result);
+		var filename = this.filename;
+		var response = new Object;
+		response.filename = filename;
+		response.code = obj.result.code;
+        this.fireEvent("uploadcomplete", this, response);
     }
 
 });

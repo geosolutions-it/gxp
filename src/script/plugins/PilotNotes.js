@@ -43,8 +43,15 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
      */
     pilotNotesTooltip: "Open drawing tools",
 
+	saveButtonText:"Save",
+	saveButtonTooltip:"Save",
+	cancelButtonText:"Cancel",
+	cancelButtonTooltip:"Discard changes",
+	deleteButtonText:"Delete",
+	deleteButtonTooltip:"Delete this feature",
 
-    handler: null,
+    feature: null,
+    container: null,
   
     
     /** private: method[constructor]
@@ -60,7 +67,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 	    var self = this;
 	    this.saveBtn = new Ext.Button({
 	        id: 'saveBtn',
-	        tooltip: 'Save',
+	        tooltip: this.saveButtonTooltip,
 	        iconCls: 'save',
 	        disabled: true,
 	        handler : this.handleSave,
@@ -69,10 +76,20 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 	    this.cancelBtn = new Ext.Button(
 			 {
 			    id: 'cancelBtn',
-			    tooltip: 'Cancel',
+			    tooltip: this.cancelButtonTooltip,
 			    iconCls: 'cancel',
 			    disabled: true,
 			    handler : this.handleCancel,
+				scope: this
+			  }		
+		);
+	    this.deleteBtn = new Ext.Button(
+			 {
+			    id: 'deleteBtn',
+			    tooltip: this.deleteButtonTooltip,
+			    iconCls: 'delete',
+			    disabled: true,
+			    handler : this.handleDelete,
 				scope: this
 			  }		
 		);
@@ -89,15 +106,15 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 							{   xtype: 'textfield',
 				                fieldLabel: 'Name',
 								width: 200,
-								// readOnly: true,
 				                name:'loginUsername', 
 				                allowBlank:true,
+								disabled: true,
 								id:'name-textfield'
 				            },{  
 								xtype: 'textarea',
 								width: 200,
 								height: 150,
-								// readOnly: true,
+								disabled: true,
 				                fieldLabel:'Note', 
 				                name:'loginPassword', 
 				                allowBlank:true,
@@ -106,14 +123,19 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 					
 					   ]
 					}],
-			        tbar:[  this.saveBtn, this.cancelBtn ]
+			        tbar:[  this.saveBtn, this.cancelBtn, '->', this.deleteBtn ]
 			    })
 	
 			);
 		
 		// register to listen "addgeometry"	event
-		this.target.on("addgeometry", function addGeometry(caller, handler){
-			self.handler = handler;
+		this.target.on("featureselected", function selectFeature(container, feature){
+			self.feature = feature;
+			self.container = container;
+			if ( feature.attributes ){
+				Ext.getCmp("name-textfield").setValue( feature.attributes.name );
+				Ext.getCmp("description-textfield").setValue( feature.attributes.description );
+			}
 			self.enable();
 		});
 		return panel;
@@ -124,10 +146,12 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
      */
 	handleSave: function(){
 		this.disable();
-		if (this.handler){
+		if (this.feature && this.container){
 			var name = Ext.getCmp("name-textfield").getValue();
 			var description = Ext.getCmp("description-textfield").getValue();
-			this.handler.onSave(name, description);
+			this.feature.attributes = { name:name, description:description };
+			this.container.saveFeature(this.feature);
+			this.resetForm();
 		}
 	},
 
@@ -136,8 +160,20 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
      */
 	handleCancel: function(){
 		this.disable();
-		if (this.handler){
-			this.handler.onCancel(this);
+		if (this.feature && this.container){
+			this.container.discardUpdates(this.feature);
+			this.resetForm();
+		}
+	},
+	
+	/** private: method[handleDelete]
+     *  callback when Delete Button is pressed
+     */
+	handleDelete: function(){
+		this.disable();
+		if (this.feature && this.container){
+			this.container.removeFeature(this.feature);
+			this.resetForm();
 		}
 	},
 	
@@ -147,6 +183,9 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 	disable: function(){
 		this.saveBtn.disable();
 		this.cancelBtn.disable();
+		this.deleteBtn.disable();
+		Ext.getCmp("name-textfield").disable();
+		Ext.getCmp("description-textfield").disable();
 	},
 	
 	/** private: method[enable]
@@ -155,6 +194,14 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 	enable: function(){
 		this.saveBtn.enable();
 		this.cancelBtn.enable();
+		this.deleteBtn.enable();
+		Ext.getCmp("name-textfield").enable();
+		Ext.getCmp("description-textfield").enable();
+	},
+	
+	resetForm: function(){
+		Ext.getCmp("name-textfield").setValue( '' );
+		Ext.getCmp("description-textfield").setValue( '' );
 	}
 	
 

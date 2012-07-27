@@ -305,6 +305,10 @@
     background-image: url(img/silk/shape_handles.png);
 }
 
+.x-btn .gxp-icon-select-feature, .x-tree-node .gxp-icon-select-feature, .gxp-icon-select-feature {
+    background-image: url(img/silk/cursor.png);
+}
+
 /* gxp_measure */
 .x-btn .gxp-icon-measure-length, .x-menu-item .gxp-icon-measure-length, .x-tree-node .gxp-icon-measure-length {
     background-image: url(img/geosilk/ruler.png) !important;

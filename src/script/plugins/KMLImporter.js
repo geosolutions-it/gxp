@@ -25,7 +25,7 @@ Ext.namespace("gxp.plugins");
  *
  *    Allows to upload KML files.
  */
-gxp.plugins.ImportKML = Ext.extend(gxp.plugins.Tool, {
+gxp.plugins.KMLImporter = Ext.extend(gxp.plugins.Tool, {
     
     /** api: ptype = gxp_import_kml */
     ptype: "gxp_import_kml",
@@ -52,12 +52,13 @@ gxp.plugins.ImportKML = Ext.extend(gxp.plugins.Tool, {
     /** private: method[constructor]
      */
     constructor: function(config) {
-        gxp.plugins.ImportKML.superclass.constructor.apply(this, arguments);
+        gxp.plugins.KMLImporter.superclass.constructor.apply(this, arguments);
     },
 
     /** api: method[addActions]
      */
     addActions: function() {
+		var xmlJsonTranslateService = this.target.xmlJsonTranslateService;
 		// open an upload file window
         var actions = [{
             menuText: this.importKMLMenuText,
@@ -67,7 +68,7 @@ gxp.plugins.ImportKML = Ext.extend(gxp.plugins.Tool, {
 	            var self = this;
 				// create an upload file form
 				var form = new gxp.KMLFileUploadPanel( {
-					xmlJsonTranslateService: this.target.xmlJsonTranslateService
+					xmlJsonTranslateService: xmlJsonTranslateService
 				} );
 				// open a modal window
 				var win = new Ext.Window({
@@ -82,12 +83,13 @@ gxp.plugins.ImportKML = Ext.extend(gxp.plugins.Tool, {
 				form.on("uploadcomplete", function addLayer(caller, response){
 						// the code to access the uploaded file
 						var code = response.code;
+						var layername = self.createLayerName( response.filename );
 						// create a new layer from uploaded file
-						var kmlLayer = new OpenLayers.Layer.Vector('KML', {
+						var kmlLayer = new OpenLayers.Layer.Vector(layername, {
 											projection: new OpenLayers.Projection("EPSG:4326"),
 											strategies: [new OpenLayers.Strategy.Fixed()],
 											protocol: new OpenLayers.Protocol.HTTP({
-												url: this.target.xmlJsonTranslateService+'/FileUploader?code='+code,
+												url: xmlJsonTranslateService+'/FileUploader?code='+code,
 												format: new OpenLayers.Format.KML({
 														extractStyles: true, 
 														extractAttributes: true,
@@ -106,9 +108,29 @@ gxp.plugins.ImportKML = Ext.extend(gxp.plugins.Tool, {
             },
             scope: this
         }];
-        return gxp.plugins.ImportKML.superclass.addActions.apply(this, [actions]);
-    }
+        return gxp.plugins.KMLImporter.superclass.addActions.apply(this, [actions]);
+    },
+
+ 	/** private: method[createLayerName]
+     * utility method to create unique names for layers: add a progressive number.
+     */
+	createLayerName: function(name){
+		var map = this.target.mapPanel.map;
+		var i = 2;
+		var trial = name;
+		while(true){
+			var layers = map.getLayersByName( trial );
+			if (layers.length === 0){
+				return trial;
+			} else {
+				trial = name + ' ('+i+')';
+				i++;
+			}
+		}
+			
+		
+	}
 
 });
 
-Ext.preg(gxp.plugins.ImportKML.prototype.ptype, gxp.plugins.ImportKML);
+Ext.preg(gxp.plugins.KMLImporter.prototype.ptype, gxp.plugins.KMLImporter);
