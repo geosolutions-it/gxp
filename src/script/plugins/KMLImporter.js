@@ -97,6 +97,7 @@ gxp.plugins.KMLImporter = Ext.extend(gxp.plugins.Tool, {
 													})
 											})
 										});
+						console.log(kmlLayer);
 						// add the new layer to current map
 						self.target.mapPanel.map.addLayer(kmlLayer);
 						// destroy the window

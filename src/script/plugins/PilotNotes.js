@@ -138,6 +138,12 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 			}
 			self.enable();
 		});
+		this.target.on("featureunselected", function selectFeature(container){
+			self.feature = null;
+			self.container = null;
+			self.disable();
+			self.resetForm();
+		});
 		return panel;
 	},
 	

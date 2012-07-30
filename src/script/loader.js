@@ -83,6 +83,7 @@
         "plugins/LoadingIndicator.js",
         "plugins/Playback.js",
 		"plugins/KMLImporter.js",
+		"plugins/KMLExporter.js",
 		"plugins/PilotNotes.js",
 		"plugins/AddGeometry.js",
 		"plugins/FeatureSelector.js",

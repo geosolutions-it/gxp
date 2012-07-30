@@ -68,8 +68,8 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 				toggleGroup: this.toggleGroup,
 	            allowDepress: true,
 	            tooltip: this.featureSelectorTooltip,
-	            handler: function(button, event) {
-					if(button.pressed) {
+	            toggleHandler: function(button, state) {
+					if(state) {
 						
 						var customLayer = this.getCustomLayer();
 						if (customLayer){
@@ -96,6 +96,7 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 				    } else {
 						this.selectControl.unselectAll();
 						this.selectControl.deactivate();
+						this.target.fireEvent("featureunselected", self);
 					}
 				},
 	            scope: this
@@ -112,11 +113,7 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
       * returns the layer with custom features
      */
    getCustomLayer: function(){
-	   var layers = this.target.mapPanel.map.getLayersByName(this.customLayerDefaultName);
-		if (layers && layers.length > 0){
-			return layers[0];
-		} 
-		return null;
+	   return this.target.drawingLayer;
    },
 
    removeFeature: function(feature){

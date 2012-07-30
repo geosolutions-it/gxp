@@ -294,6 +294,11 @@
     background-image: url(img/silk/application_get.png);
 }
 
+/* gxp_export_kml */
+.x-btn .gxp-icon-export-kml, .x-tree-node .gxp-icon-export-kml, .gxp-icon-export-kml {
+    background-image: url(img/silk/application_put.png);
+}
+
 /* gxp_pilot_notes */
 .x-btn .gxp-icon-add-point, .x-tree-node .gxp-icon-add-point, .gxp-icon-add-point {
     background-image: url(img/silk/flag_red.png);

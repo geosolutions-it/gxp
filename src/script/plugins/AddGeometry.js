@@ -86,7 +86,114 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
      */
     addActions: function() {
 	
-		var self = this;
+	   
+	
+       this.activeIndex = 0;
+       this.button = new Ext.SplitButton({
+            iconCls: "gxp-icon-add-point",
+            tooltip: this.addPointTooltip,
+            enableToggle: true,
+            toggleGroup: this.toggleGroup,
+            allowDepress: true,
+            handler: function(button, event) {
+                if(button.pressed) {
+                    button.menu.items.itemAt(this.activeIndex).setChecked(true);
+                }
+            },
+            scope: this,
+            listeners: {
+                toggle: function(button, pressed) {
+                    // toggleGroup should handle this
+                    if(!pressed) {
+                        button.menu.items.each(function(i) {
+                            i.setChecked(false);
+                        });
+                    }
+                },
+                render: function(button) {
+                    // toggleGroup should handle this
+                    Ext.ButtonToggleMgr.register(button);
+                }
+            },
+            menu: new Ext.menu.Menu({
+                items: [
+                    new Ext.menu.CheckItem(
+                        new GeoExt.Action({
+                            text: this.addPointMenuText,
+                            iconCls: "gxp-icon-add-point",
+                            toggleGroup: this.toggleGroup,
+                            group: this.toggleGroup,
+                            listeners: {
+                                checkchange: function(item, checked) {
+								//	map.addLayer( layer );
+                                    this.activeIndex = 0;
+                                    this.button.toggle(checked);
+                                    if (checked) {
+                                        this.button.setIconClass(item.iconCls);
+                                    }
+                                },
+                                scope: this
+                            },
+                            map: this.target.mapPanel.map,
+                            control: this.createDrawControl(
+                                OpenLayers.Handler.Point, this.addPointMenuTooltip
+                            )
+                        })
+                    ),
+                    new Ext.menu.CheckItem(
+                        new GeoExt.Action({
+                            text: this.addLinesMenuText,
+                            iconCls: "gxp-icon-add-lines",
+                            toggleGroup: this.toggleGroup,
+                            group: this.toggleGroup,
+                            listeners: {
+                                checkchange: function(item, checked) {
+                                    this.activeIndex = 0;
+                                    this.button.toggle(checked);
+                                    if (checked) {
+                                        this.button.setIconClass(item.iconCls);
+										
+                                    }
+                                },
+                                scope: this
+                            },
+                            map: this.target.mapPanel.map,
+                            control: this.createDrawControl(
+                                OpenLayers.Handler.Path, this.addLinesMenuTooltip
+                            )
+                        })
+                    ),
+					new Ext.menu.CheckItem(
+                        new GeoExt.Action({
+                            text: this.addPolygonMenuText,
+                            iconCls: "gxp-icon-add-polygon",
+                            toggleGroup: this.toggleGroup,
+                            group: this.toggleGroup,
+                            listeners: {
+                                checkchange: function(item, checked) {
+                                    this.activeIndex = 0;
+                                    this.button.toggle(checked);
+                                    if (checked) {
+                                        this.button.setIconClass(item.iconCls);
+                                    }
+                                },
+                                scope: this
+                            },
+                            map: this.target.mapPanel.map,
+                            control: this.createDrawControl(
+                                OpenLayers.Handler.Polygon, this.addPolygonMenuTooltip
+                            )
+                        })
+                    )
+                ]
+            })
+        });
+	
+		var actions = [
+			this.button
+		];
+	
+		/*var self = this;
 		var customLayer = this.customLayer;
 		this.addPointBtn = new Ext.Button({
 			    menuText: this.addPointMenuText,
@@ -148,9 +255,17 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 			this.addPointBtn,
 			this.addLinesBtn,
 			this.addPolygonBtn
-		];
+		];*/
+		
+		
         return gxp.plugins.AddGeometry.superclass.addActions.apply(this, [actions]);
     },
+
+	createDrawControl: function(handler, tooltip){
+		var layer = this.target.drawingLayer;
+		var control = new OpenLayers.Control.DrawFeature(layer, handler);
+		return control;
+	},
 
 	activateDrawing: function( controlName ){
 
@@ -159,7 +274,7 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 			// create a custom layer
 			var customLayer = new OpenLayers.Layer.Vector(this.customLayerDefaultName);
 			map.addLayer(customLayer);
-			map.addControl(new OpenLayers.Control.LayerSwitcher());
+			// map.addControl(new OpenLayers.Control.LayerSwitcher());
 			// prepare controls for the custom layers
 			this.drawControls = {
 			                point: new OpenLayers.Control.DrawFeature(
