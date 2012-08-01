@@ -25,6 +25,7 @@
         "widgets/ScaleLimitPanel.js",
         "widgets/TextSymbolizer.js",
         "widgets/Viewer.js",
+		"widgets/KMLFileDownloadPanel.js",
 		"widgets/KMLFileUploadPanel.js",
         "widgets/form/AutoCompleteComboBox.js",
         "widgets/form/ComparisonComboBox.js",

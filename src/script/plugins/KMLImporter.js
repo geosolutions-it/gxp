@@ -58,6 +58,8 @@ gxp.plugins.KMLImporter = Ext.extend(gxp.plugins.Tool, {
     /** api: method[addActions]
      */
     addActions: function() {
+		var map = this.target.mapPanel.map;
+	    var layer = this.target.drawingLayer;
 		var xmlJsonTranslateService = this.target.xmlJsonTranslateService;
 		// open an upload file window
         var actions = [{
@@ -80,10 +82,11 @@ gxp.plugins.KMLImporter = Ext.extend(gxp.plugins.Tool, {
 						   bodyBorder: false,
 					       items: [ form ]
 					});		
-				form.on("uploadcomplete", function addLayer(caller, response){
+				form.on("uploadcomplete", function addKMLToLayer(caller, response){
 						// the code to access the uploaded file
 						var code = response.code;
-						var layername = self.createLayerName( response.filename );
+						/*var layername = self.createLayerName( response.filename );
+						// see this: http://gis.stackexchange.com/questions/16629/how-to-add-kml-data-but-from-variable-not-from-url
 						// create a new layer from uploaded file
 						var kmlLayer = new OpenLayers.Layer.Vector(layername, {
 											projection: new OpenLayers.Projection("EPSG:4326"),
@@ -97,9 +100,40 @@ gxp.plugins.KMLImporter = Ext.extend(gxp.plugins.Tool, {
 													})
 											})
 										});
-						console.log(kmlLayer);
+						kmlLayer.events.register("beforefeaturesadded", kmlLayer, function (features) {
+							console.log('featuresadded');
+							layer.addFeatures( features );
+						});*/
+						
+						var Request = Ext.Ajax.request({
+					       url: xmlJsonTranslateService+'/FileUploader?code='+code,
+					       method: 'GET',
+					       headers:{
+					          'Content-Type' : 'application/xml'
+					       },
+					       scope: this,
+					       success: function(response, opts){
+								var format = new OpenLayers.Format.KML({
+							    	extractStyles: true, 
+									extractAttributes: true,
+									maxDepth: 2,
+									externalProjection: new OpenLayers.Projection("EPSG:4326"),
+									internalProjection: map.getProjection()
+							    });
+							    var features = format.read(response.responseText);
+							    layer.addFeatures( features );
+					       },
+					       failure:  function(response, opts){
+					       		console.error(response);
+					       }
+					    });
+						
+										
 						// add the new layer to current map
-						self.target.mapPanel.map.addLayer(kmlLayer);
+						// self.target.mapPanel.map.addLayer(kmlLayer);
+						// console.log( kmlLayer );
+						
+						
 						// destroy the window
 						win.destroy();
 					});

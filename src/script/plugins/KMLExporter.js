@@ -49,7 +49,6 @@ gxp.plugins.KMLExporter = Ext.extend(gxp.plugins.Tool, {
      */
     downloadWindowTitle: 'Download KML file',
 
-	customLayerDefaultName: "Custom layer",
     
     /** private: method[constructor]
      */
@@ -61,44 +60,54 @@ gxp.plugins.KMLExporter = Ext.extend(gxp.plugins.Tool, {
      */
     addActions: function() {
 	
+		var map = this.target.mapPanel.map;
+		var layer = this.target.drawingLayer;
+		var xmlJsonTranslateService = this.target.xmlJsonTranslateService;
+		
 		// open an upload file window
         var actions = [{
             menuText: this.exportKMLMenuText,
             iconCls: "gxp-icon-export-kml",
             tooltip: this.exportKMLTooltip,
             handler: function() {
-				var layer = this.getCustomLayer();
+				// create kml string from layer features
 				var format = new OpenLayers.Format.KML({
-				        'maxDepth':10,
-				        'extractStyles':true,
-				        // 'internalProjection': map.baseLayer.projection,
-				        'externalProjection': new OpenLayers.Projection("EPSG:4326")
-				    });
-				if ( layer && layer.features ){
-					var kml = format.write(layer.features);
-					// TOFIX show the result in a msg box
-					Ext.Msg.alert('Export KML', Ext.util.Format.htmlEncode( kml ));
-				} else {
-					Ext.Msg.alert('Export KML', 'No custom features in this map');
-				}
-				
+					        'maxDepth':10,
+					        'extractStyles':true,
+					        'internalProjection': map.getProjection(),
+					        'externalProjection': new OpenLayers.Projection("EPSG:4326")
+					    });
+				var kmlContent = format.write(layer.features);
+				// create an upload file form
+				var form = new gxp.KMLFileDownloadPanel( {
+					xmlJsonTranslateService: xmlJsonTranslateService,
+					content: kmlContent
+				} );
+				// open a modal window
+				var win = new Ext.Window({
+					       closable:true,
+						   title: this.downloadWindowTitle,
+						   iconCls: "gxp-icon-import-kml",
+						   border:false,
+						   modal: true, 
+						   bodyBorder: false,
+					       items: [ form ]
+					});
+					
+				form.on("uploadcomplete", function addKMLToLayer(caller, response){
+					var code = response.code;
+					var filename = response.filename;
+					// force browser download
+					location.href = xmlJsonTranslateService+'/FileDownloader?code=' + code +'&filename='+filename;
+				});
+				win.show(); 
 
             },
             scope: this
         }];
         return gxp.plugins.KMLExporter.superclass.addActions.apply(this, [actions]);
-    },
+    }
 
-   	/** private: method[getCustomLayer]
-      * returns the layer with custom features
-     */
-   getCustomLayer: function(){
-	   var layers = this.target.mapPanel.map.getLayersByName(this.customLayerDefaultName);
-		if (layers && layers.length > 0){
-			return layers[0];
-		} 
-		return null;
-   }
 
 });
 
