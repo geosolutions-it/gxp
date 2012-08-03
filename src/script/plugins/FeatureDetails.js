@@ -12,23 +12,23 @@
 
 /** api: (define)
  *  module = gxp.plugins
- *  class = PilotNotes
+ *  class = FeatureDetails
  */
 
 /** api: (extends)
- *  plugins/PilotNotes.js
+ *  plugins/FeatureDetails.js
  */
 Ext.namespace("gxp.plugins");
 
 /** api: constructor
- *  .. class:: PilotNotes(config)
+ *  .. class:: FeatureDetails(config)
  *
- *    Open drawing tools (Pilot Notes).
+ *    Open drawing tools (Feature Details).
  */
-gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
+gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
     
-    /** api: ptype = gxp_pilot_notes */
-    ptype: "gxp_pilot_notes",
+    /** api: ptype = gxp_feature_details */
+    ptype: "gxp_feature_details",
     
     /** api: config[pilotNotesMenuText]
      *  ``String``
@@ -57,7 +57,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
     /** private: method[constructor]
      */
     constructor: function(config) {
-        gxp.plugins.PilotNotes.superclass.constructor.apply(this, arguments);
+        gxp.plugins.FeatureDetails.superclass.constructor.apply(this, arguments);
     },
 
     /** private: method[addOutput]
@@ -66,7 +66,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
     addOutput: function() {
 	    var self = this;
 	    this.saveBtn = new Ext.Button({
-	        id: 'saveBtn',
+	        id: 'saveDetailsBtn',
 			text: 'Save',
 	        tooltip: this.saveButtonTooltip,
 	        iconCls: 'save',
@@ -76,8 +76,8 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 	    });
 	    this.cancelBtn = new Ext.Button(
 			 {
-			    id: 'cancelBtn',
-				text: 'Cancel',
+			    id: 'cancelDetailsBtn',
+				text:'Cancel',
 			    tooltip: this.cancelButtonTooltip,
 			    iconCls: 'cancel',
 			    disabled: true,
@@ -85,14 +85,14 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 				scope: this
 			  }		
 		);
-        var panel = gxp.plugins.PilotNotes.superclass.addOutput.call(this, 
-			// TODO crea un widget
+        var panel = gxp.plugins.FeatureDetails.superclass.addOutput.call(this, 
+			
 			new Ext.FormPanel({
 					frame:false,  border:false, labelAlign:'top', 
 			        // title:self.pilotNotesMenuText,
 					items:[{
                       xtype: 'fieldset',
-                      id: 'field-set',
+                      id: 'details-field-set',
                       border:false,
 			          items:[
 							{   xtype: 'textfield',
@@ -102,7 +102,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 				                allowBlank:true,
 								disabled: true,
 								anchor:'100%',
-								id:'name-textfield'
+								id:'details-name-textfield'
 				            },{  
 								xtype: 'textarea',
 								width: 200,
@@ -111,69 +111,28 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 				                fieldLabel:'Note', 
 				                name:'loginPassword', 
 				                allowBlank:true,
-								anchor:'100%',
-								id: 'description-textfield'
-				            },
-							{
-							    xtype: 'compositefield',
-							    width: 150,
-								anchor:'100%',
-							    items: [
-							        {
-										id:'date-textfield',
-							            xtype     : 'datefield',
-										editable: false,
-										format:"d/m/Y",
-							            fieldLabel: 'Day',
-										width:100,
-										anchor:'100%',
-										disabled:true
-							        },
-							        {
-										id:'time-textfield',
-							            xtype     : 'timefield',
-							            fieldLabel: 'Time',
-										editable: true,
-										format: 'H:i:s',
-										width:80,
-										//anchor:'100%',
-										disabled:true
-							        }
-							    ]
-							},{   xtype: 'textfield',
-						                fieldLabel: 'Vehicle',
-										width: 200,
-						                allowBlank:true,
-										id:'vehicle-textfield',
-										anchor:'100%',
-										disabled:true
-						     }
+								anchor:'100% -47',
+								id: 'details-description-textfield'
+				            }
 					
 					   ]
-					}],
-					/*buttons: [{
-					            text: 'Save'
-					        },{
-					            text: 'Cancel'
-					        }]*/
+					}] ,
 			       buttons:[  this.saveBtn, this.cancelBtn ]
 			    })
 	
 			);
 		
-		this.target.on("notefeatureselected", function selectFeature(container, feature){
+		// register to listen "addgeometry"	event
+		this.target.on("featureselected", function selectFeature(container, feature){
 			self.feature = feature;
 			self.container = container;
 			if ( feature.attributes ){
-				Ext.getCmp("name-textfield").setValue( feature.attributes.name );
-				Ext.getCmp("description-textfield").setValue( feature.attributes.description );
-				Ext.getCmp("date-textfield").setValue( feature.attributes.date );
-				Ext.getCmp("time-textfield").setValue( feature.attributes.time );
-				Ext.getCmp("vehicle-textfield").setValue( feature.attributes.vehicle );
+				Ext.getCmp("details-name-textfield").setValue( feature.attributes.name );
+				Ext.getCmp("details-description-textfield").setValue( feature.attributes.description );
 			}
 			self.enable();
 		});
-		this.target.on("notefeatureunselected", function selectFeature(container){
+		this.target.on("featureunselected", function selectFeature(container){
 			self.feature = null;
 			self.container = null;
 			self.disable();
@@ -188,12 +147,9 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 	handleSave: function(){
 		this.disable();
 		if (this.feature && this.container){
-			var name = Ext.getCmp("name-textfield").getValue();
-			var description = Ext.getCmp("description-textfield").getValue();
-			var vehicle = Ext.getCmp("vehicle-textfield").getValue();
-			var date = Ext.getCmp("date-textfield").getValue();
-			var time = Ext.getCmp("time-textfield").getValue();
-			this.feature.attributes = { name:name, description:description, vehicle:vehicle, date:date, time:time };
+			var name = Ext.getCmp("details-name-textfield").getValue();
+			var description = Ext.getCmp("details-description-textfield").getValue();
+			this.feature.attributes = { name:name, description:description };
 			this.container.saveFeature(this.feature);
 			this.resetForm();
 		}
@@ -216,11 +172,8 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 	disable: function(){
 		this.saveBtn.disable();
 		this.cancelBtn.disable();
-		Ext.getCmp("name-textfield").disable();
-		Ext.getCmp("description-textfield").disable();
-		Ext.getCmp("vehicle-textfield").disable();
-		Ext.getCmp("date-textfield").disable();
-		Ext.getCmp("time-textfield").disable();
+		Ext.getCmp("details-name-textfield").disable();
+		Ext.getCmp("details-description-textfield").disable();
 	},
 	
 	/** private: method[enable]
@@ -229,22 +182,16 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 	enable: function(){
 		this.saveBtn.enable();
 		this.cancelBtn.enable();
-		Ext.getCmp("name-textfield").enable();
-		Ext.getCmp("description-textfield").enable();
-		Ext.getCmp("vehicle-textfield").enable();
-		Ext.getCmp("date-textfield").enable();
-		Ext.getCmp("time-textfield").enable();
+		Ext.getCmp("details-name-textfield").enable();
+		Ext.getCmp("details-description-textfield").enable();
 	},
 	
 	resetForm: function(){
-		Ext.getCmp("name-textfield").setValue( '' );
-		Ext.getCmp("description-textfield").setValue( '' );
-		Ext.getCmp("vehicle-textfield").setValue( '' );
-		Ext.getCmp("date-textfield").setValue( '' );
-		Ext.getCmp("time-textfield").setValue( '' );
+		Ext.getCmp("details-name-textfield").setValue( '' );
+		Ext.getCmp("details-description-textfield").setValue( '' );
 	}
 	
 
 });
 
-Ext.preg(gxp.plugins.PilotNotes.prototype.ptype, gxp.plugins.PilotNotes);
+Ext.preg(gxp.plugins.FeatureDetails.prototype.ptype, gxp.plugins.FeatureDetails);

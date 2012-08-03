@@ -300,18 +300,27 @@
 }
 
 /* gxp_pilot_notes */
-.x-btn .gxp-icon-add-point, .x-tree-node .gxp-icon-add-point, .gxp-icon-add-point {
-    background-image: url(img/silk/flag_red.png);
-}
-.x-btn .gxp-icon-add-lines, .x-tree-node .gxp-icon-add-lines, .gxp-icon-add-lines {
-    background-image: url(img/silk/chart_line.png);
-}
-.x-btn .gxp-icon-add-polygon, .x-tree-node .gxp-icon-add-polygon, .gxp-icon-add-polygon {
-    background-image: url(img/silk/shape_handles.png);
+
+.x-btn .gxp-icon-add-note, .x-menu-item .gxp-icon-add-note, .x-tree-node .gxp-icon-add-note, .x-menu-item-checked .x-menu-group-item .x-menu-item-icon.gxp-icon-add-note, .gxp-icon-add-note {
+    background-image: url(img/silk/note_add.png); !important;
 }
 
-.x-btn .gxp-icon-select-feature, .x-tree-node .gxp-icon-select-feature, .gxp-icon-select-feature {
-    background-image: url(img/silk/cursor.png);
+.x-btn .gxp-icon-add-point, .x-menu-item .gxp-icon-add-point, .x-tree-node .gxp-icon-add-point, .x-menu-item-checked .x-menu-group-item .x-menu-item-icon.gxp-icon-add-point, .gxp-icon-add-point {
+    background-image: url(img/silk/flag_red.png); !important;
+}
+.x-btn .gxp-icon-add-lines, .x-menu-item .gxp-icon-add-lines, .x-tree-node .gxp-icon-add-lines, .x-menu-item-checked .x-menu-group-item .x-menu-item-icon.gxp-icon-add-lines, .gxp-icon-add-lines {
+    background-image: url(img/silk/chart_line.png); !important;
+}
+.x-btn .gxp-icon-add-polygon, .x-menu-item .gxp-icon-add-polygon, .x-tree-node .gxp-icon-add-polygon, .x-menu-item-checked .x-menu-group-item .x-menu-item-icon.gxp-icon-add-polygon, .gxp-icon-add-polygon {
+    background-image: url(img/silk/shape_handles.png); !important;
+}
+
+.x-btn .gxp-icon-select-feature, .x-menu-item .gxp-icon-select-feature, .x-tree-node .gxp-icon-select-feature, .x-menu-item-checked .x-menu-group-item .x-menu-item-icon.gxp-icon-select-feature, .gxp-icon-select-feature {
+    background-image: url(img/silk/cursor.png); !important;
+}
+
+.x-btn .gxp-icon-delete-feature, .x-menu-item .gxp-icon-delete-feature, .x-tree-node .gxp-icon-delete-feature, .x-menu-item-checked .x-menu-group-item .x-menu-item-icon.gxp-icon-delete-feature, .gxp-icon-delete-feature {
+    background-image: url(img/silk/delete.png); !important;
 }
 
 /* gxp_measure */

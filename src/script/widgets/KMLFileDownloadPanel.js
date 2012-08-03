@@ -24,11 +24,11 @@ gxp.KMLFileDownloadPanel = Ext.extend(Ext.FormPanel, {
 	buttonText: "Export",
     filenameLabel: "KML file name",
     fieldEmptyText: "export.kml",
-    uploadText: "Upload",
-    waitMsgText: "Uploading your data...",
+    uploadText: "Export",
+    waitMsgText: "Generating KML...",
     invalidFileExtensionText: "File extension must be one of: ",
     resetText: "Reset",
-    failedUploadingTitle: "Cannot upload file",
+    failedUploadingTitle: "Cannot generate KML file",
     /** end i18n */
 
 

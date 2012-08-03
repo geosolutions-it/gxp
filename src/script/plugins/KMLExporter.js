@@ -54,6 +54,7 @@ gxp.plugins.KMLExporter = Ext.extend(gxp.plugins.Tool, {
      */
     constructor: function(config) {
         gxp.plugins.KMLExporter.superclass.constructor.apply(this, arguments);
+		this.layer = config.layer;
     },
 
     /** api: method[addActions]
@@ -61,9 +62,9 @@ gxp.plugins.KMLExporter = Ext.extend(gxp.plugins.Tool, {
     addActions: function() {
 	
 		var map = this.target.mapPanel.map;
-		var layer = this.target.drawingLayer;
 		var xmlJsonTranslateService = this.target.xmlJsonTranslateService;
 		
+		var self = this;
 		// open an upload file window
         var actions = [{
             menuText: this.exportKMLMenuText,
@@ -74,10 +75,11 @@ gxp.plugins.KMLExporter = Ext.extend(gxp.plugins.Tool, {
 				var format = new OpenLayers.Format.KML({
 					        'maxDepth':10,
 					        'extractStyles':true,
+							'foldersName': 'Gliders Export',
 					        'internalProjection': map.getProjection(),
 					        'externalProjection': new OpenLayers.Projection("EPSG:4326")
 					    });
-				var kmlContent = format.write(layer.features);
+				var kmlContent = format.write(self.layer.features);
 				// create an upload file form
 				var form = new gxp.KMLFileDownloadPanel( {
 					xmlJsonTranslateService: xmlJsonTranslateService,
@@ -99,6 +101,7 @@ gxp.plugins.KMLExporter = Ext.extend(gxp.plugins.Tool, {
 					var filename = response.filename;
 					// force browser download
 					location.href = xmlJsonTranslateService+'/FileDownloader?code=' + code +'&filename='+filename;
+					win.destroy();
 				});
 				win.show(); 
 

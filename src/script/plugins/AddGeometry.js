@@ -78,6 +78,7 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
      */
     constructor: function(config) {
         gxp.plugins.AddGeometry.superclass.constructor.apply(this, arguments);
+		this.layer = config.layer;
     },
 
 
@@ -148,7 +149,7 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
                             group: this.toggleGroup,
                             listeners: {
                                 checkchange: function(item, checked) {
-                                    this.activeIndex = 0;
+                                    this.activeIndex = 1;
                                     this.button.toggle(checked);
                                     if (checked) {
                                         this.button.setIconClass(item.iconCls);
@@ -171,7 +172,7 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
                             group: this.toggleGroup,
                             listeners: {
                                 checkchange: function(item, checked) {
-                                    this.activeIndex = 0;
+                                    this.activeIndex = 2;
                                     this.button.toggle(checked);
                                     if (checked) {
                                         this.button.setIconClass(item.iconCls);
@@ -262,8 +263,7 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
     },
 
 	createDrawControl: function(handler, tooltip){
-		var layer = this.target.drawingLayer;
-		var control = new OpenLayers.Control.DrawFeature(layer, handler);
+		var control = new OpenLayers.Control.DrawFeature(this.layer, handler);
 		return control;
 	},
 

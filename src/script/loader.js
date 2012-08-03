@@ -86,7 +86,9 @@
 		"plugins/KMLImporter.js",
 		"plugins/KMLExporter.js",
 		"plugins/PilotNotes.js",
+		"plugins/FeatureDetails.js",
 		"plugins/AddGeometry.js",
+		"plugins/AddNote.js",
 		"plugins/FeatureSelector.js",
         "locale/es.js",
         "locale/ca.js"

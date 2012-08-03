@@ -53,13 +53,14 @@ gxp.plugins.KMLImporter = Ext.extend(gxp.plugins.Tool, {
      */
     constructor: function(config) {
         gxp.plugins.KMLImporter.superclass.constructor.apply(this, arguments);
+		this.layer = config.layer;
     },
 
     /** api: method[addActions]
      */
     addActions: function() {
+		var self = this;
 		var map = this.target.mapPanel.map;
-	    var layer = this.target.drawingLayer;
 		var xmlJsonTranslateService = this.target.xmlJsonTranslateService;
 		// open an upload file window
         var actions = [{
@@ -105,6 +106,7 @@ gxp.plugins.KMLImporter = Ext.extend(gxp.plugins.Tool, {
 							layer.addFeatures( features );
 						});*/
 						
+						
 						var Request = Ext.Ajax.request({
 					       url: xmlJsonTranslateService+'/FileUploader?code='+code,
 					       method: 'GET',
@@ -121,7 +123,7 @@ gxp.plugins.KMLImporter = Ext.extend(gxp.plugins.Tool, {
 									internalProjection: map.getProjection()
 							    });
 							    var features = format.read(response.responseText);
-							    layer.addFeatures( features );
+							    self.layer.addFeatures( features );
 					       },
 					       failure:  function(response, opts){
 					       		console.error(response);
