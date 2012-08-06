@@ -409,7 +409,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
         config.srs = {};
         config.srs[srs] = true;
         
-        var bbox = config.bbox || this.target.map.maxExtent;
+        var bbox = config.bbox || this.target.map.maxExtent || OpenLayers.Projection.defaults[srs].maxExtent;
         config.bbox = {};
         config.bbox[srs] = {bbox: bbox};
         
@@ -424,6 +424,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
             config.url || this.url, {
                 layers: config.name,
                 transparent: "transparent" in config ? config.transparent : true,
+                cql_filter: config.cql_filter,
                 format: config.format
             }, {
                 projection: srs
@@ -496,8 +497,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
                 STYLES: config.styles,
                 FORMAT: config.format,
                 TRANSPARENT: config.transparent,
-                ELEVATION: config.elevation,
-                TIME: config.time
+                CQL_FILTER: config.cql_filter
             });
             
             var singleTile = false;
@@ -522,8 +522,8 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
                 buffer: ("buffer" in config) ? config.buffer : 1,
                 dimensions: original.data.dimensions,
                 transitionEffect: null, //singleTile ? 'resize' : null,
-                elevation: config.elevation,
-                time: config.time
+                minScale: config.minscale,
+                maxScale: config.maxscale
             });
             
             // data for the new record
@@ -536,8 +536,6 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
                 source: config.source,
                 properties: "gxp_wmslayerpanel",
                 fixed: config.fixed,
-                elevation: config.elevation,
-                time: config.time,
                 selected: "selected" in config ? config.selected : false,
                 restUrl: this.restUrl,
                 layer: layer
@@ -566,7 +564,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
             record.json = config;
 
         } else {
-            if (window.console) {
+            if (window.console && this.store.getCount() > 0) {
                 console.warn("Could not create layer record for layer '" + config.name + "'. Check if the layer is found in the WMS GetCapabilities response.");
             }
         }
@@ -827,7 +825,8 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
                 record.json
             ),
             layer = record.getLayer(),
-            params = layer.params;
+            params = layer.params,
+            options = layer.options;
         var name = config.name,
             raw = this.store.reader.raw;
         if (raw) {
@@ -852,7 +851,11 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
         return Ext.apply(config, {
             format: params.FORMAT,
             styles: params.STYLES,
-            transparent: params.TRANSPARENT
+            transparent: params.TRANSPARENT,
+            cql_filter: params.CQL_FILTER,
+            minscale: options.minScale,
+            maxscale: options.maxScale,
+            infoFormat: record.get("infoFormat")
         });
     },
     
