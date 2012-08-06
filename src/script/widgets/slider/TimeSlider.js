@@ -25,10 +25,11 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
     timeManager : null,
     playbackMode : 'track',
     autoPlay : false,
+    map: null,
     initComponent : function() {
         if(!this.timeManager) {
             this.timeManager = new OpenLayers.Control.TimeManager();
-            app.mapPanel.map.addControl(this.timeManager);
+            this.map.addControl(this.timeManager);
         }
                 
         if(this.timeManager.timeAgents) {
@@ -52,6 +53,7 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
                 keyIncrement : sliderInfo.interval,
                 indexMap : sliderInfo.map,
                 values: sliderInfo.values
+                //values: [sliderInfo.minValue,sliderInfo.maxValue]
             };
             //set an appropiate time format if one was not specified
             if(!this.initialConfig.timeFormat){
@@ -104,6 +106,11 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
         });
 
         gxp.slider.TimeSlider.superclass.initComponent.call(this);
+    },
+
+    beforeDestroy : function(){
+        this.map = null;
+        gxp.slider.TimeSlider.superclass.beforeDestroy.call(this);
     },
 
     /** api: method[setPlaybackMode]

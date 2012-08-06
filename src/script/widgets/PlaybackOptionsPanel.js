@@ -70,7 +70,7 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
                 ref:'form',
                 labelWidth:10,
                 defaultType: 'textfield',
-                items: [{
+                items: [/*{
                     xtype: 'fieldset',
                     title: this.rangeFieldsetText,
                     defaultType: 'datefield',
@@ -154,7 +154,7 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
                         },
                         ref:'../../playbackModeField'
                     }]
-                },
+                },*/
                 {
                     xtype:'checkbox',
                     boxLabel:this.loopText,
