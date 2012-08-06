@@ -62,7 +62,10 @@ gxp.plugins.Playback = Ext.extend(gxp.plugins.Tool, {
      *  output and action(s).
      */
     actionTarget: null,
-
+    dynamicRange:false,
+    //api config
+    //playback mode is one of: "track","cumulative","ranged",??"decay"??
+    playbackMode:"ranged",
     /** api: config[outputTarget]
      *  ``Object`` or ``String`` Where to place the tool's output (widgets.PlaybackPanel)
      *  Use 'map' as the default to display a transparent floating panel over the map.
@@ -85,12 +88,13 @@ gxp.plugins.Playback = Ext.extend(gxp.plugins.Tool, {
             xtype: 'gxp_playbacktoolbar',
             mapPanel:this.target.mapPanel,
             playbackMode:this.playbackMode,
+            dynamicRange:this.dynamicRange,
             looped:this.looped,
             autoPlay:this.autoStart,
             optionsWindow: new Ext.Window({
                 title: gxp.PlaybackOptionsPanel.prototype.titleText,
                 width: 350,
-                height: 425,
+                height: 125,
                 layout: 'fit',
                 items: [{xtype: 'gxp_playbackoptions'}],
                 closeable: true,
@@ -160,7 +164,7 @@ gxp.plugins.Playback = Ext.extend(gxp.plugins.Tool, {
         if(toolbar) {
             var control = toolbar.control;
             config.outputConfig = Ext.apply(toolbar.initialConfig, {
-                dynamicRange : toolbar.dyanamicRange,
+                dynamicRange : toolbar.dynamicRange,
                 playbackMode : toolbar.playbackMode
             });
             if(control) {
@@ -183,7 +187,7 @@ gxp.plugins.Playback = Ext.extend(gxp.plugins.Tool, {
                             layers : []
                         };
                         for(var j = 0; j < agents[i].layers.length; j++) {
-                            var layerRec = app.mapPanel.layers.getByLayer(agents[i].layers[j]);
+                            var layerRec = this.target.mapPanel.layers.getByLayer(agents[i].layers[j]);
                             var layerConfig = this.target.layerSources[layerRec.get('source')].getConfigForRecord(layerRec);
                             agentConfig.layers.push(layerConfig);
                         }
