@@ -323,6 +323,18 @@
     background-image: url(img/silk/delete.png); !important;
 }
 
+.x-btn .gxp-icon-removeall, .x-menu-item .gxp-icon-removeall, .x-tree-node .gxp-icon-removeall, .x-menu-item-checked .x-menu-group-item .x-menu-item-icon.gxp-icon-removeall, .gxp-icon-removeall {
+    background-image: url(img/silk/bin_closed.png); !important;
+}
+
+.x-btn .gxp-icon-rotate-feature, .x-menu-item .gxp-icon-rotate-feature, .x-tree-node .gxp-icon-rotate-feature, .x-menu-item-checked .x-menu-group-item .x-menu-item-icon.gxp-icon-rotate-feature, .gxp-icon-rotate-feature {
+    background-image: url(img/silk/shape_rotate_clockwise.png); !important;
+}
+
+.x-btn .gxp-icon-drag-feature, .x-menu-item .gxp-icon-drag-feature, .x-tree-node .gxp-icon-drag-feature, .x-menu-item-checked .x-menu-group-item .x-menu-item-icon.gxp-icon-drag-feature, .gxp-icon-drag-feature {
+    background-image: url(img/silk/shape_square_go.png); !important;
+}
+
 /* gxp_measure */
 .x-btn .gxp-icon-measure-length, .x-menu-item .gxp-icon-measure-length, .x-tree-node .gxp-icon-measure-length {
     background-image: url(img/geosilk/ruler.png) !important;

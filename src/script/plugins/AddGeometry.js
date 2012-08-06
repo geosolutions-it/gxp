@@ -71,6 +71,8 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
      */
     addPolygonTooltip: "Add Polygon",
 
+    clearAllMenuText: "Clear all",
+
 	customLayerDefaultName: "Custom layer",
   
     
@@ -107,7 +109,10 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
                     // toggleGroup should handle this
                     if(!pressed) {
                         button.menu.items.each(function(i) {
-                            i.setChecked(false);
+							if (i.setChecked){
+								i.setChecked(false);
+							}
+                            
                         });
                     }
                 },
@@ -185,7 +190,14 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
                                 OpenLayers.Handler.Polygon, this.addPolygonMenuTooltip
                             )
                         })
-                    )
+                    ),{
+                            text: this.clearAllMenuText,
+                            iconCls: "gxp-icon-removeall",
+                            toggleGroup: this.toggleGroup,
+                            group: this.toggleGroup,
+                            handler:this.handleRemoveFeatures,
+							scope:this
+                        }      
                 ]
             })
         });
@@ -261,6 +273,33 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 		
         return gxp.plugins.AddGeometry.superclass.addActions.apply(this, [actions]);
     },
+
+    handleRemoveFeatures: function(){
+		if ( !this.layer.features || this.layer.features.length == 0){
+				Ext.Msg.show({
+		               title: 'Clear all',
+		               msg: 'No feature to be removed.',
+		               buttons: Ext.Msg.OK,
+		               icon: Ext.MessageBox.WARNING
+		        });
+		} else {
+			var self = this;
+			Ext.MessageBox.show({
+			           title:'Clear all',
+			           msg: 'You are removing all your changes and this operation cannot be undone. <br />Would you like to remove your changes?',
+			           buttons: Ext.MessageBox.YESNO,
+			           fn: function(btn){
+							if ( btn === 'yes' ){
+								self.layer.removeAllFeatures();
+							}
+							
+					   },
+			           icon: Ext.MessageBox.QUESTION
+			       });
+		}
+		
+		
+	},
 
 	createDrawControl: function(handler, tooltip){
 		var control = new OpenLayers.Control.DrawFeature(this.layer, handler);

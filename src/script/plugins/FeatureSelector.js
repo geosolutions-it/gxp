@@ -38,6 +38,10 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 
     deleteFeatureText: "Delete",
 
+    dragFeatureText: "Drag",
+
+    rotateFeatureText: "Rotate",
+
 
     /** api: config[ featureSelectorTooltip]
      *  ``String``
@@ -116,7 +120,45 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 	                            map: this.target.mapPanel.map,
 	                            control: this.selectorControl
 	                        })
-						),  new Ext.menu.CheckItem(
+						), new Ext.menu.CheckItem(
+			                        new GeoExt.Action({
+			                            text: this.dragFeatureText,
+			                            iconCls: "gxp-icon-drag-feature",
+			                            toggleGroup: this.toggleGroup,
+			                            group: this.toggleGroup,
+			                            listeners: {
+			                                checkchange: function(item, checked) {
+			                                    this.activeIndex = 1;
+			                                    this.button.toggle(checked);
+			                                    if (checked) {
+			                                        this.button.setIconClass(item.iconCls);
+			                                    } 
+			                                },
+			                                scope: this
+			                            },
+			                            map: this.target.mapPanel.map,
+			                            control: this.createModifyControl(OpenLayers.Control.ModifyFeature.DRAG)
+			                        })
+						 ), new Ext.menu.CheckItem(
+						            new GeoExt.Action({
+						                 text: this.rotateFeatureText,
+						                 iconCls: "gxp-icon-rotate-feature",
+						                 toggleGroup: this.toggleGroup,
+						                 group: this.toggleGroup,
+						                 listeners: {
+						                     checkchange: function(item, checked) {
+						                          this.activeIndex = 2;
+						                          this.button.toggle(checked);
+						                          if (checked) {
+						                              this.button.setIconClass(item.iconCls);
+						                          } 
+						                     },
+						                     scope: this
+						                 },
+						                 map: this.target.mapPanel.map,
+						                control: this.createModifyControl(OpenLayers.Control.ModifyFeature.ROTATE)
+						            })
+						),new Ext.menu.CheckItem(
 			                        new GeoExt.Action({
 			                            text: this.deleteFeatureText,
 			                            iconCls: "gxp-icon-delete-feature",
@@ -124,7 +166,7 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 			                            group: this.toggleGroup,
 			                            listeners: {
 			                                checkchange: function(item, checked) {
-			                                    this.activeIndex =1;
+			                                    this.activeIndex = 3;
 			                                    this.button.toggle(checked);
 			                                    if (checked) {
 			                                        this.button.setIconClass(item.iconCls);
@@ -147,6 +189,13 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 		];
         return gxp.plugins.FeatureSelector.superclass.addActions.apply(this, [actions]);
     },
+
+	createModifyControl: function(mode){
+		return new OpenLayers.Control.ModifyFeature(
+			this.layer,
+			{ mode: mode }
+		);
+	},
 
 	createSelectorControl: function(){
 		var self = this;
