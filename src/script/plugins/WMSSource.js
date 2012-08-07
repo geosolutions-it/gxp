@@ -521,9 +521,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
                 opacity: ("opacity" in config) ? config.opacity : 1,
                 buffer: ("buffer" in config) ? config.buffer : 1,
                 dimensions: original.data.dimensions,
-                transitionEffect: null, //singleTile ? 'resize' : null,
-                elevation: config.elevation,
-                time: config.time
+                transitionEffect: singleTile ? 'resize' : null
             });
             
             // data for the new record
@@ -536,8 +534,6 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
                 source: config.source,
                 properties: "gxp_wmslayerpanel",
                 fixed: config.fixed,
-                elevation: config.elevation,
-                time: config.time,
                 selected: "selected" in config ? config.selected : false,
                 restUrl: this.restUrl,
                 layer: layer

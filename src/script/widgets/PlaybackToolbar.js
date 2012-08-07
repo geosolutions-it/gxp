@@ -32,7 +32,7 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
      *  The control to configure the playback panel with.
      */
     control: null,
-    viewer: null,
+    mapPanel: null,
     initialTime:null,
     timeFormat:"l, F d, Y g:i:s A",
     toolbarCls:'x-toolbar gx-overlay-playback', //must use toolbarCls since it is used instead of baseCls in toolbars
@@ -43,7 +43,7 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
     //playback mode is one of: "track","cumulative","ranged",??"decay"??
     playbackMode:"track",
     showIntervals:false,
-    labelButtons:false,
+    labelButtons:true,
     settingsButton:true,
     rateAdjuster:false,
     looped:false,
@@ -80,6 +80,7 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
     resetLabel:'Reset',
     resetTooltip:'Reset to the start',
     loopLabel:'Loop',
+    normalLabel:'Loop',
     loopTooltip:'Continously loop the animation',
     normalTooltip:'Return to normal playback',
     pauseLabel:'Pause',
@@ -150,6 +151,7 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
             this.control.destroy();
             this.control = null;
         }
+        this.mapPanel = null;
         gxp.PlaybackToolbar.superclass.destroy.call(this);
     },
     /** api: method[setTime]
@@ -216,6 +218,7 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
             'slider': {
                 xtype: 'gxp_timeslider',
                 ref: 'slider',
+                map: this.mapPanel.map,
                 timeManager: this.control,
                 playbackMode: this.playbackMode
             },
@@ -335,7 +338,7 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
                     //source & name identify different layers, but title & styles
                     //are required to distinguish the same layer added multiple times with a different
                     //style or presentation
-                    var ndx = app.mapPanel.layers.findBy(function(rec) {
+                    var ndx = this.mapPanel.layers.findBy(function(rec) {
                         return rec.json && 
                         rec.json.source == lyrJson.source &&
                         rec.json.title == lyrJson.title &&
@@ -345,9 +348,9 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
                     });
 
                     if(ndx > -1) {
-                        layers.push(app.mapPanel.layers.getAt(ndx).getLayer());
+                        layers.push(this.mapPanel.layers.getAt(ndx).getLayer());
                     }
-                });
+                }, this);
 
                 config.layers = layers;
                 delete config.type;
@@ -479,19 +482,19 @@ gxp.PlaybackToolbar.guessTimeFormat = function(increment){
         var format = this.timeFormat;
         switch (resolution) {
             case 'Minutes':
-                format = 'l, F d, Y g:i A';
+                format = 'c';
                 break;
             case 'Hours':
-                format = 'l, F d, Y g A';
+                format = 'c';
                 break;
             case 'Days':
-                format = 'l, F d, Y';
+                format = 'c';
                 break;
             case 'Months':
-                format = 'F, Y';
+                format = 'c';
                 break;
             case 'Years':
-                format = 'Y';
+                format = 'c';
                 break;
         }
         return format;
