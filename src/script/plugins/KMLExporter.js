@@ -62,7 +62,7 @@ gxp.plugins.KMLExporter = Ext.extend(gxp.plugins.Tool, {
     addActions: function() {
 	
 		var map = this.target.mapPanel.map;
-		var xmlJsonTranslateService = this.target.xmlJsonTranslateService;
+		var xmlJsonTranslateService = this.target.proxy + this.target.xmlJsonTranslateService;
 		
 		var self = this;
 		// open an upload file window
@@ -89,7 +89,7 @@ gxp.plugins.KMLExporter = Ext.extend(gxp.plugins.Tool, {
 				var win = new Ext.Window({
 					       closable:true,
 						   title: this.downloadWindowTitle,
-						   iconCls: "gxp-icon-import-kml",
+						   iconCls: "gxp-icon-export-kml",
 						   border:false,
 						   modal: true, 
 						   bodyBorder: false,

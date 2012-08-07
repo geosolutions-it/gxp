@@ -89,6 +89,7 @@
 		"plugins/FeatureDetails.js",
 		"plugins/AddGeometry.js",
 		"plugins/AddNote.js",
+		"plugins/EmbeddedLink.js",
 		"plugins/FeatureSelector.js",
         "locale/es.js",
         "locale/ca.js"

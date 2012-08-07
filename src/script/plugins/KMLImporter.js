@@ -61,7 +61,7 @@ gxp.plugins.KMLImporter = Ext.extend(gxp.plugins.Tool, {
     addActions: function() {
 		var self = this;
 		var map = this.target.mapPanel.map;
-		var xmlJsonTranslateService = this.target.xmlJsonTranslateService;
+		var xmlJsonTranslateService = this.target.proxy + this.target.xmlJsonTranslateService;
 		// open an upload file window
         var actions = [{
             menuText: this.importKMLMenuText,
@@ -123,6 +123,7 @@ gxp.plugins.KMLImporter = Ext.extend(gxp.plugins.Tool, {
 									internalProjection: map.getProjection()
 							    });
 							    var features = format.read(response.responseText);
+								console.log(features);
 							    self.layer.addFeatures( features );
 					       },
 					       failure:  function(response, opts){
