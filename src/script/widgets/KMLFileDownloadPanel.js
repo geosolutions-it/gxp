@@ -65,7 +65,8 @@ gxp.KMLFileDownloadPanel = Ext.extend(Ext.FormPanel, {
         },{  
 			xtype:'hidden',
 			name:'content', 
-			value:this.content
+			value:this.content,
+			id:"content"
 		 }
         ];
         
@@ -73,11 +74,13 @@ gxp.KMLFileDownloadPanel = Ext.extend(Ext.FormPanel, {
             text: this.buttonText,
             handler: function() {
 				this.filename = Ext.getCmp("filename").getValue();
+				var content = Ext.getCmp("content").getValue();
 				var map = this.map;
                 var form = this.getForm();
                 if (form.isValid()) {
-                    form.submit({
-                        url: this.xmlJsonTranslateService + '/FileDownloader', 
+					// application/x-www-form-urlencoded
+                   /*form.submit({
+                        url: this.xmlJsonTranslateService + 'FileDownloader', 
                         submitEmptyText: false,
                         waitMsg: this.waitMsgText,
                         waitMsgTarget: true,
@@ -93,7 +96,30 @@ gxp.KMLFileDownloadPanel = Ext.extend(Ext.FormPanel, {
                             });
 						},
 						success:this.handleUploadSuccess
-                    });
+                    }); */
+					var Request = Ext.Ajax.request({
+							       url: this.xmlJsonTranslateService + 'FileDownloader',
+							       method: 'POST',
+							       headers:{
+							          'Content-Type' : 'application/xml'
+							       },
+								   waitMsg: this.waitMsgText,
+		                           waitMsgTarget: true,
+		                           reset: true,
+							       scope: this,
+								   params: 'file='+this.filename+'&content='+content,
+							       success: this.handleUploadSuccess,
+							       failure:  function(response, opts){
+							       		console.error(response);
+										 Ext.Msg.show({
+			                               title: this.failedUploadingTitle,
+			                               msg: response.responseText,
+			                               buttons: Ext.Msg.OK,
+			                               icon: Ext.MessageBox.ERROR
+			                            });
+							       }
+							    });		
+
                 }
             },
             scope: this
@@ -127,8 +153,8 @@ gxp.KMLFileDownloadPanel = Ext.extend(Ext.FormPanel, {
 
     /** private: method[handleUploadSuccess]
      */
-    handleUploadSuccess: function(form, action) {
-        var obj = Ext.decode( action.response.responseText );
+    handleUploadSuccess: function(result) {
+        var obj = Ext.decode( result.responseText );
 		var filename = this.filename;
 		var response = new Object;
 		response.filename = filename;

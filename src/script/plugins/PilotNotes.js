@@ -99,7 +99,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 				                fieldLabel: 'Name',
 								width: 200,
 				                name:'loginUsername', 
-				                allowBlank:true,
+				                allowBlank:false,
 								disabled: true,
 								anchor:'100%',
 								id:'name-textfield'
@@ -110,7 +110,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 								disabled: true,
 				                fieldLabel:'Note', 
 				                name:'loginPassword', 
-				                allowBlank:true,
+				                allowBlank:false,
 								anchor:'100%',
 								id: 'description-textfield'
 				            },
@@ -122,6 +122,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 							        {
 										id:'date-textfield',
 							            xtype     : 'datefield',
+										allowBlank:false,
 										editable: false,
 										format:"d/m/Y",
 							            fieldLabel: 'Day',
@@ -132,6 +133,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 							        {
 										id:'time-textfield',
 							            xtype     : 'timefield',
+										allowBlank:false,
 							            fieldLabel: 'Time',
 										editable: true,
 										format: 'H:i:s',
@@ -142,6 +144,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 							    ]
 							},{   xtype: 'textfield',
 						                fieldLabel: 'Vehicle',
+										allowBlank:false,
 										width: 200,
 						                allowBlank:true,
 										id:'vehicle-textfield',
@@ -186,16 +189,36 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
      *  callback when save button is pressed
      */
 	handleSave: function(){
-		this.disable();
+		
 		if (this.feature && this.container){
-			var name = Ext.getCmp("name-textfield").getValue();
-			var description = Ext.getCmp("description-textfield").getValue();
-			var vehicle = Ext.getCmp("vehicle-textfield").getValue();
-			var date = Ext.getCmp("date-textfield").getValue();
-			var time = Ext.getCmp("time-textfield").getValue();
-			this.feature.attributes = { name:name, description:description, vehicle:vehicle, date:date, time:time };
-			this.container.saveFeature(this.feature);
-			this.resetForm();
+			var nameField = Ext.getCmp("name-textfield");
+			var descField = Ext.getCmp("description-textfield");
+			var vehicleField = Ext.getCmp("vehicle-textfield");
+			var dateField = Ext.getCmp("date-textfield");
+			var timeField = Ext.getCmp("time-textfield");
+			 if ( nameField.isValid(false) &&
+			           descField.isValid(false) &&
+			              vehicleField.isValid(false ) &&
+			                dateField.isValid(false) &&
+			                   timeField.isValid(false )){
+				this.disable();
+				var name = nameField.getValue();
+				var description = descField.getValue();
+				var vehicle = vehicleField.getValue();
+				var date = dateField.getValue();
+				var time = timeField.getValue();
+				this.feature.attributes = { name:name, description:description, vehicle:vehicle, date:date, time:time };
+				this.container.saveFeature(this.feature);
+				this.resetForm();
+			
+			} else {
+				  Ext.Msg.show({
+                   title: 'Cannot save this attributes',
+                   msg: 'Fields cannot be blank',
+                   buttons: Ext.Msg.OK,
+                   icon: Ext.MessageBox.ERROR
+                });
+			}
 		}
 	},
 
