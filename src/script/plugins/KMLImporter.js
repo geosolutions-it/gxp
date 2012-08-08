@@ -123,7 +123,7 @@ gxp.plugins.KMLImporter = Ext.extend(gxp.plugins.Tool, {
 									internalProjection: map.getProjection()
 							    });
 							    var features = format.read(response.responseText);
-								console.log(features);
+								// console.log(features);
 							    self.layer.addFeatures( features );
 					       },
 					       failure:  function(response, opts){

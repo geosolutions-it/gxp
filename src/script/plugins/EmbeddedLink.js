@@ -75,7 +75,7 @@ gxp.plugins.EmbeddedLink = Ext.extend(gxp.plugins.Tool, {
 						     msgTarget: 'side'
 						},
 						items: [{
-				            xtype: "textfield",
+				            xtype: "textarea",
 				            id: "embeddedLink",
 				            value: this.createUrl() ,
 							disabled:true,
@@ -108,11 +108,24 @@ gxp.plugins.EmbeddedLink = Ext.extend(gxp.plugins.Tool, {
 	},
 
   	createUrl: function(){
-		 
+		
+		 T = this.target;
+	
+		 var layers = this.target.mapPanel.map.layers;
+		 var vehicleUrl = '';
+		 for (var i=0; i<layers.length; i++){
+			var layer = layers[i];
+			if ( layer.visibility && layer.params && layer.params.CQL_FILTER ){
+				vehicleUrl += encodeURIComponent(layer.params.CQL_FILTER) + ',';
+			}
+		 }
+		
 		 var currentUrl = window.location.href + '?';
 		 currentUrl += 'bounds=' + this.target.mapPanel.map.getExtent().toString();
-		 currentUrl += 'time=';
-		 currentUrl += 'vehicles='
+		 currentUrl += '&center=' + this.target.mapPanel.map.getCenter().lon +',' + this.target.mapPanel.map.getCenter().lat;
+		 currentUrl += '&zoom=' + this.target.mapPanel.map.getZoom();
+		 currentUrl += '&time=';
+		 currentUrl += '&vehicles=' + vehicleUrl;
 		
 		return currentUrl;
 	}
