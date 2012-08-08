@@ -62,7 +62,7 @@ gxp.plugins.KMLExporter = Ext.extend(gxp.plugins.Tool, {
     addActions: function() {
 	
 		var map = this.target.mapPanel.map;
-		var xmlJsonTranslateService = this.target.proxy + this.target.xmlJsonTranslateService;
+		var xmlJsonTranslateService = this.target.proxy + encodeURIComponent(this.target.xmlJsonTranslateService);
 		
 		var self = this;
 		// open an upload file window
@@ -96,11 +96,14 @@ gxp.plugins.KMLExporter = Ext.extend(gxp.plugins.Tool, {
 					       items: [ form ]
 					});
 					
+					
+				// application/x-www-form-urlencoded
+					
 				form.on("uploadcomplete", function addKMLToLayer(caller, response){
 					var code = response.code;
 					var filename = response.filename;
 					// force browser download
-					location.href = xmlJsonTranslateService+'/FileDownloader?code=' + code +'&filename='+filename;
+					location.href = xmlJsonTranslateService+'FileDownloader' + encodeURIComponent('?code=' + code +'&filename='+filename);
 					win.destroy();
 				});
 				win.show(); 
