@@ -51,7 +51,7 @@ gxp.plugins.Measure = Ext.extend(gxp.plugins.Tool, {
      *  ``String``
      *  Text for measure bearing menu item (i18n).
      */
-	bearingMenuText: "Mesure Bearing",
+	bearingMenuText: "Bearing",
 	
     /** api: config[lengthTooltip]
      *  ``String``
