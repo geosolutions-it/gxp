@@ -404,7 +404,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
      */
     createLazyLayerRecord: function(config) {
         config = Ext.apply({}, config);
-        
+
         var srs = config.srs || this.target.map.projection;
         config.srs = {};
         config.srs[srs] = true;
@@ -512,7 +512,8 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
 
             layer.setName(config.title || layer.name);
             layer.addOptions({
-                attribution: layer.attribution,
+                // attribution: layer.attribution,
+				attribution: ("attribution" in config) ? config.attribution : null,
                 maxExtent: maxExtent,
                 restrictedExtent: maxExtent,
                 singleTile: singleTile,

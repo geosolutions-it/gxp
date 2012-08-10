@@ -40,6 +40,7 @@
         "widgets/GoogleStreetViewPanel.js",
         "widgets/tips/SliderTip.js",
         "widgets/PlaybackToolbar.js",
+		"widgets/Watermark.js",
         "plugins/LayerSource.js",
         "plugins/BingSource.js",
         "plugins/WMSSource.js",
