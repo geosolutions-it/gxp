@@ -113,7 +113,23 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 				                allowBlank:false,
 								anchor:'100%',
 								id: 'description-textfield'
-				            },
+				            },{   xtype: 'textfield',
+							          fieldLabel: 'Latitude',
+									  width: 200,
+							          allowBlank:true,
+									  disabled: true,
+									  hidden:true,
+									  anchor:'100%',
+									  id:'pn-latitude-textfield'
+							},{   xtype: 'textfield',
+									  fieldLabel: 'Longitude',
+									  width: 200,
+									  allowBlank:true,
+									  disabled: true,
+									  hidden:true,
+									  anchor:'100%',
+									  id:'pn-longitude-textfield'
+								},
 							{
 							    xtype: 'compositefield',
 							    width: 150,
@@ -174,6 +190,15 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 				Ext.getCmp("time-textfield").setValue( feature.attributes.time );
 				Ext.getCmp("vehicle-textfield").setValue( feature.attributes.vehicle );
 			}
+			
+			if ( feature.geometry instanceof OpenLayers.Geometry.Point ){
+				Ext.getCmp("pn-latitude-textfield").setVisible(true);
+				Ext.getCmp("pn-longitude-textfield").setVisible(true);
+				Ext.getCmp("pn-latitude-textfield").setValue(  feature.geometry.x );
+				Ext.getCmp("pn-longitude-textfield").setValue( feature.geometry.y );
+			}
+			
+			
 			self.enable();
 		});
 		this.target.on("notefeatureunselected", function selectFeature(container){
@@ -208,6 +233,12 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 				var date = dateField.getValue();
 				var time = timeField.getValue();
 				this.feature.attributes = { name:name, description:description, vehicle:vehicle, date:date, time:time };
+				
+					if ( this.feature.geometry instanceof OpenLayers.Geometry.Point ){
+						this.feature.geometry.x = Ext.getCmp("pn-latitude-textfield").getValue();
+						this.feature.geometry.y = Ext.getCmp("pn-longitude-textfield").getValue();
+					}				
+				
 				this.container.saveFeature(this.feature);
 				this.resetForm();
 			
@@ -244,6 +275,8 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		Ext.getCmp("vehicle-textfield").disable();
 		Ext.getCmp("date-textfield").disable();
 		Ext.getCmp("time-textfield").disable();
+		Ext.getCmp("pn-latitude-textfield").setVisible(false);
+		Ext.getCmp("pn-longitude-textfield").setVisible(false);
 	},
 	
 	/** private: method[enable]
@@ -257,6 +290,8 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		Ext.getCmp("vehicle-textfield").enable();
 		Ext.getCmp("date-textfield").enable();
 		Ext.getCmp("time-textfield").enable();
+		Ext.getCmp("pn-latitude-textfield").enable();
+		Ext.getCmp("pn-longitude-textfield").enable();
 	},
 	
 	resetForm: function(){
@@ -265,6 +300,8 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		Ext.getCmp("vehicle-textfield").setValue( '' );
 		Ext.getCmp("date-textfield").setValue( '' );
 		Ext.getCmp("time-textfield").setValue( '' );
+		Ext.getCmp("pn-latitude-textfield").setValue( '' );
+		Ext.getCmp("pn-longitude-textfield").setValue( '' );
 	}
 	
 
