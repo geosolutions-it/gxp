@@ -152,9 +152,24 @@ gxp.plugins.Measure = Ext.extend(gxp.plugins.Tool, {
             var dim = metricData.order == 2 ?
             '<sup>2</sup>' :
             '';
-
+			switch(metricUnit){
+				case "m"  : 
+					nmi = metric.toFixed(2) * 0.000539956803;
+					break;
+				case "km"  :
+					nmi = metric.toFixed(2) * 1000 * 0.000539956803;	
+					break;
+				default :
+					nmi = "unknown";
+			}
+			if(nmi){
+			
+				nmi = Math.round(nmi*100)/100;
+			}
+			var lenghtmeasure = metricData.geometry.CLASS_NAME.indexOf("LineString") > -1;
             return metric.toFixed(2) + " " + metricUnit + dim + "<br>" +
-                english.toFixed(2) + " " + englishUnit + dim;
+                english.toFixed(2) + " " + englishUnit + dim + "<br>" +
+				(lenghtmeasure?nmi + " " + "nmi":"") ;
         };
 
         var measureToolTip;
@@ -228,7 +243,7 @@ gxp.plugins.Measure = Ext.extend(gxp.plugins.Tool, {
                     symbolizer: {
                         "Point": {
                             pointRadius: 4,
-                            graphicName: "triangle",
+                            //graphicName: "triangle",
 							graphicName: "square",
 							//rotation: 45, //todo
                             fillColor: "white",
@@ -328,7 +343,7 @@ gxp.plugins.Measure = Ext.extend(gxp.plugins.Tool, {
             var englishData = metricData.geometry.CLASS_NAME.indexOf("LineString") > -1 ?
             measureControl.getBestLength(metricData.geometry) :
             measureControl.getBestArea(metricData.geometry);
-
+			
             var english = englishData[0];
             var englishUnit = englishData[1];
 			
@@ -340,9 +355,26 @@ gxp.plugins.Measure = Ext.extend(gxp.plugins.Tool, {
 			var pj =map.getProjectionObject();
 			
 			var azimuth =calculateAzimuth(p0,p1,pj);
+			var nmi;
+
+			switch(metricUnit){
+				case "m"  : 
+					nmi = metric.toFixed(2) * 0.000539956803;
+					break;
+				case "km"  :
+					nmi = metric.toFixed(2) * 1000 * 0.000539956803;	
+					break;
+				default :
+					nmi = "unknown";
+			}
+			if(nmi){
+			
+				nmi = Math.round(nmi*100)/100;
+			}
             return "<table> <tr>"+
-				"<th rowspan='2'>Distance:</td><td> " + metric.toFixed(2) + " " + metricUnit + dim + "</td></tr>" +
+				"<th rowspan='3'>Distance:</td><td> " + metric.toFixed(2) + " " + metricUnit + dim + "</td></tr>" +
                 "<tr><td>" +english.toFixed(2) + " " + englishUnit + dim  + "</td></tr>" +
+				"<tr><td>" + nmi + " " + "nmi"  + "</td></tr>" +
 				"<tr><td>Azimuth:</td><td> " + deg_to_dms(azimuth) + "</td></tr>" +
 				"<tr><td>Bearing:</td><td> " + bearing(azimuth) + "</td></tr></table>";
         };
