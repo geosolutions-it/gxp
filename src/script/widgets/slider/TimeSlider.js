@@ -207,9 +207,15 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
                 interval;
             
             if(this.timeManager.units) {
-                var step = parseFloat(then['getUTC' + this.timeManager.units]()) + parseFloat(this.timeManager.step);
-                var stepTime = then['setUTC' + this.timeManager.units](step);
-                interval = stepTime - min;
+                if (this.timeManager.units == "Days"){
+                    var step = parseFloat(then['setUTCDate']()) + parseFloat(this.timeManager.step);
+                    var stepTime = then['setUTCDate'](step);
+                    interval = stepTime - min;
+                }else{
+                    var step = parseFloat(then['getUTC' + this.timeManager.units]()) + parseFloat(this.timeManager.step);
+                    var stepTime = then['setUTC' + this.timeManager.units](step);
+                    interval = stepTime - min;                    
+                }
             }
             else {
                 interval = false;
