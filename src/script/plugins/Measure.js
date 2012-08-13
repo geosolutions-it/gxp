@@ -321,14 +321,14 @@ gxp.plugins.Measure = Ext.extend(gxp.plugins.Tool, {
 			
 			var bearing ="";
 			if (0<=azimuth && azimuth<90){
-				bearing = "N "+deg_to_dms( azimuth ) +"&ordm; E";
+				bearing = "N "+deg_to_dms( azimuth ) +" E";
 			
 			}else if(90<azimuth && azimuth<=180){
-				bearing = "S "+ deg_to_dms(180.0 -azimuth) +"&ordm; E";
+				bearing = "S "+ deg_to_dms(180.0 -azimuth) +" E";
 			}else if(180<azimuth && azimuth<270){
-				bearing = "S "+ deg_to_dms(azimuth - 180.0 ) +"&ordm; W";
+				bearing = "S "+ deg_to_dms(azimuth - 180.0 ) +" W";
 			}else if(270<=azimuth && azimuth<=360){
-				bearing = "N "+ deg_to_dms(360 - azimuth ) +"&ordm; W";
+				bearing = "N "+ deg_to_dms(360 - azimuth ) +" W";
 			}
 			return bearing;
 		
