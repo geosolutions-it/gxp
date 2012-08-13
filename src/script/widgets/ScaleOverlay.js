@@ -99,6 +99,7 @@ gxp.ScaleOverlay = Ext.extend(Ext.Panel, {
         scaleLinePanel.on('render', function(){
             var scaleLine = new OpenLayers.Control.ScaleLine({
                 geodesic: true,
+				topOutUnits:'nmi',
                 div: scaleLinePanel.getEl().dom
             });
 
