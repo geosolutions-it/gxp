@@ -113,17 +113,23 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 				                allowBlank:true,
 								anchor:'100% ',
 								id: 'details-description-textfield'
-				            },{   xtype: 'textfield',
+				            },{   xtype: 'numberfield',
 						          fieldLabel: 'Latitude',
 								  width: 200,
+								  decimalPrecision: 20,
+								  maxValue:90,
+								  minValue:-90,
 						          allowBlank:true,
 								  disabled: true,
 								  hidden:true,
 								  anchor:'100%',
 								  id:'latitude-textfield'
-						    },{   xtype: 'textfield',
+						    },{   xtype: 'numberfield',
 								  fieldLabel: 'Longitude',
 								  width: 200,
+								  decimalPrecision: 20,
+								  maxValue:180,
+								  minValue:-180,
 								  allowBlank:true,
 								  disabled: true,
 								  hidden:true,
@@ -149,10 +155,11 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 			}
 			
 			if ( feature.geometry instanceof OpenLayers.Geometry.Point ){
+				var point = self.feature.geometry.clone().transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
 				Ext.getCmp("latitude-textfield").setVisible(true);
 				Ext.getCmp("longitude-textfield").setVisible(true);
-				Ext.getCmp("latitude-textfield").setValue(  feature.geometry.x );
-				Ext.getCmp("longitude-textfield").setValue( feature.geometry.y );
+				Ext.getCmp("latitude-textfield").setValue(  point.x );
+				Ext.getCmp("longitude-textfield").setValue( point.y );
 			}
 			
 			self.enable();
@@ -170,17 +177,41 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
      *  callback when save button is pressed
      */
 	handleSave: function(){
-		this.disable();
+		
 		if (this.feature && this.container){
 			var name = Ext.getCmp("details-name-textfield").getValue();
 			var description = Ext.getCmp("details-description-textfield").getValue();
 			this.feature.attributes = { name:name, description:description };
 			if ( this.feature.geometry instanceof OpenLayers.Geometry.Point ){
-				this.feature.geometry.x = Ext.getCmp("latitude-textfield").getValue();
-				this.feature.geometry.y = Ext.getCmp("longitude-textfield").getValue();
+				var latField = Ext.getCmp("latitude-textfield");
+				var lngField = Ext.getCmp("longitude-textfield");
+				
+				
+				if ( latField.isValid(false) && lngField.isValid(false) ){
+					var point = new OpenLayers.Geometry.Point(latField.getValue(), lngField.getValue());
+					point = point.transform( new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+					this.feature.geometry.x = point.x;
+					this.feature.geometry.y = point.y;	
+					this.disable();
+					this.container.saveFeature(this.feature);
+					this.resetForm();
+				} else {
+					Ext.Msg.show({
+		                   title: 'Cannot save this geometryu',
+		                   msg: 'Invalid coordinates.',
+		                   buttons: Ext.Msg.OK,
+		                   icon: Ext.MessageBox.ERROR
+		                });
+				}
+					
+				
+				
+			} else {
+				this.disable();
+				this.container.saveFeature(this.feature);
+				this.resetForm();
 			}
-			this.container.saveFeature(this.feature);
-			this.resetForm();
+			
 		}
 	},
 
@@ -203,6 +234,8 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 		this.cancelBtn.disable();
 		Ext.getCmp("details-name-textfield").disable();
 		Ext.getCmp("details-description-textfield").disable();
+		Ext.getCmp("latitude-textfield").disable();
+		Ext.getCmp("longitude-textfield").disable();
 		Ext.getCmp("latitude-textfield").setVisible(false);
 		Ext.getCmp("longitude-textfield").setVisible(false);
 	},
@@ -225,6 +258,7 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 		Ext.getCmp("latitude-textfield").setValue( '' );
 		Ext.getCmp("longitude-textfield").setValue( '' );
 	}
+	
 	
 
 });
