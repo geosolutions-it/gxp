@@ -8,7 +8,7 @@
 
 /** api: (define)
  *  module = gxp
- *  class = Watermark
+ *  class = MousePosition
  *  base_link = `Ext.Panel <http://dev.sencha.com/deploy/dev/docs/?class=Ext.Panel>`_
  */
 Ext.namespace("gxp");
@@ -18,28 +18,18 @@ Ext.namespace("gxp");
  *   
  *      create a panel to display a watermark on the map
  */
-gxp.Watermark = Ext.extend(Ext.Panel, {
+gxp.MousePosition = Ext.extend(Ext.Panel, {
 	/** api: config[map]
      *  ``OpenLayers.Map`` or :class:`GeoExt.MapPanel`
      *  The map where to show the watermark.
      */
     map: null,
-    /** api: config[map]
-     *  ``String`` 
-     *  html style for the watermark (to control position).
-     */
-    style: null,
-    /** api: config[map]
-     *  ``String`` 
-     *  attribution displayed by the watermark, it could be also an image.
-     */
-    attribution: null,
 
     /** private: method[initComponent]
      *  Initialize the component.
      */
     initComponent: function() {
-        gxp.Watermark.superclass.initComponent.call(this);
+        gxp.MousePosition.superclass.initComponent.call(this);
         if(this.map) {
             if(this.map instanceof GeoExt.MapPanel) {
                 this.map = this.map.map;
@@ -74,26 +64,16 @@ gxp.Watermark = Ext.extend(Ext.Panel, {
 
     /** private: method[addWatermark]
      *  
-     *  Create the watermark and add it to the map.
+     *  Create the map position control and add it to the map.
      */
-    addWatermark: function() {
+    addMousePosition: function() {
 		var self = this;
-        var watermarkPanel = new Ext.BoxComponent({});
-        watermarkPanel.on('render', function(){
-	
-			var poweredByControl = new OpenLayers.Control();
-			OpenLayers.Util.extend(poweredByControl, {
-			        draw: function () {
-			          OpenLayers.Control.prototype.draw.apply(this, arguments);
-			          this.div.innerHTML = '<img src=\"' + self.url + '\" width=\"60\" height=\"60\" class=\"olPoweredBy\" id=\"olPoweredBy\" title=\"Powered by NURC\" style=\"'+ self.position +'\"/>';
-			          return this.div;
-			        }
-
-			    });
-			this.map.addControl(poweredByControl);	
+        var mousePanel = new Ext.BoxComponent({});
+        mousePanel.on('render', function(){
+			this.map.addControl(new OpenLayers.Control.MousePosition());	
 	
         }, this);
-        this.add(watermarkPanel);
+        this.add(mousePanel);
     },
 
     /** private: method[bind]
@@ -101,7 +81,7 @@ gxp.Watermark = Ext.extend(Ext.Panel, {
      */
     bind: function(map) {
         this.map = map;
-        this.addWatermark();
+        this.addMousePosition();
     },
     
     /** private: method[unbind]
@@ -113,4 +93,4 @@ gxp.Watermark = Ext.extend(Ext.Panel, {
 });
 
 /** api: xtype = gxp_watermark */
-Ext.reg('gxp_watermark', gxp.Watermark);
+Ext.reg('gxp_mouse_position', gxp.MousePosition);

@@ -41,6 +41,7 @@
         "widgets/tips/SliderTip.js",
         "widgets/PlaybackToolbar.js",
 		"widgets/Watermark.js",
+		"widgets/MousePosition.js",
         "plugins/LayerSource.js",
         "plugins/BingSource.js",
         "plugins/WMSSource.js",
