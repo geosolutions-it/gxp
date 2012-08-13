@@ -70,7 +70,7 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
                 ref:'form',
                 labelWidth:10,
                 defaultType: 'textfield',
-                items: [/*{
+                items: [{
                     xtype: 'fieldset',
                     title: this.rangeFieldsetText,
                     defaultType: 'datefield',
@@ -154,7 +154,7 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
                         },
                         ref:'../../playbackModeField'
                     }]
-                },*/
+                },
                 {
                     xtype:'checkbox',
                     boxLabel:this.loopText,
@@ -228,15 +228,15 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
             case 'cumulative':
                 this.playbackToolbar.setPlaybackMode('cumulative');
                 break;
-            case 'ranged':
+            case "range":
                 this.disableListMode(true);
-                this.playbackToolbar.setPlaybackMode('ranged');
+                this.playbackToolbar.setPlaybackMode("range");
                 break;
             default:
                 this.playbackToolbar.setPlaybackMode('track');
                 break;
         }
-        if(mode != 'ranged'){
+        if(mode != "range"){
             this.disableListMode(false);
         }
     },
