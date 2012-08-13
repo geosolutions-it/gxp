@@ -69,7 +69,7 @@ gxp.form.PlaybackModeComboBox = Ext.extend(Ext.form.ComboBox, {
         });
         //initialize the default modes
         if(!config.modes && !this.modes.length){
-            this.modes.push([false, this.normalOptText], ['cumulative', this.cumulativeOptText], ['ranged', this.rangedOptText]);
+            this.modes.push([false, this.normalOptText], ['cumulative', this.cumulativeOptText], ['range', this.rangedOptText]);
         }
         gxp.form.PlaybackModeComboBox.superclass.constructor.call(this,config);
   },
@@ -78,8 +78,8 @@ gxp.form.PlaybackModeComboBox = Ext.extend(Ext.form.ComboBox, {
         var defaultMode = this.defaultMode;
         
         var defConfig = {
-            displayField : "field2",
-            valueField : "field1",
+            displayField : 1,
+            valueField : 0,
             store : modes,
             value : defaultMode,
             listeners : {
@@ -100,7 +100,7 @@ gxp.form.PlaybackModeComboBox = Ext.extend(Ext.form.ComboBox, {
         var mode = record.get('field1');
         Ext.each(this.timeAgents,function(agent){
             agent.rangeMode = mode;            
-            if(mode == 'range') {
+            if(mode == "range") {
                 if(!agent.rangeInterval) {
                     agent.rangeInterval = 1;
                 }
@@ -117,7 +117,6 @@ gxp.form.PlaybackModeComboBox = Ext.extend(Ext.form.ComboBox, {
      * return: ``Array``(``OpenLayers.TimeAgent``) 
      */
     guessTimeAgents: function(){
-        
     }
     
 });

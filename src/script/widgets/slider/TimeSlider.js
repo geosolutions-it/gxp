@@ -115,7 +115,7 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
 
     /** api: method[setPlaybackMode]
      * :arg mode: {String} one of 'track',
-     * 'cumulative', or 'ranged'
+     * 'cumulative', or "range"
      *  
      *  Set the playback mode of the control.
      */
@@ -161,11 +161,11 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
             if(ctl.range[0].getTime() != oldvals.start || ctl.range[1].getTime() != oldvals.end ||
                  ctl.units != oldvals.units || ctl.step != oldvals.step) {
                 this.reconfigureSlider(this.buildSliderValues());
-                /*
-                 if (this.playbackMode == 'ranged') {
-                 this.timeManager.incrementTime(this.control.rangeInterval, this.control.units);
+                
+                 if (this.playbackMode == "range") {
+                    this.timeManager.incrementTime(this.control.rangeInterval, this.control.units);
                  }
-                 */
+                 
                 this.setThumbStyles();
                 this.fireEvent('rangemodified', this, ctl.range);
             }
@@ -326,12 +326,12 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
                 }
                 break;
             case 'min':
-                if (value >= timeManager.intialRange[0].getTime()) {
+                if (value >= timeManager.initialRange[0].getTime()) {
                     timeManager.setStart(new Date(value));
                 }
                 break;
             case 'max':
-                if (value <= timeManager.intialRange[1].getTime()) {
+                if (value <= timeManager.initialRange[1].getTime()) {
                     timeManager.setEnd(new Date(value));
                 }
                 break;
@@ -354,7 +354,7 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
                         break;
                 }
                 for (var i = 0, len = timeManager.timeAgents.length; i < len; i++) {
-                    if(timeManager.timeAgents[i].rangeMode == 'range'){
+                    if(timeManager.timeAgents[i].rangeMode == 'range'){    
                         timeManager.timeAgents[i].rangeInterval = (slider.thumbs[0].value - value) / adj;    
                     }
                 }
