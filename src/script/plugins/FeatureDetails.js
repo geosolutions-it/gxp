@@ -119,7 +119,7 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 								  decimalPrecision: 20,
 								  maxValue:90,
 								  minValue:-90,
-						          allowBlank:true,
+						          allowBlank:false,
 								  disabled: true,
 								  hidden:true,
 								  anchor:'100%',
@@ -130,7 +130,7 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 								  decimalPrecision: 20,
 								  maxValue:180,
 								  minValue:-180,
-								  allowBlank:true,
+								  allowBlank:false,
 								  disabled: true,
 								  hidden:true,
 								  anchor:'100%',
@@ -197,7 +197,7 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 					this.resetForm();
 				} else {
 					Ext.Msg.show({
-		                   title: 'Cannot save this geometryu',
+		                   title: 'Cannot save this geometry',
 		                   msg: 'Invalid coordinates.',
 		                   buttons: Ext.Msg.OK,
 		                   icon: Ext.MessageBox.ERROR

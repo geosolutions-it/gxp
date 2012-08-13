@@ -36,6 +36,9 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
      */
     addPointMenuText: "Add Point",
 
+    addPointFromCoordsMenuText: "Add Point from coordinates",
+    addPointFromCoordsTooltip: "Add Point from coordinates",
+
 
     /** api: config[ addPointTooltip]
      *  ``String``
@@ -191,11 +194,18 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
                             )
                         })
                     ),{
+						text: this.addPointFromCoordsMenuText,
+                        iconCls: "gxp-icon-add-point",
+                        toggleGroup: this.toggleGroup,
+                        group: this.toggleGroup,
+                        handler:this.handleAddPointFromCoords,
+						scope:this	
+					},{
                             text: this.clearAllMenuText,
                             iconCls: "gxp-icon-removeall",
                             toggleGroup: this.toggleGroup,
                             group: this.toggleGroup,
-                            handler:this.handleRemoveFeatures,
+							handler:this.handleRemoveFeatures,
 							scope:this
                         }      
                 ]
@@ -205,70 +215,6 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 		var actions = [
 			this.button
 		];
-	
-		/*var self = this;
-		var customLayer = this.customLayer;
-		this.addPointBtn = new Ext.Button({
-			    menuText: this.addPointMenuText,
-	            iconCls: "gxp-icon-add-point",
-				enableToggle: true,
-				toggleGroup: this.toggleGroup,
-	            allowDepress: true,
-	            tooltip: this.addPointTooltip,
-	            toggleHandler: function(button, state) {
-					if(state) {
-					   	self.activateDrawing('point');
-				    } else {
-						self.drawControls['point'].deactivate();
-					}
-				},
-	            scope: this
-		});
-		
-		
-		this.addLinesBtn = new Ext.Button({
-			    menuText: this.addLinesMenuText,
-	            iconCls: "gxp-icon-add-lines",
-				enableToggle: true,
-				toggleGroup: this.toggleGroup,
-	            allowDepress: true,
-	            tooltip: this.addLinesTooltip,
-	            toggleHandler: function(button, state) {
-					if(state) {
-						self.activateDrawing('line');
-				    } else {
-						self.drawControls['line'].deactivate();
-					}
-
-	            },
-	            scope: this
-		});
-		
-
-		this.addPolygonBtn = new Ext.Button({
-			    menuText: this.addPolygonMenuText,
-	            iconCls: "gxp-icon-add-polygon",
-				enableToggle: true,
-				toggleGroup: this.toggleGroup,
-	            allowDepress: true,
-	            tooltip: this.addPolygonTooltip,
-	            toggleHandler: function(button, state) {
-					if(state) {		
-						// activate polygon drawing feature
-						self.activateDrawing('polygon');
-				    } else {
-						self.drawControls['polygon'].deactivate();
-					}
-
-	            },
-	            scope: this
-		});
-		
-        var actions = [
-			this.addPointBtn,
-			this.addLinesBtn,
-			this.addPolygonBtn
-		];*/
 		
 		
         return gxp.plugins.AddGeometry.superclass.addActions.apply(this, [actions]);
@@ -299,6 +245,124 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 		}
 		
 		
+	},
+	
+	handleAddPointFromCoords: function(){
+		var map = this.target.mapPanel.map;
+		var layer = this.layer;
+		var form = new Ext.FormPanel({
+			width: 500,
+			frame: true,
+		    autoHeight: true,
+			bodyStyle: 'padding: 10px 10px 0 10px;',
+			labelWidth: 50,
+			defaults: {
+			     anchor: '95%',
+			     allowBlank: false,
+			     msgTarget: 'side'
+			},
+			items:[{
+	            xtype: "textfield",
+	            fieldLabel: 'Latitude',
+				decimalPrecision: 15,
+				width:200,
+				maxValue:90,
+				minValue:-90,
+				allowBlank:false,
+				id:"lat-input-field"
+	        },{  
+				xtype:'textfield',
+				fieldLabel: 'Longitude',
+				decimalPrecision: 15,
+				width:200,
+				maxValue:180,
+				minValue:-180,
+				allowBlank:false,
+				id:"lng-input-field"
+			 }
+	        ],
+			buttons: [{
+	            text: 'Add point',
+	            handler: function(){
+					var latField = Ext.getCmp("lat-input-field");
+					var lngField = Ext.getCmp("lng-input-field"); 
+					if (latField.isValid(false) && lngField.isValid(true)){
+						var point = new OpenLayers.Geometry.Point(latField.getValue(), lngField.getValue());
+						point = point.transform( new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+						var feature = new OpenLayers.Feature.Vector( point );
+						layer.addFeatures(feature);
+					} else {
+						Ext.Msg.show({
+			                   title: 'Cannot create this point',
+			                   msg: 'Invalid coordinates.',
+			                   buttons: Ext.Msg.OK,
+			                   icon: Ext.MessageBox.ERROR
+			                });						
+					}
+				}}]	
+		});
+		// open modal window
+		var win = new Ext.Window({
+			       closable:true,
+				   title: 'Add point from coordinates',
+				   iconCls: "gxp-icon-add-point",
+				   border:false,
+				   modal: true, 
+				   bodyBorder: false,
+			       items: [ new Ext.FormPanel({
+					width: 500,
+					frame: true,
+				    autoHeight: true,
+					bodyStyle: 'padding: 10px 10px 0 10px;',
+					labelWidth: 50,
+					defaults: {
+					     anchor: '95%',
+					     allowBlank: false,
+					     msgTarget: 'side'
+					},
+					items:[{
+			            xtype: "textfield",
+			            fieldLabel: 'Latitude',
+						decimalPrecision: 15,
+						width:200,
+						maxValue:90,
+						minValue:-90,
+						allowBlank:false,
+						id:"lat-input-field"
+			        },{  
+						xtype:'textfield',
+						fieldLabel: 'Longitude',
+						decimalPrecision: 15,
+						width:200,
+						maxValue:180,
+						minValue:-180,
+						allowBlank:false,
+						id:"lng-input-field"
+					 }
+			        ],
+					buttons: [{
+			            text: 'Add point',
+			            handler: function(){
+							var latField = Ext.getCmp("lat-input-field");
+							var lngField = Ext.getCmp("lng-input-field"); 
+							if (latField.isValid(false) && lngField.isValid(true)){
+								var point = new OpenLayers.Geometry.Point(latField.getValue(), lngField.getValue());
+								point = point.transform( new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+								var feature = new OpenLayers.Feature.Vector( point );
+								layer.addFeatures(feature);
+								win.destroy();
+							} else {
+								Ext.Msg.show({
+					                   title: 'Cannot create this point',
+					                   msg: 'Invalid coordinates.',
+					                   buttons: Ext.Msg.OK,
+					                   icon: Ext.MessageBox.ERROR
+					                });						
+							}
+						}}]	
+				}) ]
+			});
+		win.show();
 	},
 
 	createDrawControl: function(handler, tooltip){
