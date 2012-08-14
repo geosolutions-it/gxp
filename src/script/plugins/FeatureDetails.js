@@ -116,7 +116,7 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 				            },{   xtype: 'numberfield',
 						          fieldLabel: 'Latitude',
 								  width: 200,
-								  decimalPrecision: 20,
+								  decimalPrecision: 5,
 								  maxValue:90,
 								  minValue:-90,
 						          allowBlank:false,
@@ -127,7 +127,7 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 						    },{   xtype: 'numberfield',
 								  fieldLabel: 'Longitude',
 								  width: 200,
-								  decimalPrecision: 20,
+								  decimalPrecision: 5,
 								  maxValue:180,
 								  minValue:-180,
 								  allowBlank:false,
@@ -155,7 +155,7 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 			}
 			
 			if ( feature.geometry instanceof OpenLayers.Geometry.Point ){
-				var point = self.feature.geometry.clone().transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
+				var point = self.feature.geometry.clone(); //.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
 				Ext.getCmp("latitude-textfield").setVisible(true);
 				Ext.getCmp("longitude-textfield").setVisible(true);
 				Ext.getCmp("latitude-textfield").setValue(  point.x );
@@ -189,7 +189,7 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 				
 				if ( latField.isValid(false) && lngField.isValid(false) ){
 					var point = new OpenLayers.Geometry.Point(latField.getValue(), lngField.getValue());
-					point = point.transform( new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+					// point = point.transform( new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
 					this.feature.geometry.x = point.x;
 					this.feature.geometry.y = point.y;	
 					this.disable();

@@ -118,9 +118,9 @@ gxp.plugins.KMLImporter = Ext.extend(gxp.plugins.Tool, {
 								var format = new OpenLayers.Format.KML({
 							    	extractStyles: true, 
 									extractAttributes: true,
-									maxDepth: 2,
-									externalProjection: new OpenLayers.Projection("EPSG:4326"),
-									internalProjection: map.getProjection()
+									maxDepth: 2 //,
+									// externalProjection: new OpenLayers.Projection("EPSG:4326"),
+									// internalProjection: map.getProjection()
 							    });
 							    var features = format.read(response.responseText);
 								// console.log(features);

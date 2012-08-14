@@ -75,9 +75,9 @@ gxp.plugins.KMLExporter = Ext.extend(gxp.plugins.Tool, {
 				var format = new OpenLayers.Format.KML({
 					        'maxDepth':10,
 					        'extractStyles':true,
-							'foldersName': 'Gliders Export',
-					        'internalProjection': map.getProjection(),
-					        'externalProjection': new OpenLayers.Projection("EPSG:4326")
+							'foldersName': 'Gliders Export' //,
+					       // 'internalProjection': map.getProjection(),
+					       // 'externalProjection': new OpenLayers.Projection("EPSG:4326")
 					    });
 				var kmlContent = format.write(self.layer.features);
 				// create an upload file form

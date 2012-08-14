@@ -288,7 +288,7 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 					var lngField = Ext.getCmp("lng-input-field"); 
 					if (latField.isValid(false) && lngField.isValid(true)){
 						var point = new OpenLayers.Geometry.Point(latField.getValue(), lngField.getValue());
-						point = point.transform( new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+						// point = point.transform( new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
 						var feature = new OpenLayers.Feature.Vector( point );
 						layer.addFeatures(feature);
 					} else {
@@ -347,7 +347,7 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 							var lngField = Ext.getCmp("lng-input-field"); 
 							if (latField.isValid(false) && lngField.isValid(true)){
 								var point = new OpenLayers.Geometry.Point(latField.getValue(), lngField.getValue());
-								point = point.transform( new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+								// point = point.transform( new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
 								var feature = new OpenLayers.Feature.Vector( point );
 								layer.addFeatures(feature);
 								win.destroy();
