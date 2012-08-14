@@ -109,23 +109,23 @@ gxp.plugins.EmbeddedLink = Ext.extend(gxp.plugins.Tool, {
 
   	createUrl: function(){
 		
-		 T = this.target;
-	
-		 var layers = this.target.mapPanel.map.layers;
-		 var vehicleUrl = '';
-		 for (var i=0; i<layers.length; i++){
-			var layer = layers[i];
-			if ( layer.visibility && layer.params && layer.params.CQL_FILTER ){
-				vehicleUrl += encodeURIComponent(layer.params.CQL_FILTER) + ',';
-			}
-		 }
+		 // Note to self: in order to create urls dynamically, have a look at TimeSlider.js listeners
+		 var timeManagers = this.target.mapPanel.map.getControlsByClass('OpenLayers.Control.TimeManager');
+		
+		// t = timeManagers[0];
 		
 		 var currentUrl = window.location.href + '?';
 		 currentUrl += 'bounds=' + this.target.mapPanel.map.getExtent().toString();
 		 currentUrl += '&center=' + this.target.mapPanel.map.getCenter().lon +',' + this.target.mapPanel.map.getCenter().lat;
 		 currentUrl += '&zoom=' + this.target.mapPanel.map.getZoom();
-		 currentUrl += '&time=';
-		 currentUrl += '&vehicles=' + vehicleUrl;
+		
+		 if ( timeManagers.length > 0 ){
+			var timeManager = timeManagers[0];
+			// currentUrl += '&currentTime=' + timeManager.currentTime;
+			currentUrl += '&startTime=' + timeManager.timeSpans[0].start.toISOString();
+			currentUrl += '&endTime=' + timeManager.timeSpans[0].end.toISOString();
+			currentUrl += '&timeUnit=' + timeManager.units;
+		 } 
 		
 		return currentUrl;
 	}
