@@ -87,11 +87,21 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
                 if(!(this.timeManager.units || this.timeManager.snapToIntervals)) {
                     allow = false;
                 }
+                 //deny tail slider motion in cumulative playback mode
                 else if(this.playbackMode == 'cumulative' && slider.indexMap[thumb.index] == 'tail') {
                     allow = false;
                 }
+                //deny negative intervals
+                if (slider.indexMap[thumb.index] == 'tail'){
+                    var indexPrimary = thumb.index == 0 ? 1:0;
+                    if ( newVal > slider.thumbs[indexPrimary].value) return false;
+                }else{
+                    var indexTail = thumb.index == 0 ? 1:0;
+                    if ( newVal < slider.thumbs[indexTail].value) return false;
+                }
                 return allow;
             },
+           
             'afterrender' : function(slider) {
                 this.sliderTip = slider.plugins[0];
                 if(this.timeManager.units && slider.thumbs.length > 1) {
