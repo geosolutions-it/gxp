@@ -113,18 +113,24 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 				                allowBlank:false,
 								anchor:'100%',
 								id: 'description-textfield'
-				            },{   xtype: 'textfield',
+				            },	{   xtype: 'numberfield',
 							          fieldLabel: 'Latitude',
 									  width: 200,
-							          allowBlank:true,
+									  decimalPrecision: 5,
+									  maxValue:90,
+									  minValue:-90,
+							          allowBlank:false,
 									  disabled: true,
 									  hidden:true,
 									  anchor:'100%',
 									  id:'pn-latitude-textfield'
-							},{   xtype: 'textfield',
+							    },{   xtype: 'numberfield',
 									  fieldLabel: 'Longitude',
 									  width: 200,
-									  allowBlank:true,
+									  decimalPrecision: 5,
+									  maxValue:180,
+									  minValue:-180,
+									  allowBlank:false,
 									  disabled: true,
 									  hidden:true,
 									  anchor:'100%',
@@ -170,11 +176,6 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 					
 					   ]
 					}],
-					/*buttons: [{
-					            text: 'Save'
-					        },{
-					            text: 'Cancel'
-					        }]*/
 			       buttons:[  this.saveBtn, this.cancelBtn ]
 			    })
 	
@@ -192,10 +193,11 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 			}
 			
 			if ( feature.geometry instanceof OpenLayers.Geometry.Point ){
+				var point = self.feature.geometry.clone(); 
 				Ext.getCmp("pn-latitude-textfield").setVisible(true);
 				Ext.getCmp("pn-longitude-textfield").setVisible(true);
-				Ext.getCmp("pn-latitude-textfield").setValue(  feature.geometry.x );
-				Ext.getCmp("pn-longitude-textfield").setValue( feature.geometry.y );
+				Ext.getCmp("pn-latitude-textfield").setValue(  point.x );
+				Ext.getCmp("pn-longitude-textfield").setValue( point.y );
 			}
 			
 			
@@ -226,7 +228,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 			              vehicleField.isValid(false ) &&
 			                dateField.isValid(false) &&
 			                   timeField.isValid(false )){
-				this.disable();
+				
 				var name = nameField.getValue();
 				var description = descField.getValue();
 				var vehicle = vehicleField.getValue();
@@ -235,12 +237,33 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 				this.feature.attributes = { name:name, description:description, vehicle:vehicle, date:date, time:time };
 				
 					if ( this.feature.geometry instanceof OpenLayers.Geometry.Point ){
-						this.feature.geometry.x = Ext.getCmp("pn-latitude-textfield").getValue();
-						this.feature.geometry.y = Ext.getCmp("pn-longitude-textfield").getValue();
+						var latField = Ext.getCmp("pn-latitude-textfield");
+						var lngField = Ext.getCmp("pn-longitude-textfield");
+
+
+						if ( latField.isValid(false) && lngField.isValid(false) ){
+							var point = new OpenLayers.Geometry.Point(latField.getValue(), lngField.getValue());
+							
+							this.feature.geometry.x = point.x;
+							this.feature.geometry.y = point.y;	
+							this.disable();
+							this.container.saveFeature(this.feature);
+							this.resetForm();
+						} else {
+							Ext.Msg.show({
+				                   title: 'Cannot save this geometry',
+				                   msg: 'Invalid coordinates.',
+				                   buttons: Ext.Msg.OK,
+				                   icon: Ext.MessageBox.ERROR
+				                });
+						}
+					} else {
+						this.disable();
+						this.container.saveFeature(this.feature);
+						this.resetForm();
 					}				
 				
-				this.container.saveFeature(this.feature);
-				this.resetForm();
+				
 			
 			} else {
 				  Ext.Msg.show({
@@ -277,6 +300,8 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		Ext.getCmp("time-textfield").disable();
 		Ext.getCmp("pn-latitude-textfield").setVisible(false);
 		Ext.getCmp("pn-longitude-textfield").setVisible(false);
+		Ext.getCmp("pn-latitude-textfield").disable();
+		Ext.getCmp("pn-longitude-textfield").disable();
 	},
 	
 	/** private: method[enable]
