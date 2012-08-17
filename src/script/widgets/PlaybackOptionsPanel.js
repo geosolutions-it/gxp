@@ -284,6 +284,10 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
             //set min and max for not negative ranges.
             this.rangeStartField.setMaxValue(this.timeManager.range[1]);
             this.rangeEndField.setMinValue(this.timeManager.range[0]);
+            //disable if range mode 
+             if(playbackMode == "range"){
+                this.listOnlyCheck.setDisabled(true);
+            }
         }
     },
     saveValues:function(btn){
