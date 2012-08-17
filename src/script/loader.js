@@ -93,6 +93,7 @@
 		"plugins/AddNote.js",
 		"plugins/EmbeddedLink.js",
 		"plugins/FeatureSelector.js",
+		"plugins/Synchronizer.js",
         "locale/es.js",
         "locale/ca.js"
     );
