@@ -87,11 +87,23 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
                 if(!(this.timeManager.units || this.timeManager.snapToIntervals)) {
                     allow = false;
                 }
+                 //deny tail slider motion in cumulative playback mode
                 else if(this.playbackMode == 'cumulative' && slider.indexMap[thumb.index] == 'tail') {
                     allow = false;
                 }
+                //deny negative intervals
+                if (this.playbackMode !="track"){
+                    if (slider.indexMap[thumb.index] == 'tail'){
+                        var indexPrimary = thumb.index == 0 ? 1:0;
+                        if ( newVal > slider.thumbs[indexPrimary].value) allow = false;
+                    }else{
+                        var indexTail = thumb.index == 0 ? 1:0;
+                        if ( newVal < slider.thumbs[indexTail].value) allow = false;
+                    }
+                }
                 return allow;
             },
+           
             'afterrender' : function(slider) {
                 this.sliderTip = slider.plugins[0];
                 if(this.timeManager.units && slider.thumbs.length > 1) {
@@ -157,7 +169,7 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
                     step : ctl.step
                 }
             };
-            ctl.guessPlaybackRate();
+            //ctl.guessPlaybackRate();
             if(ctl.range[0].getTime() != oldvals.start || ctl.range[1].getTime() != oldvals.end ||
                  ctl.units != oldvals.units || ctl.step != oldvals.step) {
                 this.reconfigureSlider(this.buildSliderValues());
@@ -282,6 +294,13 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
             tailThumb.el.addClass('x-slider-tail-thumb');
             tailThumb.constrain = false;
             headThumb.constrain = false;
+        }
+        //visibility on normal mode
+        if(this.playbackMode == 'track'){
+            slider.thumbs[tailIndex].el.addClass('x-slider-min-thumb-hidden');
+        }else {
+            slider.thumbs[tailIndex].el.removeClass('x-slider-min-thumb-hidden');
+            // TODO reset to start slider.thumbs[1].
         }
     },    
 
