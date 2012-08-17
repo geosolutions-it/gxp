@@ -295,13 +295,7 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
             tailThumb.constrain = false;
             headThumb.constrain = false;
         }
-        //visibility on normal mode
-        if(this.playbackMode == 'track'){
-            slider.thumbs[tailIndex].el.addClass('x-slider-min-thumb-hidden');
-        }else {
-            slider.thumbs[tailIndex].el.removeClass('x-slider-min-thumb-hidden');
-            // TODO reset to start slider.thumbs[1].
-        }
+        
     },    
 
     getThumbText: function(thumb) {
