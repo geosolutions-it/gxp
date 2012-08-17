@@ -112,20 +112,22 @@ gxp.plugins.EmbeddedLink = Ext.extend(gxp.plugins.Tool, {
 		 // Note to self: in order to create urls dynamically, have a look at TimeSlider.js listeners
 		 var timeManagers = this.target.mapPanel.map.getControlsByClass('OpenLayers.Control.TimeManager');
 		
-		// t = timeManagers[0];
-		
-		 var currentUrl = window.location.href + '?';
+		 var currentUrl = location.protocol + '//' + location.host + location.pathname + '?';
 		 currentUrl += 'bounds=' + this.target.mapPanel.map.getExtent().toString();
 		 currentUrl += '&center=' + this.target.mapPanel.map.getCenter().lon +',' + this.target.mapPanel.map.getCenter().lat;
 		 currentUrl += '&zoom=' + this.target.mapPanel.map.getZoom();
 		
 		 if ( timeManagers.length > 0 ){
 			var timeManager = timeManagers[0];
-			// currentUrl += '&currentTime=' + timeManager.currentTime;
-			currentUrl += '&startTime=' + timeManager.timeSpans[0].start.toISOString();
-			currentUrl += '&endTime=' + timeManager.timeSpans[0].end.toISOString();
+			currentUrl += '&startTime=' + timeManager.range[0].toISOString(); 
+			currentUrl += '&endTime=' + timeManager.range[1].toISOString();  
 			currentUrl += '&timeUnit=' + timeManager.units;
 		 } 
+		
+		 // get cruise name
+		 // TODO is there a better way?
+		 var cruiseName = Ext.getCmp('tree').title;
+		 currentUrl += '&cruiseName=' + cruiseName;
 		
 		return currentUrl;
 	}
