@@ -309,9 +309,14 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 				   border:false,
 				   modal: true, 
 				   bodyBorder: false,
+				   width: 500,
+                   // height: 200,
+                   resizable: false,
 			       items: [ new Ext.FormPanel({
 					width: 500,
+					labelWidth:80,
 					frame: true,
+					border:false,
 				    autoHeight: true,
 					bodyStyle: 'padding: 10px 10px 0 10px;',
 					labelWidth: 50,
@@ -324,7 +329,6 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 			            xtype: "textfield",
 			            fieldLabel: 'Latitude',
 						decimalPrecision: 15,
-						width:200,
 						maxValue:90,
 						minValue:-90,
 						allowBlank:false,
@@ -333,7 +337,6 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 						xtype:'textfield',
 						fieldLabel: 'Longitude',
 						decimalPrecision: 15,
-						width:200,
 						maxValue:180,
 						minValue:-180,
 						allowBlank:false,
@@ -342,6 +345,7 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 			        ],
 					buttons: [{
 			            text: 'Add point',
+			            formBind: true,
 			            handler: function(){
 							var latField = Ext.getCmp("lat-input-field");
 							var lngField = Ext.getCmp("lng-input-field"); 
