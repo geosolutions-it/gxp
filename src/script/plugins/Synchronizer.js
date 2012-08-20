@@ -61,7 +61,7 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 						layer.redraw(true);
 					}
 				}
-				setInterval(refresh, interval);
+				// setInterval(refresh, interval);
 			
 		}, this);
 	

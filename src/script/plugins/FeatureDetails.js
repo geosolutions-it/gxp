@@ -135,7 +135,35 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 								  hidden:true,
 								  anchor:'100%',
 								  id:'longitude-textfield'
-							}
+							},{
+									    xtype: 'compositefield',
+									    width: 150,
+										anchor:'100%',
+									    items: [
+									        {
+												id:'details-date-textfield',
+									            xtype     : 'datefield',
+												allowBlank:true,
+												editable: false,
+												format:"d/m/Y",
+									            fieldLabel: 'Day',
+												width:100,
+												anchor:'100%',
+												disabled:true
+									        },
+									        {
+												id:'details-time-textfield',
+									            xtype     : 'timefield',
+												allowBlank:true,
+									            fieldLabel: 'Time',
+												editable: true,
+												format: 'H:i:s',
+												width:80,
+												//anchor:'100%',
+												disabled:true
+									        }
+									    ]
+									}
 					
 					   ]
 					}] ,
@@ -152,6 +180,8 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 			if ( feature.attributes ){
 				Ext.getCmp("details-name-textfield").setValue( feature.attributes.name );
 				Ext.getCmp("details-description-textfield").setValue( feature.attributes.description );
+				Ext.getCmp("details-date-textfield").setValue( feature.attributes.date );
+				Ext.getCmp("details-time-textfield").setValue( feature.attributes.time );
 			}
 			
 			if ( feature.geometry instanceof OpenLayers.Geometry.Point ){
@@ -181,7 +211,9 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 		if (this.feature && this.container){
 			var name = Ext.getCmp("details-name-textfield").getValue();
 			var description = Ext.getCmp("details-description-textfield").getValue();
-			this.feature.attributes = { name:name, description:description };
+			var date = Ext.getCmp("details-date-textfield").getValue();
+			var time = Ext.getCmp("details-time-textfield").getValue();
+			this.feature.attributes = { name:name, description:description, date:date, time:time };
 			if ( this.feature.geometry instanceof OpenLayers.Geometry.Point ){
 				var latField = Ext.getCmp("latitude-textfield");
 				var lngField = Ext.getCmp("longitude-textfield");
@@ -234,6 +266,8 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 		this.cancelBtn.disable();
 		Ext.getCmp("details-name-textfield").disable();
 		Ext.getCmp("details-description-textfield").disable();
+		Ext.getCmp("details-date-textfield").disable();
+		Ext.getCmp("details-time-textfield").disable();
 		Ext.getCmp("latitude-textfield").disable();
 		Ext.getCmp("longitude-textfield").disable();
 		Ext.getCmp("latitude-textfield").setVisible(false);
@@ -248,6 +282,8 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 		this.cancelBtn.enable();
 		Ext.getCmp("details-name-textfield").enable();
 		Ext.getCmp("details-description-textfield").enable();
+		Ext.getCmp("details-date-textfield").enable();
+		Ext.getCmp("details-time-textfield").enable();
 		Ext.getCmp("latitude-textfield").enable();
 		Ext.getCmp("longitude-textfield").enable();
 	},
@@ -255,6 +291,8 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 	resetForm: function(){
 		Ext.getCmp("details-name-textfield").setValue( '' );
 		Ext.getCmp("details-description-textfield").setValue( '' );
+		Ext.getCmp("details-date-textfield").setValue( '' );
+		Ext.getCmp("details-time-textfield").setValue( '' );
 		Ext.getCmp("latitude-textfield").setValue( '' );
 		Ext.getCmp("longitude-textfield").setValue( '' );
 	}

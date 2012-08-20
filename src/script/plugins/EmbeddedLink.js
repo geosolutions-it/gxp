@@ -78,7 +78,7 @@ gxp.plugins.EmbeddedLink = Ext.extend(gxp.plugins.Tool, {
 				            xtype: "textarea",
 				            id: "embeddedLink",
 				            value: this.createUrl() ,
-							disabled:true,
+							readOnly:true,
 				            fieldLabel: 'Link'
 				        }]/*,
 						buttons:[
