@@ -34,23 +34,41 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
      */
     constructor: function(config) {
         gxp.plugins.Synchronizer.superclass.constructor.apply(this, arguments);
+		this.timeInterval = config.refreshTimeInterval;
     },
 
     /** private: method[init]
      *  :arg target: ``Object`` The object initializing this plugin.
      */
     init: function(target) {
+		gxp.plugins.Synchronizer.superclass.init.apply(this, arguments);
+		var interval = this.timeInterval;
+		this.target.on(
+			'portalready',
+			function(){
+				var refresh = function(){
+					var timeManagers = target.mapPanel.map.getControlsByClass('OpenLayers.Control.TimeManager');
+					if (timeManagers.length <= 0){
+						console.error('Cannot create Synchronizer: no TimeManager found');
+						return;
+					}
+
+					var timeManager = timeManagers[0];
+					var layers = timeManager.layers;					
+					
+					for (var i=0; i<layers.length; i++){
+						var layer = layers[i];
+						layer.redraw(true);
+					}
+				}
+				setInterval(refresh, interval);
+			
+		}, this);
 	
-		//setInterval(this.refresh, 5000);
 		
-	},
-	
-	/** private: method[refresh]
-	 *
-	 */
-	refresh: function(){
-		console.log('refreshed');
+		
 	}
+
 
 });
 

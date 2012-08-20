@@ -119,6 +119,7 @@ gxp.plugins.EmbeddedLink = Ext.extend(gxp.plugins.Tool, {
 		
 		 if ( timeManagers.length > 0 ){
 			var timeManager = timeManagers[0];
+			
 			currentUrl += '&startTime=' + timeManager.range[0].toISOString(); 
 			currentUrl += '&endTime=' + timeManager.range[1].toISOString();  
 			currentUrl += '&timeUnit=' + timeManager.units;
