@@ -313,13 +313,10 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
                    // height: 200,
                    resizable: false,
 			       items: [ new Ext.FormPanel({
-					width: 500,
-					labelWidth:80,
 					frame: true,
 					border:false,
 				    autoHeight: true,
 					bodyStyle: 'padding: 10px 10px 0 10px;',
-					labelWidth: 50,
 					defaults: {
 					     anchor: '95%',
 					     allowBlank: false,
@@ -328,6 +325,7 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 					items:[{
 			            xtype: "textfield",
 			            fieldLabel: 'Latitude',
+						width:5,
 						decimalPrecision: 15,
 						maxValue:90,
 						minValue:-90,
@@ -336,6 +334,7 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 			        },{  
 						xtype:'textfield',
 						fieldLabel: 'Longitude',
+						width:5,
 						decimalPrecision: 15,
 						maxValue:180,
 						minValue:-180,
