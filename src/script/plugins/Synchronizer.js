@@ -58,10 +58,14 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 					
 					for (var i=0; i<layers.length; i++){
 						var layer = layers[i];
-						layer.redraw(true);
+						if (layer.getVisibility()){
+							// layer.redraw(true);
+							layer.mergeNewParams({fake_time: (new Date()).toISOString()});
+						}
+						
 					}
 				}
-				// setInterval(refresh, interval);
+				setInterval(refresh, interval);
 			
 		}, this);
 	
