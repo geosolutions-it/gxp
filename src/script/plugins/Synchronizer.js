@@ -65,7 +65,7 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 						
 					}
 				}
-				setInterval(refresh, interval);
+				// setInterval(refresh, interval);
 			
 		}, this);
 	

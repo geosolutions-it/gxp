@@ -15,7 +15,7 @@
  * @requires OpenLayers/Format/WMSCapabilities/v1_3_0.js
  * @requires OpenLayers/Protocol/WFS/v1_1_0.js
  * @requires GeoExt/data/WMSCapabilitiesReader.js
- * @requires GeoExt/data/WMSCapabilitiesStore.js
+ * @requires GeoExt/data/WMSStore.js
  * @requires GeoExt/data/WMSDescribeLayerStore.js
  * @requires GeoExt/data/AttributeReader.js
  * @requires GeoExt/data/AttributeStore.js
@@ -422,7 +422,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
         record.setLayer(new OpenLayers.Layer.WMS(
             config.title || config.name,
             config.url || this.url, {
-                layers: config.name,
+                layers: config.name,	
                 transparent: "transparent" in config ? config.transparent : true,
                 cql_filter: config.cql_filter,
                 format: config.format
@@ -513,7 +513,6 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
             layer.setName(config.title || layer.name);
             layer.addOptions({
                 attribution: layer.attribution,
-				// attribution: ("attribution" in config) ? config.attribution : null,
                 maxExtent: maxExtent,
                 restrictedExtent: maxExtent,
                 singleTile: singleTile,
