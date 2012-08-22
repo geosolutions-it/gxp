@@ -301,6 +301,10 @@
 
 /* gxp_pilot_notes */
 
+.x-btn .gxp-icon-real-time, .x-menu-item .gxp-icon-real-time, .x-tree-node .gxp-icon-real-time, .x-menu-item-checked .x-menu-group-item .x-menu-item-icon.gxp-icon-real-time, .gxp-icon-real-time {
+    background-image: url(img/silk/clock.png); !important;
+}
+
 .x-btn .gxp-icon-add-note, .x-menu-item .gxp-icon-add-note, .x-tree-node .gxp-icon-add-note, .x-menu-item-checked .x-menu-group-item .x-menu-item-icon.gxp-icon-add-note, .gxp-icon-add-note {
     background-image: url(img/silk/note_add.png); !important;
 }

@@ -42,36 +42,89 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
      */
     init: function(target) {
 		gxp.plugins.Synchronizer.superclass.init.apply(this, arguments);
-		var interval = this.timeInterval;
+		// get the timemanager when the portal is ready
+		/*var self = this;
 		this.target.on(
 			'portalready',
 			function(){
-				var refresh = function(){
-					var timeManagers = target.mapPanel.map.getControlsByClass('OpenLayers.Control.TimeManager');
-					if (timeManagers.length <= 0){
-						console.error('Cannot create Synchronizer: no TimeManager found');
-						return;
-					}
+				 var timeManagers = self.target.mapPanel.map.getControlsByClass('OpenLayers.Control.TimeManager');
+				 if (timeManagers.length <= 0){
+					console.error('Cannot init Synchronizer: no TimeManager found');
+					return;
+				  }
+				  self.timeManager = timeManagers[0];
+				  // listen to play events
+				  self.timeManager.events.register('play', self, function(){ console.log('play');});
 
-					var timeManager = timeManagers[0];
-					var layers = timeManager.layers;					
-					
-					for (var i=0; i<layers.length; i++){
-						var layer = layers[i];
-						if (layer.getVisibility()){
-							// layer.redraw(true);
-							layer.mergeNewParams({fake_time: (new Date()).toISOString()});
-						}
-						
-					}
-				}
-				// setInterval(refresh, interval);
-			
-		}, this);
+		}, this);*/
+		
+		
+	},
 	
-		
-		
-	}
+  addActions: function() {
+
+		var map = this.target.mapPanel.map;
+		var interval;
+		var self = this;
+		this.button = new Ext.Button({
+			 menuText: this.exportKMLMenuText,
+	         iconCls: "gxp-icon-real-time",
+	         tooltip: "Real time sync",
+			 enableToggle:true,
+	         toggleHandler: function(button, pressed) {
+
+				  var timeManager = self.getTimeManager();
+
+				  var refresh = function(){
+
+							var layers = timeManager.layers;					
+
+							for (var i=0; i<layers.length; i++){
+								var layer = layers[i];
+								if (layer.getVisibility()){
+									layer.redraw(true);
+								}
+
+							}	
+				  };
+					if (pressed){
+						timeManager.stop();
+						interval = setInterval(refresh, self.timeInterval);
+
+					} else {
+						clearInterval( interval );
+
+					}			
+			 }, scope:this});
+			
+        var actions = [
+			this.button
+        ];
+        return gxp.plugins.Synchronizer.superclass.addActions.apply(this, [actions]);
+    },
+
+    getTimeManager: function(){
+	    if ( ! this.timeManager ){ // if it is not initialized
+			var timeManagers = this.target.mapPanel.map.getControlsByClass('OpenLayers.Control.TimeManager');
+			if (timeManagers.length <= 0){
+				console.error('Cannot init Synchronizer: no TimeManager found');
+				return;
+			}
+			this.timeManager = timeManagers[0];
+			var self = this;
+			// listen to play events
+			this.timeManager.events.register('play', this, 
+					function(){ 
+						if (self.button.pressed){
+							self.button.toggle();
+						}
+					});		
+	    }
+		return this.timeManager;
+    }
+
+
+	
 
 
 });
