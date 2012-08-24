@@ -35,6 +35,7 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
     constructor: function(config) {
         gxp.plugins.Synchronizer.superclass.constructor.apply(this, arguments);
 		this.timeInterval = config.refreshTimeInterval;
+		this.range = config.range;
     },
 
     /** private: method[init]
@@ -82,7 +83,12 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 							for (var i=0; i<layers.length; i++){
 								var layer = layers[i];
 								if (layer.getVisibility()){
-									layer.redraw(true);
+									// layer.redraw(true);
+									var timeParam = self.range[0].toISOString() +'/'+ self.range[1].toISOString();
+									layer.mergeNewParams({
+										TIME: timeParam,
+										fake: (new Date()).getTime()
+									});
 								}
 
 							}	
