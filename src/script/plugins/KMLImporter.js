@@ -81,6 +81,8 @@ gxp.plugins.KMLImporter = Ext.extend(gxp.plugins.Tool, {
 						   border:false,
 						   modal: true, 
 						   bodyBorder: false,
+						   resizable: false,
+						   width: 500,
 					       items: [ form ]
 					});		
 				form.on("uploadcomplete", function addKMLToLayer(caller, response){

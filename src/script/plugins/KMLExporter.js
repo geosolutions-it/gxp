@@ -93,10 +93,12 @@ gxp.plugins.KMLExporter = Ext.extend(gxp.plugins.Tool, {
 						   border:false,
 						   modal: true, 
 						   bodyBorder: false,
+						   resizable: false,
+						   width: 500,
 					       items: [ form ]
 					});
-					
-					
+
+	                   				
 				// application/x-www-form-urlencoded
 					
 				form.on("uploadcomplete", function addKMLToLayer(caller, response){
