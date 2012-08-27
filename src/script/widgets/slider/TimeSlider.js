@@ -45,7 +45,12 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
         
         var sliderInfo = this.buildSliderValues();
         if(sliderInfo) {
+			// TOFIX force timeManager rage to default values
+			var oldRange = this.timeManager.range;
+			// this method changes rage to the largest interval read from the server
             this.timeManager.guessPlaybackRate();
+			this.timeManager.range = oldRange;
+			
             var initialSettings = {
                 maxValue: sliderInfo.maxValue,
                 minValue: sliderInfo.minValue,
