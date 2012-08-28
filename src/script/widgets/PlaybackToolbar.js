@@ -43,7 +43,7 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
     //playback mode is one of: "track","cumulative","ranged",??"decay"??
     playbackMode:"track",
     showIntervals:false,
-    labelButtons:true,
+    labelButtons:false,
     settingsButton:true,
     rateAdjuster:false,
     looped:false,
@@ -184,7 +184,7 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
     },
     /** api: method[setPlaybackMode]
      * :arg mode: {String} one of 'track',
-     * 'cumulative', or 'ranged'
+     * 'cumulative', or "range"
      *  
      *  Set the playback mode of the control.
      */
@@ -220,7 +220,10 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
                 ref: 'slider',
                 map: this.mapPanel.map,
                 timeManager: this.control,
-                playbackMode: this.playbackMode
+                playbackMode: this.playbackMode,
+                showIntervals: this.showIntervals,
+                timeFormat: this.timeFormat,
+                dynamicRange: this.dynamicRange
             },
             'reset': {
                 iconCls: 'gxp-icon-reset',
@@ -360,7 +363,7 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
             }
         }
         else {
-            if(this.playbackMode == 'ranged') {
+            if(this.playbackMode == "range") {
                 Ext.apply(this.controlConfig, {
                     agentOptions : {
                         'WMS' : {
@@ -432,10 +435,10 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
             btn.btnEl.addClass('gxp-icon-pause');
             btn.setTooltip(this.pauseTooltip);
         } else {
-            if(this.control.timer){
+            //if(this.control.timer){
                 //don't stop playing again if it is already stopped
                 this.control.stop();
-            }
+            //}
             btn.btnEl.addClass('gxp-icon-play');
             btn.btnEl.removeClass('gxp-icon-pause');
             btn.setTooltip(this.playTooltip);
@@ -481,6 +484,9 @@ gxp.PlaybackToolbar.guessTimeFormat = function(increment){
         var resolution = gxp.PlaybackToolbar.smartIntervalFormat(increment).units;
         var format = this.timeFormat;
         switch (resolution) {
+            case 'Seconds':
+                format = 'c';
+                break;
             case 'Minutes':
                 format = 'c';
                 break;

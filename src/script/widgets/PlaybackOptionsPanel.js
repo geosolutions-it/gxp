@@ -59,7 +59,7 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
      */
     initComponent: function() {
         var config = Ext.applyIf(this.initialConfig,{
-            minHeight:400,
+            //minHeight:400,
             minWidth:275,
             ref:'optionsPanel',
             items:[
@@ -68,6 +68,8 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
                 layout: 'form',
                 autoScroll: true,
                 ref:'form',
+                border:false,
+                bodyStyle: "padding: 10px",
                 labelWidth:10,
                 defaultType: 'textfield',
                 items: [{
@@ -194,10 +196,13 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
     setStartTime: function(cmp, date){
         this.timeManager.setStart(date);
         this.timeManager.fixedRange=true;
+        this.rangeEndField.setMinValue(date);
+        
     },
     setEndTime:function(cmp,date){
         this.timeManager.setEnd(date);
         this.timeManager.fixedRange=true;
+        this.rangeStartField.setMaxValue(date);
     },
     toggleListMode: function(cmp, checked){
         this.stepValueField.setDisabled(checked);
@@ -216,7 +221,7 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
     setStep:function(cmp,newVal,oldVal){
         if(cmp.validate() && newVal){
             this.timeManager.step = newVal;
-            if(this.playbackToolbar.playbackMode == 'ranged' && 
+            if(this.playbackToolbar.playbackMode == 'range' && 
                 this.timeManager.rangeInterval != newVal){
                     this.timeManager.rangeInterval = newVal;
                     this.timeManager.incrementTime(newVal);
@@ -228,15 +233,15 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
             case 'cumulative':
                 this.playbackToolbar.setPlaybackMode('cumulative');
                 break;
-            case 'ranged':
+            case "range":
                 this.disableListMode(true);
-                this.playbackToolbar.setPlaybackMode('ranged');
+                this.playbackToolbar.setPlaybackMode("range");
                 break;
             default:
                 this.playbackToolbar.setPlaybackMode('track');
                 break;
         }
-        if(mode != 'ranged'){
+        if(mode != "range"){
             this.disableListMode(false);
         }
     },
