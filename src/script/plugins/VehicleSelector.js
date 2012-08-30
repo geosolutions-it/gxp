@@ -52,6 +52,7 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
     addOutput: function() {
 
 		this.checkbox =  new Ext.form.CheckboxGroup({
+			style: 'margin-left: 30px',
 		    id:'vehicle-group',
 		    xtype: 'checkboxgroup',
 		    itemCls: 'x-check-group-alt',
@@ -121,6 +122,7 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 				scope:this
 			})*/
 		);
+		panel.setPagePosition(10, 0);
        return panel;
     },
 

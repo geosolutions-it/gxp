@@ -60,7 +60,7 @@ gxp.plugins.Legend = Ext.extend(gxp.plugins.Tool, {
                 height: 300
             };
         }
-        Ext.applyIf(this.outputConfig, {title: this.menuText});
+        // Ext.applyIf(this.outputConfig, {title: this.menuText});
     },
 
     /** api: method[addActions]
