@@ -94,6 +94,7 @@
 		"plugins/EmbeddedLink.js",
 		"plugins/FeatureSelector.js",
 		"plugins/Synchronizer.js",
+		"plugins/VehicleSelector.js",
         "locale/es.js",
         "locale/ca.js"
     );

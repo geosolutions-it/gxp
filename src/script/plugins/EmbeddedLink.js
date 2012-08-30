@@ -34,14 +34,14 @@ gxp.plugins.EmbeddedLink = Ext.extend(gxp.plugins.Tool, {
      *  ``String``
      *  Text for embedded link item (i18n).
      */
-    embeddedLinkMenuText: "Embedded Link",
+    embeddedLinkMenuText: "Embed Link",
 
 
     /** api: config[embeddedLinkTooltip]
      *  ``String``
      *  Text for embedded link tooltip (i18n).
      */
-    embeddedLinkTooltip: "Embedded Link",
+    embeddedLinkTooltip: "Embed Link",
 
 	copyButtonText:"Copy to clipboard",
 	copyButtonTooltip:"Copy to clipboard",
