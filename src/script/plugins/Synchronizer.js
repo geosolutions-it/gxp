@@ -43,22 +43,6 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
      */
     init: function(target) {
 		gxp.plugins.Synchronizer.superclass.init.apply(this, arguments);
-		// get the timemanager when the portal is ready
-		/*var self = this;
-		this.target.on(
-			'portalready',
-			function(){
-				 var timeManagers = self.target.mapPanel.map.getControlsByClass('OpenLayers.Control.TimeManager');
-				 if (timeManagers.length <= 0){
-					console.error('Cannot init Synchronizer: no TimeManager found');
-					return;
-				  }
-				  self.timeManager = timeManagers[0];
-				  // listen to play events
-				  self.timeManager.events.register('play', self, function(){ console.log('play');});
-
-		}, this);*/
-		
 		
 	},
 	
@@ -66,8 +50,10 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 
 		var map = this.target.mapPanel.map;
 		var interval;
+		var tooltipInterval;
 		var self = this;
 		this.button = new Ext.Button({
+			 id:'sync-button',
 			 menuText: this.exportKMLMenuText,
 	         iconCls: "gxp-icon-real-time",
 	         tooltip: "Real time sync",
@@ -75,6 +61,7 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 	         toggleHandler: function(button, pressed) {
 
 				  var timeManager = self.getTimeManager();
+				  var timeToRefresh = self.timeInterval;
 
 				  var refresh = function(){
 
@@ -93,16 +80,40 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 
 							}	
 				  };
+				
+				  var countDown = function(){	
+					if (self.tooltip !== undefined ){
+						self.tooltip.update(  timeToRefresh/1000 + ' seconds' );
+					}
+					
+					timeToRefresh -= 1000;
+					if ( timeToRefresh === 0){
+						timeToRefresh = self.timeInterval;
+					}
+				  };
+				
 					if (pressed){
 						timeManager.stop();
+						self.tooltip = 	new Ext.ToolTip({
+								        target: 'sync-button',
+								        html:  timeToRefresh/1000 + ' seconds',
+								        title: 'Time to refresh',
+								        autoHide: false,
+								        closable: true,
+								        draggable:true
+									});
+						tooltipInterval = setInterval( countDown, 1000 );
 						interval = setInterval(refresh, self.timeInterval);
-
 					} else {
 						clearInterval( interval );
-
+						if (self.tooltip){
+							self.tooltip.destroy();
+							clearInterval( tooltipInterval );
+						}
 					}			
 			 }, scope:this});
 			
+		
         var actions = [
 			this.button
         ];
@@ -128,8 +139,6 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 	    }
 		return this.timeManager;
     }
-
-
 	
 
 
