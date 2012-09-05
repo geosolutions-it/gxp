@@ -110,7 +110,7 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 			}
 		});
 
- 		var panel = gxp.plugins.PilotNotes.superclass.addOutput.call(this, 
+ 		var panel = gxp.plugins.VehicleSelector.superclass.addOutput.call(this, 
 			this.checkbox
 			/*new Ext.Panel({
 					margins: {
@@ -154,10 +154,10 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
    createCheckboxes: function(){
 	    var checkboxes = new Array();
 	    for ( var i=0; i<this.vehicles.length; i++ ){
-			checkboxes[i] = { boxLabel: this.vehicles[i], name: this.vehicles[i], checked:true}
+			checkboxes[i] = {boxLabel: this.vehicles[i], name: this.vehicles[i], checked:true}
 		}
 		return checkboxes;
-	}
+    }
 
 
 });
