@@ -125,10 +125,26 @@ gxp.plugins.EmbeddedLink = Ext.extend(gxp.plugins.Tool, {
 			currentUrl += '&timeUnit=' + timeManager.units;
 		 } 
 		
+		// get info about selected vehicles
+		
 		 // get cruise name
 		 // TODO is there a better way?
 		 var cruiseName = Ext.getCmp('tree').title;
 		 currentUrl += '&cruiseName=' + cruiseName;
+		
+		 currentUrl += '&vehicles=';
+		 var checkbox = Ext.getCmp('vehicle-group');
+		 var items = checkbox.items.items || checkbox.items;
+		 for (var i=0; i<items.length; i++){
+			var box = items[i];
+			if (box.checked){
+				currentUrl += box.name;
+				if ( i < items.length -1 ){
+					currentUrl += ',';
+				}
+			}
+			
+		 }
 		
 		return currentUrl;
 	}

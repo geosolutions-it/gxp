@@ -59,40 +59,41 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 	         tooltip: "Real time sync",
 			 enableToggle:true,
 	         toggleHandler: function(button, pressed) {
-
-				  var timeManager = self.getTimeManager();
-				  var timeToRefresh = self.timeInterval;
-
-				  var refresh = function(){
-
-							var layers = timeManager.layers;					
-
-							for (var i=0; i<layers.length; i++){
-								var layer = layers[i];
-								if (layer.getVisibility()){
-									// layer.redraw(true);
-									var timeParam = self.range[0].toISOString() +'/'+ self.range[1].toISOString();
-									layer.mergeNewParams({
-										TIME: timeParam,
-										fake: (new Date()).getTime()
-									});
-								}
-
-							}	
-				  };
-				
-				  var countDown = function(){	
-					if (self.tooltip !== undefined ){
-						self.tooltip.update(  timeToRefresh/1000 + ' seconds' );
-					}
-					
-					timeToRefresh -= 1000;
-					if ( timeToRefresh === 0){
-						timeToRefresh = self.timeInterval;
-					}
-				  };
 				
 					if (pressed){
+						
+					  var timeManager = self.getTimeManager();
+					  var timeToRefresh = self.timeInterval;
+
+					  var refresh = function(){
+
+								var layers = timeManager.layers;					
+
+								for (var i=0; i<layers.length; i++){
+									var layer = layers[i];
+									if (layer.getVisibility()){
+										// layer.redraw(true);
+										var timeParam = self.range[0].toISOString() +'/'+ self.range[1].toISOString();
+										layer.mergeNewParams({
+											TIME: timeParam,
+											fake: (new Date()).getTime()
+										});
+									}
+
+								}	
+					  };
+
+					  var countDown = function(){	
+						if (self.tooltip && self.tooltip.getEl()){
+							self.tooltip.update(  timeToRefresh/1000 + ' seconds' );
+						}
+
+						timeToRefresh -= 1000;
+						if ( timeToRefresh === 0){
+							timeToRefresh = self.timeInterval;
+						}
+					  };
+											
 						timeManager.stop();
 						self.tooltip = 	new Ext.ToolTip({
 								        target: 'sync-button',
