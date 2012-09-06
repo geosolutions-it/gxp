@@ -225,7 +225,7 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
                 timeFormat: this.timeFormat,
                 dynamicRange: this.dynamicRange
             },
-            'reset': {
+            /*'reset': {
                 iconCls: 'gxp-icon-reset',
                 ref:'btnReset',
                 handler: this.control.reset,
@@ -233,7 +233,7 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
                 tooltip: this.resetTooltip,
                 menuText: this.resetLabel,
                 text: (this.labelButtons) ? this.resetLabel : false
-            },
+            },*/
             'pause': {
                 iconCls: 'gxp-icon-pause',
                 ref:'btnPause',
