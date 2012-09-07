@@ -77,8 +77,13 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 								var layer = this.layers[l].data.layer;
 								if ( layer instanceof OpenLayers.Layer.WMS && layer.name !== "Nurc Background" ){
 									if (layer.params.CQL_FILTER){
-										var filter = "cruise_name = '"+ this.cruiseName + "' AND " + clause;
+									
 										var type = this.getType(layer.params.CQL_FILTER);
+										var cruiseName = this.getCruiseName(layer.params.CQL_FILTER);
+										
+										// var filter = "cruise_name = '"+ this.cruiseName + "' AND " + clause;
+										var filter = "cruise_name = "+ cruiseName + " AND " + clause;
+										
 										if ( type ){
 											filter += " AND type=" + type;
 										}
@@ -128,6 +133,14 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 
    getType: function( filter ){
 	  var match = filter.match(/.*type *= *([a-zA-Z0-9']*)/);
+	  if ( match && match.length >= 2 ){
+		return match[1];
+	  } 
+	  return null;
+   },
+
+   getCruiseName: function( filter ){
+	  var match = filter.match(/.*cruise_name *= *([a-zA-Z0-9']*)/);
 	  if ( match && match.length >= 2 ){
 		return match[1];
 	  } 
