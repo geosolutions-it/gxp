@@ -304,8 +304,21 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
     },    
 
     getThumbText: function(thumb) {
+	    function prettify( duration ){
+			// adapted from http://ejohn.org/files/pretty.js
+			var secDiff = ( duration / 1000);
+			var dayDiff = Math.floor(secDiff / 86400);
+			return dayDiff == 0 && (
+						secDiff < 60 && "few seconds" ||
+						secDiff < 3600 && Math.floor( secDiff / 60 ) + " minutes" ||
+						secDiff < 86400 && Math.floor( secDiff / 3600 ) + " hours") ||
+					dayDiff < 7 && dayDiff + " days" ||
+					Math.ceil( dayDiff / 7 ) + " weeks";			
+		}
+		var timeManager = thumb.slider.timeManager;
+		var left = prettify(timeManager.range[1].getTime() - timeManager.currentTime.getTime() ) ;
         if(thumb.slider.indexMap[thumb.index] != 'tail') {
-            return (new Date(thumb.value).format(thumb.slider.timeFormat));
+            return (new Date(thumb.value).format(thumb.slider.timeFormat))+" - " + left + " left";
         }
         else {
             var formatInfo = gxp.PlaybackToolbar.smartIntervalFormat.call(thumb, thumb.slider.thumbs[0].value - thumb.value);
