@@ -12,6 +12,7 @@
     left: 17px
 }
 
+
 /* Pan- and Zoom- Panel Styles*/
 
 .olControlPanPanel div {
@@ -341,6 +342,10 @@
 
 .x-btn .gxp-icon-embedded-link, .x-menu-item .gxp-icon-embedded-link, .x-tree-node .gxp-icon-embedded-link, .x-menu-item-checked .x-menu-group-item .x-menu-item-icon.gxp-icon-embedded-link, .gxp-icon-embedded-link {
     background-image: url(img/silk/link.png); !important;
+}
+
+.x-btn .gxp-icon-sync-configuration, .x-menu-item .gxp-icon-sync-configuration, .x-tree-node .gxp-icon-sync-configuration, .x-menu-item-checked .x-menu-group-item .x-menu-item-icon.gxp-icon-sync-configuration, .gxp-icon-sync-configuration  {
+    background-image: url(img/silk/wrench.png);
 }
 
 /* gxp_measure */
