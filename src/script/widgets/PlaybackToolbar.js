@@ -96,13 +96,41 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
         if(!this.control){
             this.control = this.buildTimeManager();
         }
+
+		this.tooltip = null;
+	
         this.control.events.on({
             'play':function(evt){
+				if (this.tooltip===null){
+					this.tooltip = new Ext.ToolTip({
+								        target: 'sync-button',
+								        html:  '1 sec to refresh',
+								        title: 'Working interval: ' + Ext.util.Format.date(this.control.range[0], "d/m/Y") + ' to ' 
+													+ Ext.util.Format.date(this.control.range[1], "d/m/Y" ),
+								        autoHide: false,
+								        closable: true,
+								        draggable:true,
+										anchor: 'bottom',
+										closable: true
+									});	
+					// force show now
+					this.tooltip.showAt( [ this.getEl().getX()-50,  this.getEl().getY()+50 ]);
+								
+				}
                 this.playing = true;
             },
             'stop':function(evt){
+				if (this.tooltip){
+					this.tooltip.destroy();
+					this.tooltip = null;
+				}
+					
                 this.playing = false;
             },
+			'tick': function(evt){
+				if (this.tooltip)
+					this.tooltip.update( evt.currentTime );
+			},
             scope: this
         });
         
@@ -141,6 +169,8 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
         );
         gxp.PlaybackToolbar.superclass.initComponent.call(this);   
      
+	
+
     },
     /** private: method[destroy]
      *  Destory the component.
