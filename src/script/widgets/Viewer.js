@@ -194,6 +194,8 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
              *  Fires when application is ready for user interaction.
              */
             "ready",
+
+			"timemanager",
             
             /** api: event[portalready]
              *  Fires after the portal is initialized.

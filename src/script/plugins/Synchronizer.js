@@ -20,6 +20,33 @@
  */
 Ext.namespace("gxp.plugins");
 
+// hack from http://troubleshootsfdc.blogspot.it/2010/09/display-extjs-tooltip-on-click-on.html
+Ext.ux.ClickToolTip = Ext.extend(Ext.ToolTip,{
+    initTarget : function(target){
+        var t;
+        if((t = Ext.get(target))){
+            if(this.target){
+                var tg = Ext.get(this.target);
+                this.mun(tg, 'click', this.onTargetOver, this);
+                this.mun(tg, 'mouseout', this.onTargetOut, this);
+                this.mun(tg, 'mousemove', this.onMouseMove, this);
+            }
+            this.mon(t, {
+                click: this.onTargetOver,
+                mouseout: this.onTargetOut,
+                mousemove: this.onMouseMove,
+                scope: this
+            });
+            this.target = t;
+        }
+        if(this.anchor){
+            this.anchorTarget = this.target;
+        }
+    }
+	});
+Ext.reg('ux.ClickToolTip', Ext.ux.ClickToolTip);
+
+
 /** api: constructor
  *  .. class:: Synchronizer(config)
  *
@@ -40,8 +67,8 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
         gxp.plugins.Synchronizer.superclass.constructor.apply(this, arguments);
 		this.timeInterval = config.refreshTimeInterval;
 		this.range = config.range;
-		this.startTime = this.range[0];
-		this.endTime = this.range[1];
+		this.startTime = Date.fromISO( this.range[0] );
+		this.endTime = Date.fromISO( this.range[1] );
     },
 
     /** private: method[init]
@@ -49,7 +76,6 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
      */
     init: function(target) {
 		gxp.plugins.Synchronizer.superclass.init.apply(this, arguments);
-		
 	},
 	
   addActions: function() {
@@ -59,76 +85,7 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 		var tooltipInterval;
 		var self = this;
 
-	/*	this.syncButton = new Ext.Button({
-				 id:'sync-button',
-				 text: 'Sync',
-		         iconCls: "gxp-icon-real-time",
-		         tooltip: "Real time sync",
-				 enableToggle:true,
-		         toggleHandler: function(button, pressed) {
-
-						if (pressed){
-
-						  var timeManager = self.getTimeManager();
-						  var timeToRefresh = self.timeInterval;
-
-						  var refresh = function(){
-
-									var layers = timeManager.layers;					
-
-									for (var i=0; i<layers.length; i++){
-										var layer = layers[i];
-										if (layer.getVisibility()){
-											// layer.redraw(true);
-											var timeParam = self.range[0].toISOString() +'/'+ self.range[1].toISOString();
-											layer.mergeNewParams({
-												TIME: timeParam,
-												fake: (new Date()).getTime()
-											});
-										}
-
-									}	
-						  };
-
-						  var countDown = function(){	
-							if (self.tooltip && self.tooltip.getEl()){
-								self.tooltip.update(  'next refresh in ' +timeToRefresh/1000 + ' secs' );
-							}
-
-							timeToRefresh -= 1000;
-							if ( timeToRefresh === 0){
-								timeToRefresh = self.timeInterval;
-							}
-						  };
-
-							timeManager.stop();
-							self.tooltip = 	new Ext.ToolTip({
-									        target: 'sync-button',
-									        html:  timeToRefresh/1000 + ' seconds',
-									        title: 'Working interval: ' + Ext.util.Format.date(self.range[0], "d/m/Y") + ' to ' 
-														+ Ext.util.Format.date(self.range[1], "d/m/Y" ),
-									        autoHide: false,
-									        closable: true,
-									        draggable:true
-										});
-							tooltipInterval = setInterval( countDown, 1000 );
-							interval = setInterval(refresh, self.timeInterval);
-						} else {
-							clearInterval( interval );
-							if (self.tooltip){
-								self.tooltip.destroy();
-								clearInterval( tooltipInterval );
-							}
-						}			
-				 }, scope:this});
-
-			this.configurationButton = new Ext.Button({
-			         iconCls: "gxp-icon-sync-configuration",
-					 text:'Settings',
-			         tooltip: "Config real time sync",
-					 handler: function(){},
-					 scope: this
-					});*/
+		
 
 		this.activeIndex = 0;
 		this.button = new Ext.SplitButton({
@@ -209,19 +166,28 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 												  };
 
 													timeManager.stop();
+													timeManager.toolbar.disable();
+													
 													self.tooltip = 	new Ext.ToolTip({
 															        target: 'sync-button',
-															        html:  timeToRefresh/1000 + ' seconds',
-															        title: 'Working interval: ' + Ext.util.Format.date(self.range[0], "d/m/Y") + ' to ' 
-																				+ Ext.util.Format.date(self.range[1], "d/m/Y" ),
+															        html:  interval/1000 + ' seconds',
+															        title: 'Working interval: ' + Ext.util.Format.date(self.startTime, "d/m/Y") + ' to ' 
+																				+ Ext.util.Format.date(self.endTime, "d/m/Y" ),
 															        autoHide: false,
 															        closable: true,
-															        draggable:true
+															        draggable:true,
+																	anchor: 'bottom',
+																	closable: true
 																});
+													// force show now
+													self.tooltip.showAt( [ Ext.getCmp('sync-button').getEl().getX() -50, Ext.getCmp('sync-button').getEl().getY() -50  ]);
+											
 													tooltipInterval = setInterval( countDown, 1000 );
 													interval = setInterval(refresh, self.timeInterval);	
 	                                    } else {
 											clearInterval( interval );
+											var timeManager = self.getTimeManager();
+											timeManager.toolbar.enable();
 											if (self.tooltip){
 												self.tooltip.destroy();
 												clearInterval( tooltipInterval );
@@ -270,7 +236,7 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 														maxValue: self.range[1],
 														minValue: self.range[0],
 														format:"d/m/Y",
-														value:Ext.util.Format.date(self.startTime, "d/m/Y"),
+														value:Ext.util.Format.date( self.startTime, "d/m/Y"),
 														width:5
 											        },{  
 														id:"end-datefield",
@@ -281,15 +247,15 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 														maxValue: self.range[1],
 														minValue: self.range[0],
 														format:"d/m/Y",
-														value:Ext.util.Format.date(self.endTime, "d/m/Y"),
+														value:Ext.util.Format.date( self.endTime, "d/m/Y"),
 														width:5
 													 },{  
 														id:"interval-numberfield",
 														xtype:'numberfield',
-														fieldLabel: 'Refresh interval (5-60 secs)',
+														fieldLabel: 'Refresh interval (5 sec-15 min)',
 														allowDecimals:false,
 														width:5,
-														maxValue:60,
+														maxValue:60*15,
 														minValue:5,
 														value:self.timeInterval/1000,
 														allowBlank:false
@@ -303,8 +269,8 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 															var endTimeField = Ext.getCmp("end-datefield"); 
 															var intervalField = Ext.getCmp("interval-numberfield"); 
 															if (startTimeField.isValid(false) && endTimeField.isValid(true) && intervalField.isValid(true)){	
-																self.startTime = startTimeField.getValue();
-																self.endTime = endTimeField.getValue();
+																self.startTime = new Date( startTimeField.getValue() );
+																self.endTime = new Date( endTimeField.getValue() );
 																self.timeInterval = intervalField.getValue() * 1000;
 																win.destroy();
 															} else {
@@ -329,7 +295,10 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 	            })
 	        });
 		
-	
+		this.target.on("timemanager", function(){
+				self.getTimeManager();
+		});
+
         var actions = [
 			this.button
         ];
@@ -351,7 +320,12 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 						if (self.button.pressed){
 							self.button.toggle();
 						}
-					});		
+						self.button.disable();
+					});	
+			this.timeManager.events.register('stop', this, 
+					function(){ 
+						self.button.enable();
+					});	
 	    }
 		return this.timeManager;
     }

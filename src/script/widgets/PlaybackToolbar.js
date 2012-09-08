@@ -139,7 +139,8 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
              */
             "rangemodified"            
         );
-        gxp.PlaybackToolbar.superclass.initComponent.call(this);        
+        gxp.PlaybackToolbar.superclass.initComponent.call(this);   
+     
     },
     /** private: method[destroy]
      *  Destory the component.
@@ -212,6 +213,22 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
         }
         return items;
     },
+
+	disable: function(){
+		this.btnPlay.disable();
+		this.btnNext.disable();
+		this.btnLoop.disable();
+		this.btnFastforward.disable();
+		this.slider.disable();
+	},
+	
+	enable: function(){
+		this.btnPlay.enable();
+		this.btnNext.enable();
+		this.btnLoop.enable();
+		this.btnFastforward.enable();
+		this.slider.enable();		
+	},
 
     getAvailableTools: function(){         
         var tools = {
@@ -393,6 +410,10 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
         //DON'T DROP FRAMES
         //this.controlConfig.maxFrameDelay = NaN;
         var ctl = this.control = new OpenLayers.Control.TimeManager(this.controlConfig);
+		if (!ctl.toolbar){
+			ctl.toolbar = this;
+		}
+	
         ctl.loop = this.looped;
         this.mapPanel.map.addControl(ctl);
         if(ctl.layers) {

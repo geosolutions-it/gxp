@@ -52,7 +52,9 @@ gxp.plugins.LoadingIndicator = Ext.extend(gxp.plugins.Tool, {
      *  :arg target: ``Object``
      */
     init: function(target) {
-        target.map.events.register("preaddlayer", this, function(e) {
+		console.log(target);
+        target.on("layerselectionchange", this, function(e) {
+			console.log(e);
             var layer = e.layer;
             if (layer instanceof OpenLayers.Layer.WMS) {
                 layer.events.on({
