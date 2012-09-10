@@ -211,7 +211,12 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 									var xmlFormat = new OpenLayers.Format.XML();                  
 									var xmlResp = xmlFormat.read(r.priv.responseText);
 									
-									var rootNode = xmlResp.getElementsByTagName('wfs:FeatureCollection')[0];
+									var rootNode;
+									if(Ext.isChrome)
+										rootNode = xmlResp.getElementsByTagName('FeatureCollection')[0];
+									else
+										rootNode = xmlResp.getElementsByTagName('wfs:FeatureCollection')[0];
+										
 									var numberOfFeatures = rootNode.getAttribute('numberOfFeatures');
 									
 									if(numberOfFeatures == 1){	
