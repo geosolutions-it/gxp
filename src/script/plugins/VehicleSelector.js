@@ -390,22 +390,10 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 	  return null;
     },
 
-    saveState: function(state){
-	 this.oldState = state;
-    },
-
     restoreState: function(col, gpanel, rowIndex){	
 		var store = gpanel.getStore();		
 		var record = store.getAt(rowIndex);
 		record.set("selected", true);
-    },
-
-    createCheckboxes: function(){
-	    var checkboxes = new Array();
-	    for ( var i=0; i<this.vehicles.length; i++ ){
-			checkboxes[i] = {boxLabel: this.vehicles[i], name: this.vehicles[i], checked:true}
-		}
-		return checkboxes;
     }
 });
 

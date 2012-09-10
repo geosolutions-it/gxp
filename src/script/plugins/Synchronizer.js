@@ -258,7 +258,7 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 													 },{  
 														id:"interval-numberfield",
 														xtype:'numberfield',
-														fieldLabel: 'Refresh interval (5 sec-15 min)',
+														fieldLabel: 'Refresh interval (s)',
 														allowDecimals:false,
 														width:5,
 														maxValue:60*15,

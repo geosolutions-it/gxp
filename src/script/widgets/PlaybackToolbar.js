@@ -110,6 +110,7 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
 								        autoHide: false,
 								        closable: true,
 								        draggable:true,
+										width: 350,
 										anchor: 'bottom',
 										closable: true
 									});	

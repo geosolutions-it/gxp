@@ -132,7 +132,7 @@ gxp.plugins.EmbeddedLink = Ext.extend(gxp.plugins.Tool, {
 		 var cruiseName = Ext.getCmp('tree').title;
 		 currentUrl += '&cruiseName=' + cruiseName;
 		
-		 currentUrl += '&vehicles=';
+		 /*currentUrl += '&vehicles=';
 		 var checkbox = Ext.getCmp('vehicle-group');
 		 var items = checkbox.items.items || checkbox.items;
 		 for (var i=0; i<items.length; i++){
@@ -143,8 +143,7 @@ gxp.plugins.EmbeddedLink = Ext.extend(gxp.plugins.Tool, {
 					currentUrl += ',';
 				}
 			}
-			
-		 }
+		 }*/
 		
 		return currentUrl;
 	}
