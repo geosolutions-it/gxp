@@ -63,7 +63,7 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 
     /** private: method[constructor]
      */
-    constructor: function(config) {
+    constructor: function(config) {		
         gxp.plugins.Synchronizer.superclass.constructor.apply(this, arguments);
 		this.timeInterval = config.refreshTimeInterval;
 		this.range = config.range;
@@ -183,6 +183,12 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 													self.tooltip.showAt( [ Ext.getCmp('sync-button').getEl().getX() -50, Ext.getCmp('sync-button').getEl().getY() -50  ]);
 											
 													tooltipInterval = setInterval( countDown, 1000 );
+													
+													//
+													// Fire event in order to refresh the Vehicle selector
+													//
+													this.target.fireEvent('refreshToolActivated');
+													
 													interval = setInterval(refresh, self.timeInterval);	
 	                                    } else {
 											clearInterval( interval );
