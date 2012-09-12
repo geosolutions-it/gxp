@@ -540,19 +540,19 @@ gxp.PlaybackToolbar.guessTimeFormat = function(increment){
                 format = 'l, F d, Y g:i:s A';
                 break;
             case 'Minutes':
-                format = 'l, F d, Y g:i A';
+                format = 'l, F d, Y g:i:s A';
                 break;
             case 'Hours':
-                format = 'l, F d, Y g A';
+                format = 'l, F d, Y g:i:s A';
                 break;
             case 'Days':
-                format = 'l, F d, Y';
+                format = 'l, F d, Y g:i:s A';
                 break;
             case 'Months':
-                format = 'F, Y';
+                format = 'l, F d, Y g:i:s A';
                 break;
             case 'Years':
-                format = 'Y';
+                format = 'l, F d, Y g:i:s A';
                 break;
         }
         return format;

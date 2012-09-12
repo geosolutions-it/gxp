@@ -49,6 +49,7 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
     listOnlyText:'Use Exact List Values Only',
     stepText:'Animation Step',
     unitsText:'Animation Units',
+    frameRateText:'Animation Request',
     noUnitsText:'Snap To Time List',
     loopText:'Loop Animation',
     reverseText:'Reverse Animation',
@@ -82,6 +83,7 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
                         text: this.rangeChoiceText
                     }, {
                         fieldLabel: this.startText,
+                        //format: "d-m-Y",  
                         listeners: {
                             'select': this.setStartTime,
                             'change': this.setStartTime,
@@ -90,6 +92,7 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
                         ref: '../../rangeStartField'
                     }, {
                         fieldLabel: this.endText,
+                        //format: "d-m-Y",  
                         listeners: {
                             'select': this.setEndTime,
                             'change': this.setEndTime,
@@ -100,7 +103,7 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
                 }, {
                     xtype: 'fieldset',
                     title: this.animationFieldsetText,
-                    labelWidth:100,
+                    labelWidth:120,
                     items: [
                    /* {
                       boxLabel:this.listOnlyText,
@@ -111,6 +114,16 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
                       ref:'../../listOnlyCheck'
                     },*/
                     {
+                        fieldLabel: this.frameRateText,
+                        xtype: 'numberfield',
+                        anchor:'-25',
+                        enableKeyEvents:true,
+                        listeners: {
+                            'change': this.setFrameRate,
+                            scope: this
+                        },
+                        ref: '../../rateValueField'
+                    },{
                         fieldLabel: this.stepText,
                         xtype: 'numberfield',
                         anchor:'-25',
@@ -193,6 +206,10 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
         this.un('show',this,this.populateForm);
         gxp.PlaybackOptionsPanel.superclass.destroy.call(this);
     },
+    setFrameRate: function(cmp,newVal,oldVal){
+        this.timeManager.frameRate = newVal; 
+        
+    },    
     setStartTime: function(cmp, date){
         this.timeManager.setStart(date);
         this.timeManager.fixedRange=true;
@@ -215,6 +232,12 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
             this.timeManager.units = units;
             if(this.playbackToolbar.playbackMode != 'track'){
                 this.timeManager.incrementTime();
+                
+                // prende la data di inizio e la data di fine del pannello
+                // e invoca la funzione setRange di timeManager per ricalcolare i valori della slide
+                this.timeManager.setRange([this.timeManager.range[0],this.timeManager.range[1]]);
+                this.timeManager.fixedRange=true;             
+
             }
         }
     },
@@ -225,6 +248,12 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
                 this.timeManager.rangeInterval != newVal){
                     this.timeManager.rangeInterval = newVal;
                     this.timeManager.incrementTime(newVal);
+                    
+                    // prende la data di inizio e la data di fine del pannello
+                    // e invoca la funzione setRange di timeManager per ricalcolare i valori della slide
+                    this.timeManager.setRange([this.timeManager.range[0],this.timeManager.range[1]]);
+                    this.timeManager.fixedRange=true;                              
+                    
             }
         }
     },
@@ -264,6 +293,8 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
             this.rangeStartField.originalValue = this.timeManager.range[0];
             this.rangeEndField.setValue(this.timeManager.range[1]);
             this.rangeEndField.originalValue = this.timeManager.range[1];
+            this.rateValueField.setValue(this.timeManager.frameRate);
+            this.rateValueField.originalValue = this.timeManager.frameRate;
             this.stepValueField.setValue(this.timeManager.step);
             this.stepValueField.originalValue = this.timeManager.step;
             this.stepUnitsField.setValue(this.timeManager.units);

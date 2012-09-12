@@ -265,7 +265,7 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
     reconfigureSlider : function(sliderInfo) {
         var slider = this;
         slider.setMaxValue(sliderInfo.maxValue);
-        slider.setMinValue(sliderInfo.minValue);
+        slider.setMinValue(sliderInfo.minValue);       
         Ext.apply(slider, {
             increment : sliderInfo.interval,
             keyIncrement : sliderInfo.interval,
