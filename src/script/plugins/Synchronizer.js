@@ -167,6 +167,8 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 
 													timeManager.stop();
 													timeManager.toolbar.disable();
+                                                    timeManager.toolbar.optionsWindow.optionsPanel.form.disable();
+                                                    timeManager.toolbar.optionsWindow.optionsPanel.bottomToolbar.items.items[0].disable();
 													
 													self.tooltip = 	new Ext.ToolTip({
 															        target: 'sync-button',
@@ -194,6 +196,8 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 											clearInterval( interval );
 											var timeManager = self.getTimeManager();
 											timeManager.toolbar.enable();
+                                            timeManager.toolbar.optionsWindow.optionsPanel.form.enable();
+                                            timeManager.toolbar.optionsWindow.optionsPanel.bottomToolbar.items.items[0].enable();                                            
 											if (self.tooltip){
 												self.tooltip.destroy();
 												clearInterval( tooltipInterval );
