@@ -200,7 +200,7 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
                 autoScroll: true,
                 location: evt.xy,
                 map: this.target.mapPanel,
-                width: 250,
+                width: 420,
                 height: 300,
                 defaults: {
                     layout: "fit",
@@ -241,6 +241,7 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
             }
         } else if (text) {
             config.push(Ext.apply({
+                bodyStyle: 'padding:10px;background-color:#0055BB',
                 title: title,
                 html: text
             }, this.itemConfig));
