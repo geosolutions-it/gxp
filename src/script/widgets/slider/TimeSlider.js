@@ -80,7 +80,8 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
             [new Ext.slider.Tip({getText:this.getThumbText})]);
 
         this.listeners = Ext.applyIf(this.listeners || {}, {
-            'changecomplete' : this.onSliderChangeComplete,
+            //'changecomplete' : this.onSliderChangeComplete,
+            'change' : this.onSliderChangeComplete,
             'dragstart' : function() {
                 if(this.timeManager.timer) {
                     this.timeManager.stop();
@@ -191,14 +192,21 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
     
     onTimeTick : function(evt) {
         var currentTime = evt.currentTime;
+        var curTime = evt.curTime;
         if (currentTime) {
             var toolbar = this.refOwner; //TODO use relay event instead
             var tailIndex = this.indexMap ? this.indexMap.indexOf('tail') : -1;
             var offset = (tailIndex > -1) ? currentTime.getTime() - this.thumbs[0].value : 0;
-            this.setValue(0, evt.currentTime.getTime());
+            
             if(tailIndex > -1) {
-                this.setValue(tailIndex, this.thumbs[tailIndex].value + offset);
+                if (!curTime){
+                    this.setValue(tailIndex, this.thumbs[tailIndex].value + offset);
+                } else{
+                    //this.setValue(tailIndex, this.thumbs[tailIndex].value);
+                    this.setValue(tailIndex, this.timeManager.range[0].getTime());
+                }
             }
+            this.setValue(0, evt.currentTime.getTime());
             this.updateTimeDisplay();
             //TODO use relay event instead, fire this directly from the slider
             toolbar.fireEvent('timechange', toolbar, currentTime);
