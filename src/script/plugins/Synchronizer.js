@@ -68,7 +68,19 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 		this.timeInterval = config.refreshTimeInterval;
 		this.range = config.range;
 		this.startTime = Date.fromISO( this.range[0] );
-		this.endTime = Date.fromISO( this.range[1] );
+        
+        //
+        //set endTime == currentTime;
+        //
+        this.d = new Date();        
+        this.UTC = this.d.getUTCFullYear() + '-'
+		            + this.pad(this.d.getUTCMonth() + 1) + '-'
+		            + this.pad(this.d.getUTCDate()) + 'T'
+		            + this.pad(this.d.getUTCHours()) + ':'
+		            + this.pad(this.d.getUTCMinutes()) + ':'
+		            + this.pad(this.d.getUTCSeconds()) + 'Z';        
+		//this.endTime = Date.fromISO( this.range[1] );
+        this.endTime = Date.fromISO( this.UTC );
     },
 
     /** private: method[init]
@@ -215,7 +227,6 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 		                        toggleGroup: this.toggleGroup,
 		                        group: this.toggleGroup,
 		                        handler: function(){
-								
 										// open modal window
 										var win = new Ext.Window({
 											   closable:true,
@@ -338,7 +349,10 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 					});	
 	    }
 		return this.timeManager;
-    }
+    },
+    pad: function (n){
+        return n < 10 ? '0' + n : n 
+    }  
 	
 
 

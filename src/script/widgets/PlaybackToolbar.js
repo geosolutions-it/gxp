@@ -77,8 +77,8 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
     fastforwardTooltip:'Double Speed Playback',
     nextLabel:'Next',
     nextTooltip:'Advance One Frame',
-    resetLabel:'Reset',
-    resetTooltip:'Reset to the start',
+    resetLabel:'Current Time',
+    resetTooltip:'Reset to the Current Time',
     loopLabel:'Loop',
     normalLabel:'Loop',
     loopTooltip:'Continously loop the animation',
@@ -91,7 +91,7 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
      */
     initComponent: function() {
         if(!this.playbackActions){
-            this.playbackActions = ["settings","slider","reset","play","fastforward","next","loop"]; 
+            this.playbackActions = ["settings","slider","reset","currenttime","play","fastforward","next","loop"]; 
         }
         if(!this.control){
             this.control = this.buildTimeManager();
@@ -282,6 +282,15 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
                 menuText: this.resetLabel,
                 text: (this.labelButtons) ? this.resetLabel : false
             },*/
+            'currenttime': {
+                iconCls: 'gxp-icon-currenttime',
+                ref:'btnCurrentTime',
+                handler: this.control.currenttime,
+                scope: this.control,
+                tooltip: this.resetTooltip,
+                menuText: this.resetLabel,
+                text: (this.labelButtons) ? this.resetLabel : false
+            },            
             'pause': {
                 iconCls: 'gxp-icon-pause',
                 ref:'btnPause',

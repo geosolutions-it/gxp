@@ -531,6 +531,9 @@ div.olMap div.gx-overlay-playback {
 .x-btn .gxp-icon-reset{
     background-image:url('img/silk/control_start_blue.png')
 }
+.x-btn .gxp-icon-currenttime{
+    background-image:url('img/silk/arrow_refresh.png')
+}
 .x-btn .gxp-icon-settings{
     background-image:url('img/silk/control_equalizer_blue.png')
 }
