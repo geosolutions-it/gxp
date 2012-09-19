@@ -251,9 +251,21 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 			}]
 		});
 		
+		//
+		// Synchup when the Real Time Synch is enabled
+		//
 		this.target.on('refreshToolActivated', function(){
 		    var tabPanel = Ext.getCmp('west').setActiveTab(1);
 			this.refreshRecords();
+		}, this);
+		
+		//
+		// Synchup at startup
+		//
+	    this.target.on('ready', function(){
+		    var tabPanel = Ext.getCmp('west').setActiveTab(1);
+			this.refreshRecords();
+			var tabPanel = Ext.getCmp('west').setActiveTab(0);
 		}, this);
 		
 	    var panel = gxp.plugins.VehicleSelector.superclass.addOutput.call(this, this.grid);
