@@ -42,6 +42,10 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 
     rotateFeatureText: "Rotate",
 
+	newSelection: false,
+	
+	undo:false,
+
 
     /** api: config[ featureSelectorTooltip]
      *  ``String``
@@ -184,7 +188,6 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 	        });		
 	
 	
-		
         var actions = [
 			this.button
 		];
@@ -195,7 +198,10 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 		var self = this;
 		return new OpenLayers.Control.ModifyFeature(
 			this.layer,
-			{ mode: mode }
+			{
+				 clickout: false, toggle: false,
+                 multiple: false, hover: false,
+				 mode: mode }
 		);
 	},
 
@@ -204,8 +210,38 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 		this.layer.events.on(
 					{
 					 'featureselected': function(selected) {
-							// self.target.fireEvent("featureselected", self, selected.feature);
-							self.onSelected(self, selected.feature);
+							
+							if (!self.undo){
+								if ( self.newSelection ){
+									self.onSave( self, selected.feature );
+							        /* Ext.MessageBox.show({
+							           title:'Save Changes?',
+							           msg: 'You are leaving a note that has unsaved changes. <br />Would you like to save your changes?',
+							           buttons: Ext.MessageBox.YESNO,
+							           fn: function(btn){
+										 if (btn==='yes'){ // yes
+											self.onSave( self, selected.feature );
+										 } else if (btn==='no'){ // no
+											self.onDiscard( self, selected.feature );
+										} else {
+											// this code should never be reached!
+											console.error('something went wrong: ' + btn + ' is not a valid option');
+										}
+									   },
+							           icon: Ext.MessageBox.QUESTION
+							       }); */
+								} else {
+									self.newSelection = true;
+									self.onSelected(self, selected.feature);
+								}								
+							}
+						
+
+						
+					  },
+					
+					  'beforefeaturemodified': function( feature ){
+							return !self.undo;
 						}
 					 });	
 		var control = selectControl = new OpenLayers.Control.SelectFeature(
@@ -261,16 +297,44 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
    },
 
    saveFeature: function(feature){
+		this.newSelection = false;
 		this.button.toggle();
 		this.modifyControl.deactivate();
 		this.selectorControl.unselectAll();
    },
     
    discardUpdates: function(feature){
-		this.button.toggle();
+	   this.newSelection = false;
+	   this.button.toggle();
 	   this.modifyControl.deactivate();
 	   this.selectorControl.unselectAll();
-   }
+   },
+
+   	undoSelection: function(selectedFeature, oldFeature){
+		
+		
+		//this.modifyControl.unselectFeature(selectedFeature);
+		//this.modifyControl.selectFeature(oldFeature);
+		
+		// this.modifyControl.deactivate();
+		// this.selectorControl.unselect(selectedFeature);
+		// this.modifyControl.unselectFeature(selectedFeature);
+		
+		// this.modifyControl.activate();
+		
+		// TODO hack to avoid infinite recursion, is there a better way?
+		// this.undo = true;
+		
+		// this.selectorControl.select(oldFeature);
+		
+		// this.undo = true;
+		
+		// this.modifyControl.selectFeature(oldFeature);
+		
+		// this.undo = false;
+		
+		
+	}
 
 });
 

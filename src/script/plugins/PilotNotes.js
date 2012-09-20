@@ -182,7 +182,13 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 			);
 		
 		this.target.on("notefeatureselected", function selectFeature(container, feature){
+			
 			self.feature = feature;
+			self.container = container;
+			
+			self.copyFromSelectedToForm( feature );
+			
+			/*self.feature = feature;
 			self.container = container;
 			if ( feature.attributes ){
 				Ext.getCmp("name-textfield").setValue( feature.attributes.name );
@@ -198,7 +204,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 				Ext.getCmp("pn-longitude-textfield").setVisible(true);
 				Ext.getCmp("pn-latitude-textfield").setValue(  point.x );
 				Ext.getCmp("pn-longitude-textfield").setValue( point.y );
-			}
+			}*/
 			
 			
 			self.enable();
@@ -209,7 +215,113 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 			self.disable();
 			self.resetForm();
 		});
+		
+		this.target.on("notefeaturesaved", function saveFeature(container, feature){
+
+			// se il form non è valido, annulla la selezione
+			// container.undoSelection(feature, self.feature);
+		
+			
+			if ( self.isChanged()){
+					Ext.MessageBox.show({
+			           title:'Save Changes?',
+			           msg: 'You are leaving a note that has unsaved changes. <br />Would you like to save your changes?',
+			           buttons: Ext.MessageBox.YESNO,
+			           fn: function(btn){
+						 if (btn==='yes'){ // yes
+							self.copyFromFormToSelected( self.feature, container );
+							self.resetForm();
+							self.feature = feature;
+							self.container = container;
+							self.copyFromSelectedToForm( feature );
+						 } else if (btn==='no'){ // no
+							self.resetForm();
+							self.feature = feature;
+							self.container = container;
+							self.copyFromSelectedToForm( feature );
+						} else {
+							// this code should never be reached!
+							console.error('something went wrong: ' + btn + ' is not a valid option');
+						}
+					   },
+			           icon: Ext.MessageBox.QUESTION
+			       });				
+				} else {
+					self.resetForm();
+					self.feature = feature;
+					self.container = container;
+					self.copyFromSelectedToForm( feature );
+				}
+
+			});		
+		
 		return panel;
+	},
+	
+	isChanged: function(){
+		if (this.feature && this.feature.attributes){
+			var name = Ext.getCmp("name-textfield").getValue();
+			var description = Ext.getCmp("description-textfield").getValue();
+			var date = Ext.getCmp("date-textfield").getValue();
+			var time = Ext.getCmp("time-textfield").getValue();
+			var vehicle  = Ext.getCmp("vehicle-textfield").getValue();
+			var lat = Ext.getCmp("pn-latitude-textfield").getValue();
+			var lng = Ext.getCmp("pn-longitude-textfield").getValue();
+			var data = this.feature.attributes;
+			return data.name !== name || data.description !== description 
+					|| data.date !== date || data.time !== time
+					|| data.vehicle !== vechicle || lat !== data.latitude || lng !== data.longitude;
+		}
+		return true;
+	},
+	
+	copyFromSelectedToForm: function(selected){
+		if ( selected.attributes ){
+			Ext.getCmp("name-textfield").setValue( selected.attributes.name );
+			Ext.getCmp("description-textfield").setValue( selected.attributes.description );
+			Ext.getCmp("date-textfield").setValue( selected.attributes.date );
+			Ext.getCmp("time-textfield").setValue( selected.attributes.time );
+			Ext.getCmp("vehicle-textfield").setValue( selected.attributes.vehicle );
+		}
+		
+		if ( selected.geometry instanceof OpenLayers.Geometry.Point ){
+			var point = selected.geometry.clone(); 
+			Ext.getCmp("pn-latitude-textfield").setVisible(true);
+			Ext.getCmp("pn-longitude-textfield").setVisible(true);
+			Ext.getCmp("pn-latitude-textfield").setValue(  point.x );
+			Ext.getCmp("pn-longitude-textfield").setValue( point.y );
+		}		
+	},
+	
+	copyFromFormToSelected: function(selected, container){
+		var name = Ext.getCmp("name-textfield").getValue();
+		var description = Ext.getCmp("description-textfield").getValue();
+		var date = Ext.getCmp("date-textfield").getValue();
+		var time = Ext.getCmp("time-textfield").getValue();
+		var vehicle  = Ext.getCmp("vehicle-textfield").getValue();
+		selected.attributes = { name:name, description:description, date:date, time:time, vehicle:vehicle };
+		if ( selected.geometry instanceof OpenLayers.Geometry.Point ){
+				var latField = Ext.getCmp("pn-latitude-textfield");
+				var lngField = Ext.getCmp("pn-longitude-textfield");
+				
+				
+				if ( latField.isValid(false) && lngField.isValid(false) ){
+					var point = new OpenLayers.Geometry.Point(latField.getValue(), lngField.getValue());
+					// point = point.transform( new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+					selected.geometry.x = point.x;
+					selected.geometry.y = point.y;	
+					// this.disable();
+					// container.saveFeature(selected);
+					// this.resetForm();
+				} else {
+					Ext.Msg.show({
+		                   title: 'Cannot save this geometry',
+		                   msg: 'Invalid coordinates.',
+		                   buttons: Ext.Msg.OK,
+		                   icon: Ext.MessageBox.ERROR
+		                });
+				}
+		}		
 	},
 	
 	/** private: method[handleSave]
@@ -229,7 +341,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 			                dateField.isValid(false) &&
 			                   timeField.isValid(false )){
 				
-				var name = nameField.getValue();
+				/*var name = nameField.getValue();
 				var description = descField.getValue();
 				var vehicle = vehicleField.getValue();
 				var date = dateField.getValue();
@@ -261,9 +373,11 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 						this.disable();
 						this.container.saveFeature(this.feature);
 						this.resetForm();
-					}				
+					}			*/	
 				
-				
+					this.copyFromFormToSelected( this.feature, this.container );
+					this.container.saveFeature(this.feature);
+					this.disable();
 			
 			} else {
 				  Ext.Msg.show({

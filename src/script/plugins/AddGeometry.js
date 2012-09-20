@@ -195,7 +195,7 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
                         })
                     ),{
 						text: this.addPointFromCoordsMenuText,
-                        iconCls: "gxp-icon-add-point",
+                        iconCls: "gxp-icon-add-point-from-coords",
                         toggleGroup: this.toggleGroup,
                         group: this.toggleGroup,
                         handler:this.handleAddPointFromCoords,
@@ -305,7 +305,7 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 		var win = new Ext.Window({
 			       closable:true,
 				   title: 'Add point from coordinates',
-				   iconCls: "gxp-icon-add-point",
+				   iconCls: "gxp-icon-add-point-from-coords",
 				   border:false,
 				   modal: true, 
 				   bodyBorder: false,

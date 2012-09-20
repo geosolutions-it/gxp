@@ -310,6 +310,9 @@
     background-image: url(img/silk/note_add.png); !important;
 }
 
+.x-btn .gxp-icon-add-point-from-coords, .x-menu-item .gxp-icon-add-point-from-coords, .x-tree-node .gxp-icon-add-point-from-coords, .x-menu-item-checked .x-menu-group-item .x-menu-item-icon.gxp-icon-add-point-from-coords, .gxp-icon-add-point-from-coords {
+    background-image: url(img/silk/flag_blue.png); !important;
+}
 .x-btn .gxp-icon-add-point, .x-menu-item .gxp-icon-add-point, .x-tree-node .gxp-icon-add-point, .x-menu-item-checked .x-menu-group-item .x-menu-item-icon.gxp-icon-add-point, .gxp-icon-add-point {
     background-image: url(img/silk/flag_red.png); !important;
 }
