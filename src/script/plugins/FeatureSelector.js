@@ -115,6 +115,7 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 	                                    if (checked) {
 	                                        this.button.setIconClass(item.iconCls);
 	                                    } else {	
+											this.newSelection = false;
 											this.selectorControl.unselectAll();
 											this.onUnselected(self);
 										}
