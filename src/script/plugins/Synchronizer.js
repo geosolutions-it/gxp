@@ -96,8 +96,9 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 		var interval;
 		var tooltipInterval;
 		var self = this;
-
-		
+        var navigation = this.target.mapPanel.map.getControlsByClass('OpenLayers.Control.Navigation');
+        var panPanel = this.target.mapPanel.map.getControlsByClass('OpenLayers.Control.PanPanel');
+        var zoomPanel = this.target.mapPanel.map.getControlsByClass('OpenLayers.Control.ZoomPanel');
 
 		this.activeIndex = 0;
 		this.button = new Ext.SplitButton({
@@ -179,9 +180,39 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 
 													timeManager.stop();
 													timeManager.toolbar.disable();
-                                                    timeManager.toolbar.optionsWindow.optionsPanel.form.disable();
-                                                    timeManager.toolbar.optionsWindow.optionsPanel.bottomToolbar.items.items[0].disable();
-													
+                                                    item.ownerCt.items.items[1].disable();
+                                                    for(var tool in this.target.tools){
+                                                        if(this.target.tools[tool].ptype == "gxp_navigation"){  
+                                                            this.target.tools[tool].actions[0].items[0].disable();
+                                                        }                                                        
+                                                        if(this.target.tools[tool].ptype == "gxp_navigationhistory"){  
+                                                            this.target.tools[tool].actions[0].items[0].disable();
+                                                            this.target.tools[tool].actions[1].items[0].disable();
+                                                        }
+                                                        if(this.target.tools[tool].ptype == "gxp_zoom"){  
+                                                            this.target.tools[tool].actions[0].items[0].disable();
+                                                            this.target.tools[tool].actions[1].items[0].disable();
+                                                        }   
+                                                        if(this.target.tools[tool].ptype == "gxp_zoombox"){  
+                                                            this.target.tools[tool].actions[0].disable();
+                                                            this.target.tools[tool].actions[1].disable();
+                                                        }  
+                                                        if(this.target.tools[tool].ptype == "gxp_zoomtoextent"){  
+                                                            this.target.tools[tool].actions[0].items[0].disable();
+                                                        }                                                          
+                                                    }
+                                                    
+                                                    for(var a=0;a<this.target.mapPanel.items.items.length;a++){
+                                                        if(this.target.mapPanel.items.items[a].baseCls == "gx-zoomslider"){  
+                                                            this.target.mapPanel.items.items[a].hide();
+                                                        }                                                              
+                                                    }
+                                                    
+                                                    navigation[0].deactivate();
+                                                    navigation[1].deactivate();
+                                                    panPanel[0].deactivate();
+                                                    zoomPanel[0].deactivate();                                                      
+                                                    
 													self.tooltip = 	new Ext.ToolTip({
 															        target: 'sync-button',
 															        html:  interval/1000 + ' seconds',
@@ -208,8 +239,43 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 											clearInterval( interval );
 											var timeManager = self.getTimeManager();
 											timeManager.toolbar.enable();
-                                            timeManager.toolbar.optionsWindow.optionsPanel.form.enable();
-                                            timeManager.toolbar.optionsWindow.optionsPanel.bottomToolbar.items.items[0].enable();                                            
+                                            item.ownerCt.items.items[1].enable();
+                                            for(var tool in this.target.tools){
+                                                if(this.target.tools[tool].ptype == "gxp_navigation"){  
+                                                    this.target.tools[tool].actions[0].items[0].enable();
+                                                }                                                       
+                                                if(this.target.tools[tool].ptype == "gxp_navigationhistory"){
+                                                    if (this.target.tools[tool].actions[0].control.active){
+                                                        this.target.tools[tool].actions[0].items[0].enable();
+                                                    }
+                                                    if (this.target.tools[tool].actions[1].control.active){
+                                                        this.target.tools[tool].actions[1].items[0].enable();
+                                                    }
+                                                }
+                                                if(this.target.tools[tool].ptype == "gxp_zoom"){  
+                                                    this.target.tools[tool].actions[0].items[0].enable();
+                                                    this.target.tools[tool].actions[1].items[0].enable();
+                                                }   
+                                                if(this.target.tools[tool].ptype == "gxp_zoombox"){  
+                                                    this.target.tools[tool].actions[0].enable();
+                                                    this.target.tools[tool].actions[1].enable();
+                                                }  
+                                                if(this.target.tools[tool].ptype == "gxp_zoomtoextent"){  
+                                                    this.target.tools[tool].actions[0].items[0].enable();
+                                                }   
+                                            }
+
+                                            for(var a=0;a<this.target.mapPanel.items.items.length;a++){
+                                                if(this.target.mapPanel.items.items[a].baseCls == "gx-zoomslider"){  
+                                                    this.target.mapPanel.items.items[a].show();
+                                                }                                                              
+                                            }   
+                                                        
+                                            navigation[0].activate();
+                                            navigation[1].activate();
+                                            panPanel[0].activate();
+                                            zoomPanel[0].activate();                                               
+                                            
 											if (self.tooltip){
 												self.tooltip.destroy();
 												clearInterval( tooltipInterval );

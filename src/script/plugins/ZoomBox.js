@@ -63,6 +63,8 @@ gxp.plugins.ZoomBox = Ext.extend(gxp.plugins.Tool, {
     /** api: method[addActions]
      */
     addActions: function() {
+
+        var self = this;
     
         var zoomBoxIn = new OpenLayers.Control.ZoomBox({out:false});        
         var zoomBoxOut = new OpenLayers.Control.ZoomBox({out:true});
@@ -70,7 +72,7 @@ gxp.plugins.ZoomBox = Ext.extend(gxp.plugins.Tool, {
         this.target.mapPanel.map.addControl(zoomBoxIn);
         this.target.mapPanel.map.addControl(zoomBoxOut);
         
-        var zoomInButton = new Ext.Button({
+        this.zoomInButton = new Ext.Button({
             menuText: this.zoomInBoxMenuText,
             iconCls: "gxp-icon-zoombox-in",
             tooltip: this.zoomInTooltip,
@@ -91,7 +93,7 @@ gxp.plugins.ZoomBox = Ext.extend(gxp.plugins.Tool, {
             scope: this
         });
         
-        var zoomOutButton = new Ext.Button({
+        this.zoomOutButton = new Ext.Button({
             menuText: this.zoomOutBoxMenuText,
             iconCls: "gxp-icon-zoombox-out",
             tooltip: this.zoomOutTooltip,
@@ -112,8 +114,39 @@ gxp.plugins.ZoomBox = Ext.extend(gxp.plugins.Tool, {
             scope: this
         });
         
-        var actions = [zoomInButton, zoomOutButton];
+        var actions = [this.zoomInButton, this.zoomOutButton];
+        
+        this.target.on("timemanager", function(){
+                self.getTimeManager();
+        });             
+        
         return gxp.plugins.ZoomBox.superclass.addActions.apply(this, [actions]);
+    },
+    getTimeManager: function(){
+	    if ( ! this.timeManager ){ // if it is not initialized
+			var timeManagers = this.target.mapPanel.map.getControlsByClass('OpenLayers.Control.TimeManager');
+			if (timeManagers.length <= 0){
+				console.error('Cannot init Synchronizer: no TimeManager found');
+				return;
+			}
+			this.timeManager = timeManagers[0];
+			var self = this;
+			// listen to play events
+			this.timeManager.events.register('play', this, 
+					function(){ 
+						if (self.zoomInButton.pressed){
+							self.zoomInButton.toggle();
+						}
+						self.zoomInButton.disable();
+                        self.zoomOutButton.disable();
+					});	
+			this.timeManager.events.register('stop', this, 
+					function(){ 
+						self.zoomInButton.enable();
+                        self.zoomOutButton.enable();
+					});	
+	    }
+		return this.timeManager;
     }
   
 });

@@ -65,6 +65,7 @@ gxp.plugins.ZoomToLayerExtent = Ext.extend(gxp.plugins.ZoomToExtent, {
     /** api: method[addActions]
      */
     addActions: function() {
+        var self = this;
         var actions = gxp.plugins.ZoomToLayerExtent.superclass.addActions.apply(this, arguments);
         actions[0].disable();
 
@@ -74,8 +75,35 @@ gxp.plugins.ZoomToLayerExtent = Ext.extend(gxp.plugins.ZoomToExtent, {
                 !record || !record.get('layer')
             );
         }, this);
-
+        
+        this.target.on("timemanager", function(){
+                self.getTimeManager();
+        });             
         return actions;
+    },
+    getTimeManager: function(){
+	    if ( ! this.timeManager ){ // if it is not initialized
+			var timeManagers = this.target.mapPanel.map.getControlsByClass('OpenLayers.Control.TimeManager');
+			if (timeManagers.length <= 0){
+				console.error('Cannot init Synchronizer: no TimeManager found');
+				return;
+			}
+			this.timeManager = timeManagers[0];
+			var self = this;
+			// listen to play events
+			this.timeManager.events.register('play', this, 
+					function(){ 
+						/*if (self.actions[0].items[0].pressed){
+							self.actions[0].items[0].toggle();
+						}*/
+						self.actions[0].items[0].disable();
+					});	
+			this.timeManager.events.register('stop', this, 
+					function(){ 
+						self.actions[0].items[0].enable();
+					});	
+	    }
+		return this.timeManager;
     }
         
 });
