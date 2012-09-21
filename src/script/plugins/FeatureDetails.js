@@ -50,6 +50,8 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 	deleteButtonText:"Delete",
 	deleteButtonTooltip:"Delete this feature",
 
+	oldX: null,
+	oldY: null,
     feature: null,
     container: null,
   
@@ -175,6 +177,11 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 		// register to listen "addgeometry"	event
 		this.target.on("featureselected", function selectFeature(container, feature){
 			
+			if ( feature.geometry instanceof OpenLayers.Geometry.Point ){
+				self.oldX = feature.geometry.x;
+				self.oldY = feature.geometry.y;	
+			}
+			
 			self.feature = feature;
 			self.container = container;
 			
@@ -201,8 +208,16 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 		this.target.on("featureunselected", function selectFeature(container){
 			self.feature = null;
 			self.container = null;
+			self.oldX = null;
+			self.oldY = null;
 			self.disable();
 			self.resetForm();
+		});
+		this.target.on("featurechanged", function selectFeature(container, feature){
+				if ( feature.geometry instanceof OpenLayers.Geometry.Point ){
+					Ext.getCmp("latitude-textfield").setValue(  feature.geometry.x );
+					Ext.getCmp("longitude-textfield").setValue( feature.geometry.y );
+				}
 		});
 		
 		this.target.on("featuresaved", function saveFeature(container, feature){
@@ -220,6 +235,13 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 						self.container = container;
 						self.copyFromSelectedToForm( feature );
 					 } else if (btn==='no'){ // no
+						
+						if ( self.feature.geometry instanceof OpenLayers.Geometry.Point ){
+							self.feature.geometry.x = self.oldX;
+							self.feature.geometry.y = self.oldY;
+							container.redraw();
+						}
+					
 						self.resetForm();
 						self.feature = feature;
 						self.container = container;

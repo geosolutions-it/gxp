@@ -242,6 +242,13 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 					
 					  'beforefeaturemodified': function( feature ){
 							return !self.undo;
+						},
+						
+					  	
+						
+						// drag events
+						'featuremodified': function(selected){
+							self.onChanged(self, selected.feature);
 						}
 					 });	
 		var control = selectControl = new OpenLayers.Control.SelectFeature(
@@ -309,6 +316,10 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 	   this.modifyControl.deactivate();
 	   this.selectorControl.unselectAll();
    },
+
+  redraw: function(){
+		this.layer.redraw();
+	},
 
    	undoSelection: function(selectedFeature, oldFeature){
 		
