@@ -71,10 +71,60 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 		var map = this.target.mapPanel.map;
 		var self = this;
 		this.selectorControl = this.createSelectorControl();
-		this.modifyControl = this.createModifyControl(OpenLayers.Control.ModifyFeature.DRAG | OpenLayers.Control.ModifyFeature.ROTATE);
+		this.modifyControl = this.createModifyControl( OpenLayers.Control.ModifyFeature.DRAG | OpenLayers.Control.ModifyFeature.ROTATE);
+		this.deleteControl = this.createDeleteControl( );
 	
-		 this.activeIndex = 0;
-	        this.button = new Ext.SplitButton({
+		map.addControl(this.modifyControl);
+		map.addControl( this.selectorControl );
+		map.addControl(this.deleteControl);
+	
+		this.selectButton = new Ext.Button({
+                // text: this.featureSelectorText,
+                iconCls: "gxp-icon-select-feature",
+                toggleGroup: this.toggleGroup,
+                group: this.toggleGroup,
+				tooltip: 'Select',
+				enableToggle: true,
+				toggleHandler: function(button, pressed){
+					if (! pressed ){
+						this.modifyControl.deactivate();
+						this.selectorControl.unselectAll();
+						this.onUnselected(self);	
+						this.deleteButton.disable();
+						this.newSelection = false;
+					} else {
+						this.modifyControl.activate();
+						this.selectorControl.activate();
+					} 
+				},
+				scope:this
+            		
+		});
+		
+		this.deleteButton = new Ext.Button({
+			 // text: this.deleteFeatureText,
+             iconCls: "gxp-icon-delete-feature",
+             toggleGroup: this.toggleGroup,
+             group: this.toggleGroup,		
+		     disabled:true,
+			 tooltip: 'Delete',
+			 enableToggle: true,
+			 toggleHandler: function(button, pressed){
+					if (! pressed ){
+						this.deleteControl.deactivate();
+						this.modifyControl.deactivate();
+						this.selectorControl.unselectAll();
+						this.onUnselected(self);	
+					} else {
+						this.deleteControl.activate();
+						
+					}
+			 },
+			scope:this
+		});
+	
+		// this.activeIndex = 0;
+	        /*this.button = new Ext.SplitButton({
 	            iconCls: "gxp-icon-select-feature",
 	            tooltip: this.featureSelectorTooltip,
 	            enableToggle: true,
@@ -125,45 +175,7 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 	                            // control: this.selectorControl
 								control: this.modifyControl
 	                        })
-						)/*, new Ext.menu.CheckItem(
-			                        new GeoExt.Action({
-			                            text: this.dragFeatureText,
-			                            iconCls: "gxp-icon-drag-feature",
-			                            toggleGroup: this.toggleGroup,
-			                            group: this.toggleGroup,
-			                            listeners: {
-			                                checkchange: function(item, checked) {
-			                                    this.activeIndex = 1;
-			                                    this.button.toggle(checked);
-			                                    if (checked) {
-			                                        this.button.setIconClass(item.iconCls);
-			                                    } 
-			                                },
-			                                scope: this
-			                            },
-			                            map: this.target.mapPanel.map,
-			                            control: this.createModifyControl(OpenLayers.Control.ModifyFeature.DRAG | OpenLayers.Control.ModifyFeature.ROTATE)
-			                        })
-						 ), new Ext.menu.CheckItem(
-						            new GeoExt.Action({
-						                 text: this.rotateFeatureText,
-						                 iconCls: "gxp-icon-rotate-feature",
-						                 toggleGroup: this.toggleGroup,
-						                 group: this.toggleGroup,
-						                 listeners: {
-						                     checkchange: function(item, checked) {
-						                          this.activeIndex = 2;
-						                          this.button.toggle(checked);
-						                          if (checked) {
-						                              this.button.setIconClass(item.iconCls);
-						                          } 
-						                     },
-						                     scope: this
-						                 },
-						                 map: this.target.mapPanel.map,
-						                control: this.createModifyControl(OpenLayers.Control.ModifyFeature.ROTATE)
-						            })
-						)*/, new Ext.menu.CheckItem(
+						), new Ext.menu.CheckItem(
 			                        new GeoExt.Action({
 			                            text: this.deleteFeatureText,
 			                            iconCls: "gxp-icon-delete-feature",
@@ -185,11 +197,12 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 	                        )							 
 	                ]
 	            })
-	        });		
+	        });		*/
 	
 	
         var actions = [
-			this.button
+			// this.button
+			this.selectButton 
 		];
         return gxp.plugins.FeatureSelector.superclass.addActions.apply(this, [actions]);
     },
@@ -199,8 +212,7 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 		return new OpenLayers.Control.ModifyFeature(
 			this.layer,
 			{
-				 clickout: false, toggle: false,
-                 multiple: false, hover: false,
+				 // standalone:true,
 				 mode: mode }
 		);
 	},
@@ -209,39 +221,69 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 		var self = this;
 		this.layer.events.on(
 					{
-					 'featureselected': function(selected) {
+					'featureselected': function(selected) {
 							
-							if (!self.undo){
-								if ( self.newSelection ){
-									self.onSave( self, selected.feature );
-							        /* Ext.MessageBox.show({
-							           title:'Save Changes?',
-							           msg: 'You are leaving a note that has unsaved changes. <br />Would you like to save your changes?',
-							           buttons: Ext.MessageBox.YESNO,
-							           fn: function(btn){
-										 if (btn==='yes'){ // yes
-											self.onSave( self, selected.feature );
-										 } else if (btn==='no'){ // no
-											self.onDiscard( self, selected.feature );
-										} else {
-											// this code should never be reached!
-											console.error('something went wrong: ' + btn + ' is not a valid option');
-										}
-									   },
-							           icon: Ext.MessageBox.QUESTION
-							       }); */
-								} else {
-									self.newSelection = true;
-									self.onSelected(self, selected.feature);
-								}								
+							// a feature can be selected also by mouse selection
+							if (!self.selectButton.pressed)
+								self.selectButton.toggle();
+							
+							if (self.layer.selectedFeatures.length === 1 ){
+								
+								// TOFIX se una feature è selezionata non posso selezionare un punto
+								// commentando questa linea funziona, ma non ho più drag e rotate
+								self.modifyControl.selectFeature(selected.feature);
+							
+								
+								/*this.feature.geometry.CLASS_NAME != "OpenLayers.Geometry.Point") {
+							            if((this.mode & OpenLayers.Control.ModifyFeature.DRAG)) {
+							                this.collectDragHandle();
+							            }
+							            if((this.mode & (OpenLayers.Control.ModifyFeature.ROTATE |
+							                             OpenLayers.Control.ModifyFeature.RESIZE))) {
+							                this.collectRadiusHandle();
+							            }
+							            if(this.mode & OpenLayers.Control.ModifyFeature.RESHAPE){
+							                // Don't collect vertices when we're resizing
+							                if (!(this.mode & OpenLayers.Control.ModifyFeature.RESIZE)){
+							                    this.collectVertices();
+							                }
+							            }*/
+								
+									if ( self.newSelection ){
+										self.onSave( self, selected.feature );
+									} else {
+										self.newSelection = true;
+										self.onSelected(self, selected.feature);
+									}								
+								
+							} else if (self.layer.selectedFeatures.length > 1 ) {
+								// disable modify control for selected features
+								for (var i=0; i< self.layer.selectedFeatures.length; i++){
+									var feature = self.layer.selectedFeatures[i];
+									self.modifyControl.unselectFeature(feature);
+								}
+								// disable note panel
+								self.onUnselected(self);
 							}
+							
+							
 						
 
 						
 					  },
 					
-					  'beforefeaturemodified': function( feature ){
-							return !self.undo;
+						'featureunselected': function(unselected){
+							self.modifyControl.unselectFeature(unselected.feature);
+						},
+						
+						'featureremoved': function(deleted){
+							self.newSelection = false;
+							self.modifyControl.unselectFeature(deleted.feature);
+						},
+						
+						// drag events
+						'featuremodified': function(selected){
+							self.onChanged(self, selected.feature);
 						}
 					 });	
 		var control = selectControl = new OpenLayers.Control.SelectFeature(
@@ -250,7 +292,7 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 			                        clickout: false, toggle: false,
 			                        multiple: false, hover: false,
 			                        toggleKey: "ctrlKey", // ctrl key removes from selection
-			                        // multipleKey: "shiftKey", // shift key adds to selection
+			                        multipleKey: "shiftKey", // shift key adds to selection
 			                        box: true
 			                    });
 	   return control;
@@ -298,14 +340,14 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 
    saveFeature: function(feature){
 		this.newSelection = false;
-		this.button.toggle();
+		// this.button.toggle();
 		this.modifyControl.deactivate();
 		this.selectorControl.unselectAll();
    },
     
    discardUpdates: function(feature){
 	   this.newSelection = false;
-	   this.button.toggle();
+	   // this.button.toggle();
 	   this.modifyControl.deactivate();
 	   this.selectorControl.unselectAll();
    },

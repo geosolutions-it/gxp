@@ -74,7 +74,7 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
      */
     addPolygonTooltip: "Add Polygon",
 
-    clearAllMenuText: "Clear all",
+    clearAllMenuText: "Delete all",
 
 	customLayerDefaultName: "Custom layer",
   
@@ -200,25 +200,105 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
                         group: this.toggleGroup,
                         handler:this.handleAddPointFromCoords,
 						scope:this	
-					},{
+					}/*,{
                             text: this.clearAllMenuText,
                             iconCls: "gxp-icon-removeall",
                             toggleGroup: this.toggleGroup,
                             group: this.toggleGroup,
 							handler:this.handleRemoveFeatures,
 							scope:this
-                        }      
+                        }      */
                 ]
             })
         });
+
+		 this.deleteButton = new Ext.SplitButton({
+	            iconCls: "gxp-icon-removeall",
+	            tooltip: this.addPointTooltip,
+	            enableToggle: true,
+	            toggleGroup: this.toggleGroup,
+	            allowDepress: true,
+	            handler: function(button, event) {
+	                if(button.pressed) {
+	                    button.menu.items.itemAt(this.activeIndex).setChecked(true);
+	                }
+	            },
+	            scope: this,
+	            listeners: {
+	                toggle: function(button, pressed) {
+	                    // toggleGroup should handle this
+	                    if(!pressed) {
+	                        button.menu.items.each(function(i) {
+								if (i.setChecked){
+									i.setChecked(false);
+								}
+
+	                        });
+	                    }
+	                },
+	                render: function(button) {
+	                    // toggleGroup should handle this
+	                    Ext.ButtonToggleMgr.register(button);
+	                }
+	            },
+	            menu: new Ext.menu.Menu({
+	                items: [
+	                  {
+	                            text: this.clearAllMenuText,
+	                            iconCls: "gxp-icon-removeall",
+	                            toggleGroup: this.toggleGroup,
+	                            group: this.toggleGroup,
+								handler:this.handleRemoveFeatures,
+								scope:this
+	                  },
+	                  {
+	                            text: 'Delete all selected',
+	                            iconCls: "gxp-icon-delete-feature",
+	                            toggleGroup: this.toggleGroup,
+	                            group: this.toggleGroup,
+								handler:this.handleRemoveSelectedFeatures,
+								scope:this
+	                   }      
+	                ]
+	            })
+	        });
 	
 		var actions = [
-			this.button
+			this.button,
+			this.deleteButton
 		];
 		
 		
         return gxp.plugins.AddGeometry.superclass.addActions.apply(this, [actions]);
     },
+
+    handleRemoveSelectedFeatures: function(){
+	
+		if ( !this.layer.selectedFeatures || this.layer.selectedFeatures.length == 0){
+				Ext.Msg.show({
+		               title: 'Clear all',
+		               msg: 'No selected feature.',
+		               buttons: Ext.Msg.OK,
+		               icon: Ext.MessageBox.WARNING
+		        });
+		} else {
+			var self = this;
+			Ext.MessageBox.show({
+			           title:'Clear all selected',
+			           msg: 'You are removing all your changes and this operation cannot be undone. <br />Would you like to remove your changes?',
+			           buttons: Ext.MessageBox.YESNO,
+			           fn: function(btn){
+							if ( btn === 'yes' ){
+								self.layer.removeFeatures( self.layer.selectedFeatures );
+							}
+							
+					   },
+			           icon: Ext.MessageBox.QUESTION
+			       });
+		}
+		
+		
+	},
 
     handleRemoveFeatures: function(){
 		if ( !this.layer.features || this.layer.features.length == 0){

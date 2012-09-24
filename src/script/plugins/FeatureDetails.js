@@ -174,6 +174,7 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 		
 		// register to listen "addgeometry"	event
 		this.target.on("featureselected", function selectFeature(container, feature){
+			self.disable();
 			
 			self.feature = feature;
 			self.container = container;
@@ -205,7 +206,16 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 			self.resetForm();
 		});
 		
+		this.target.on("featurechanged", function selectFeature(container, feature){
+				if ( feature.geometry instanceof OpenLayers.Geometry.Point ){
+					Ext.getCmp("latitude-textfield").setValue(  feature.geometry.x );
+					Ext.getCmp("longitude-textfield").setValue( feature.geometry.y );
+				}
+		});
+		
 		this.target.on("featuresaved", function saveFeature(container, feature){
+
+				self.disable();
 
 			if ( self.isChanged()){
 				Ext.MessageBox.show({
@@ -239,7 +249,7 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 			}
 
 	
-			
+			self.enable();
 			/*self.copyFromFormToSelected( self.feature, container );
 			
 			self.resetForm();

@@ -183,6 +183,8 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		
 		this.target.on("notefeatureselected", function selectFeature(container, feature){
 			
+			self.disable();
+			
 			self.feature = feature;
 			self.container = container;
 			
@@ -215,12 +217,19 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 			self.disable();
 			self.resetForm();
 		});
+		this.target.on("notefeaturechanged", function selectFeature(container, feature){
+				if ( feature.geometry instanceof OpenLayers.Geometry.Point ){
+					Ext.getCmp("pn-latitude-textfield").setValue(  feature.geometry.x );
+					Ext.getCmp("pn-longitude-textfield").setValue( feature.geometry.y );
+				}
+		});
 		
 		this.target.on("notefeaturesaved", function saveFeature(container, feature){
 
 			// se il form non è valido, annulla la selezione
 			// container.undoSelection(feature, self.feature);
 		
+			self.disable();
 			
 			if ( self.isChanged()){
 					Ext.MessageBox.show({
@@ -253,7 +262,9 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 					self.copyFromSelectedToForm( feature );
 				}
 
-			});		
+			});	
+			
+			self.enable();	
 		
 		return panel;
 	},
