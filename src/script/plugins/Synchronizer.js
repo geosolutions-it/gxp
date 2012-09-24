@@ -199,6 +199,9 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
                                                         }  
                                                         if(this.target.tools[tool].ptype == "gxp_zoomtoextent"){  
                                                             this.target.tools[tool].actions[0].items[0].disable();
+                                                        }          
+                                                        if(this.target.tools[tool].ptype == "gxp_zoomtolayerextent"){  
+                                                            this.target.tools[tool].actions[0].items[0].disable();
                                                         }                                                          
                                                     }
                                                     
@@ -263,6 +266,9 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
                                                 if(this.target.tools[tool].ptype == "gxp_zoomtoextent"){  
                                                     this.target.tools[tool].actions[0].items[0].enable();
                                                 }   
+                                                if(this.target.tools[tool].ptype == "gxp_zoomtolayerextent"){  
+                                                    this.target.tools[tool].actions[0].items[0].enable();
+                                                }                                                 
                                             }
 
                                             for(var a=0;a<this.target.mapPanel.items.items.length;a++){
