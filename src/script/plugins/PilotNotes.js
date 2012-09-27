@@ -99,7 +99,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 				                fieldLabel: 'Name',
 								width: 200,
 				                name:'loginUsername', 
-				                allowBlank:false,
+				                // allowBlank:false,
 								disabled: true,
 								anchor:'100%',
 								id:'name-textfield'
@@ -110,7 +110,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 								disabled: true,
 				                fieldLabel:'Note', 
 				                name:'loginPassword', 
-				                allowBlank:false,
+				                // allowBlank:false,
 								anchor:'100%',
 								id: 'description-textfield'
 				            },	{   xtype: 'numberfield',
@@ -119,7 +119,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 									  decimalPrecision: 5,
 									  maxValue:90,
 									  minValue:-90,
-							          allowBlank:false,
+							          // allowBlank:false,
 									  disabled: true,
 									  hidden:true,
 									  anchor:'100%',
@@ -130,7 +130,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 									  decimalPrecision: 5,
 									  maxValue:180,
 									  minValue:-180,
-									  allowBlank:false,
+									  // allowBlank:false,
 									  disabled: true,
 									  hidden:true,
 									  anchor:'100%',
@@ -144,7 +144,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 							        {
 										id:'date-textfield',
 							            xtype     : 'datefield',
-										allowBlank:false,
+										// allowBlank:false,
 										editable: false,
 										format:"d/m/Y",
 							            fieldLabel: 'Day',
@@ -155,7 +155,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 							        {
 										id:'time-textfield',
 							            xtype     : 'timefield',
-										allowBlank:false,
+										// allowBlank:false,
 							            fieldLabel: 'Time',
 										editable: true,
 										format: 'H:i:s',
@@ -166,9 +166,8 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 							    ]
 							},{   xtype: 'textfield',
 						                fieldLabel: 'Vehicle',
-										allowBlank:false,
+										// allowBlank:false,
 										width: 200,
-						                allowBlank:true,
 										id:'vehicle-textfield',
 										anchor:'100%',
 										disabled:true
@@ -185,10 +184,15 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 			
 			self.disable();
 			
+			self.oldX = feature.geometry.x;
+			self.oldY = feature.geometry.y;
+			
 			self.feature = feature;
 			self.container = container;
 			
 			self.copyFromSelectedToForm( feature );
+			
+			container.modifyControl.selectFeature(feature);
 			
 			/*self.feature = feature;
 			self.container = container;
@@ -214,6 +218,8 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		this.target.on("notefeatureunselected", function selectFeature(container){
 			self.feature = null;
 			self.container = null;
+			self.oldX = null;
+			self.oldY = null;
 			self.disable();
 			self.resetForm();
 		});
@@ -226,12 +232,10 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		
 		this.target.on("notefeaturesaved", function saveFeature(container, feature){
 
-			// se il form non è valido, annulla la selezione
-			// container.undoSelection(feature, self.feature);
 		
 			self.disable();
 			
-			if ( self.isChanged()){
+				if ( self.isChanged()){
 					Ext.MessageBox.show({
 			           title:'Save Changes?',
 			           msg: 'You are leaving a note that has unsaved changes. <br />Would you like to save your changes?',
@@ -242,16 +246,36 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 							self.resetForm();
 							self.feature = feature;
 							self.container = container;
+							self.oldX = feature.geometry.x;
+							self.oldY = feature.geometry.y;
 							self.copyFromSelectedToForm( feature );
 						 } else if (btn==='no'){ // no
+							
+							// we need to remove and add again feature to force redrawing in previous position
+							container.layer.removeFeatures( [self.feature] );
+
+							// reset the original position
+							self.feature.geometry.x = self.oldX;
+							self.feature.geometry.y = self.oldY;
+
+							container.layer.addFeatures( [self.feature] );
+							
 							self.resetForm();
 							self.feature = feature;
 							self.container = container;
+							
+								self.oldX = feature.geometry.x;
+								self.oldY = feature.geometry.y;
+							
 							self.copyFromSelectedToForm( feature );
 						} else {
 							// this code should never be reached!
 							console.error('something went wrong: ' + btn + ' is not a valid option');
 						}
+						
+						// allow dragging for the new feature
+						container.modifyControl.selectFeature(feature);
+						
 					   },
 			           icon: Ext.MessageBox.QUESTION
 			       });				
@@ -259,18 +283,61 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 					self.resetForm();
 					self.feature = feature;
 					self.container = container;
+					
+					self.oldX = feature.geometry.x;
+					self.oldY = feature.geometry.y;
+					
 					self.copyFromSelectedToForm( feature );
+					container.modifyControl.selectFeature(feature);
 				}
-
+				
+				self.enable();
+					
 			});	
 			
-			self.enable();	
+				
 		
 		return panel;
 	},
 	
 	isChanged: function(){
-		if (this.feature && this.feature.attributes){
+		
+		var data = this.feature.attributes;
+		var name = Ext.getCmp("name-textfield").getValue();
+		var description = Ext.getCmp("description-textfield").getValue();
+		var date = Ext.getCmp("date-textfield").getValue();
+		var time = Ext.getCmp("time-textfield").getValue();
+		var vehicle = Ext.getCmp("vehicle-textfield").getValue();
+		var lat = Ext.getCmp("pn-latitude-textfield").getValue();
+		var lng =  Ext.getCmp("pn-longitude-textfield").getValue();
+
+		function isEqual( first, second ){
+			return  first === second || (first === undefined && second === '') || (second === undefined && first === '');
+		};
+		
+		if ( this.feature.geometry instanceof OpenLayers.Geometry.Point ){
+			if ( this.oldX !== this.feature.geometry.x || this.oldY !== this.feature.geometry.y)
+			 	return true; // has been moved
+		}		
+
+		if ( this.feature.isNew === false ){
+			
+			/* return	data.name !== name || data.description !== description 
+					|| data.date !== date || data.time !== time
+					|| data.vehicle !== vehicle;*/
+					return	! isEqual(data.name, name) 
+							|| ! isEqual( data.description, description) 
+							|| ! isEqual( data.date, date )
+							|| ! isEqual( data.time, time )
+							|| ! isEqual( data.vehicle, vehicle );
+				
+		} else {
+			return ( name !== '' || description !== '' || date !== '' || time !== '' || vehicle !== '' );
+		}
+		
+		return true;		
+		
+		/*if (this.feature && this.feature.attributes){
 			var name = Ext.getCmp("name-textfield").getValue();
 			var description = Ext.getCmp("description-textfield").getValue();
 			var date = Ext.getCmp("date-textfield").getValue();
@@ -283,7 +350,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 					|| data.date !== date || data.time !== time
 					|| data.vehicle !== vechicle || lat !== data.latitude || lng !== data.longitude;
 		}
-		return true;
+		return true;*/
 	},
 	
 	copyFromSelectedToForm: function(selected){
@@ -294,7 +361,6 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 			Ext.getCmp("time-textfield").setValue( selected.attributes.time );
 			Ext.getCmp("vehicle-textfield").setValue( selected.attributes.vehicle );
 		}
-		
 		if ( selected.geometry instanceof OpenLayers.Geometry.Point ){
 			var point = selected.geometry.clone(); 
 			Ext.getCmp("pn-latitude-textfield").setVisible(true);
@@ -341,6 +407,12 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 	handleSave: function(){
 		
 		if (this.feature && this.container){
+			this.copyFromFormToSelected( this.feature, this.container );
+			// this.container.saveFeature(this.feature);
+			// this.disable();
+		}
+		
+		/*if (this.feature && this.container){
 			var nameField = Ext.getCmp("name-textfield");
 			var descField = Ext.getCmp("description-textfield");
 			var vehicleField = Ext.getCmp("vehicle-textfield");
@@ -350,7 +422,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 			           descField.isValid(false) &&
 			              vehicleField.isValid(false ) &&
 			                dateField.isValid(false) &&
-			                   timeField.isValid(false )){
+			                   timeField.isValid(false )){*/
 				
 				/*var name = nameField.getValue();
 				var description = descField.getValue();
@@ -386,11 +458,12 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 						this.resetForm();
 					}			*/	
 				
-					this.copyFromFormToSelected( this.feature, this.container );
+			/*		this.copyFromFormToSelected( this.feature, this.container );
 					this.container.saveFeature(this.feature);
 					this.disable();
 			
 			} else {
+				this.disable();
 				  Ext.Msg.show({
                    title: 'Cannot save this attributes',
                    msg: 'Fields cannot be blank',
@@ -398,7 +471,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
                    icon: Ext.MessageBox.ERROR
                 });
 			}
-		}
+		}*/
 	},
 
 	/** private: method[handleCancel]

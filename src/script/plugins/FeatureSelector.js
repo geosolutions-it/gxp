@@ -87,6 +87,7 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 				enableToggle: true,
 				toggleHandler: function(button, pressed){
 					if (! pressed ){
+						this.newSelection = false;
 						this.modifyControl.deactivate();
 						this.selectorControl.unselectAll();
 						this.onUnselected(self);	
@@ -111,6 +112,7 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 			 enableToggle: true,
 			 toggleHandler: function(button, pressed){
 					if (! pressed ){
+						this.newSelection = false;
 						this.deleteControl.deactivate();
 						this.modifyControl.deactivate();
 						this.selectorControl.unselectAll();
@@ -212,6 +214,11 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 		return new OpenLayers.Control.ModifyFeature(
 			this.layer,
 			{
+				 clickout:false, 	toggle: false,
+                 multiple: false, hover: false,
+                 toggleKey: "ctrlKey", // ctrl key removes from selection
+                 multipleKey: "shiftKey", // shift key adds to selection
+                 box: true,
 				 // standalone:true,
 				 mode: mode }
 		);
@@ -223,31 +230,20 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 					{
 					'featureselected': function(selected) {
 							
+							if ( selected.feature.isNew === undefined ){
+								selected.feature.isNew = true;
+							} else {
+								selected.feature.isNew = false;
+							}
+							
 							// a feature can be selected also by mouse selection
 							if (!self.selectButton.pressed)
 								self.selectButton.toggle();
 							
 							if (self.layer.selectedFeatures.length === 1 ){
 								
-								// TOFIX se una feature è selezionata non posso selezionare un punto
-								// commentando questa linea funziona, ma non ho più drag e rotate
-								self.modifyControl.selectFeature(selected.feature);
+								// self.modifyControl.selectFeature(selected.feature);
 							
-								
-								/*this.feature.geometry.CLASS_NAME != "OpenLayers.Geometry.Point") {
-							            if((this.mode & OpenLayers.Control.ModifyFeature.DRAG)) {
-							                this.collectDragHandle();
-							            }
-							            if((this.mode & (OpenLayers.Control.ModifyFeature.ROTATE |
-							                             OpenLayers.Control.ModifyFeature.RESIZE))) {
-							                this.collectRadiusHandle();
-							            }
-							            if(this.mode & OpenLayers.Control.ModifyFeature.RESHAPE){
-							                // Don't collect vertices when we're resizing
-							                if (!(this.mode & OpenLayers.Control.ModifyFeature.RESIZE)){
-							                    this.collectVertices();
-							                }
-							            }*/
 								
 									if ( self.newSelection ){
 										self.onSave( self, selected.feature );

@@ -6,6 +6,12 @@
  * of the license.
  */
 
+// TODO note to other developers
+// in this phase I kept FeatureDetails.js and PilotNotes.js separated
+// since at the beginning it was not clear how much these functionalities could overlap
+// in the future we need to refactor this code and abstract away common features
+
+
 /**
  * @requires plugins/Tool.js
  */
@@ -172,14 +178,18 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 	
 			);
 		
-		// register to listen "addgeometry"	event
 		this.target.on("featureselected", function selectFeature(container, feature){
 			self.disable();
+			
+			self.oldX = feature.geometry.x;
+			self.oldY = feature.geometry.y;
 			
 			self.feature = feature;
 			self.container = container;
 			
 			self.copyFromSelectedToForm( feature );
+			
+			container.modifyControl.selectFeature(feature);
 			
 			/*if ( feature.attributes ){
 				Ext.getCmp("details-name-textfield").setValue( feature.attributes.name );
@@ -202,6 +212,8 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 		this.target.on("featureunselected", function selectFeature(container){
 			self.feature = null;
 			self.container = null;
+			self.oldX = null;
+			self.oldY = null;
 			self.disable();
 			self.resetForm();
 		});
@@ -215,7 +227,7 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 		
 		this.target.on("featuresaved", function saveFeature(container, feature){
 
-				self.disable();
+			self.disable();
 
 			if ( self.isChanged()){
 				Ext.MessageBox.show({
@@ -228,27 +240,56 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 						self.resetForm();
 						self.feature = feature;
 						self.container = container;
+						self.oldX = feature.geometry.x;
+						self.oldY = feature.geometry.y;
 						self.copyFromSelectedToForm( feature );
+						
 					 } else if (btn==='no'){ // no
+						
+						// we need to remove and add again feature to force redrawing in previous position
+						container.layer.removeFeatures( [self.feature] );
+						
+						// reset the original position
+						self.feature.geometry.x = self.oldX;
+						self.feature.geometry.y = self.oldY;
+						
+						container.layer.addFeatures( [self.feature] );
+						
 						self.resetForm();
 						self.feature = feature;
 						self.container = container;
+						
+						self.oldX = feature.geometry.x;
+						self.oldY = feature.geometry.y;
+						
 						self.copyFromSelectedToForm( feature );
 					} else {
 						// this code should never be reached!
 						console.error('something went wrong: ' + btn + ' is not a valid option');
 					}
+					
+					// allow dragging for the new feature
+					container.modifyControl.selectFeature(feature);
+				
 				   },
 		           icon: Ext.MessageBox.QUESTION
 		       });				
 			} else {
+
+				
 				self.resetForm();
 				self.feature = feature;
 				self.container = container;
+				
+				self.oldX = feature.geometry.x;
+				self.oldY = feature.geometry.y;
+				
+				
 				self.copyFromSelectedToForm( feature );
+				container.modifyControl.selectFeature(feature);
 			}
 
-	
+		
 			self.enable();
 			/*self.copyFromFormToSelected( self.feature, container );
 			
@@ -270,15 +311,34 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 	},
 	
 	isChanged: function(){
-		if (this.feature && this.feature.attributes){
-			var name = Ext.getCmp("details-name-textfield").getValue();
-			var description = Ext.getCmp("details-description-textfield").getValue();
-			var date = Ext.getCmp("details-date-textfield").getValue();
-			var time = Ext.getCmp("details-time-textfield").getValue();
-			var data = this.feature.attributes;
-			return data.name !== name || data.description !== description || data.date !== date || data.time !== time;
+		
+		var data = this.feature.attributes;
+		var name = Ext.getCmp("details-name-textfield").getValue();
+		var description = Ext.getCmp("details-description-textfield").getValue();
+		var date = Ext.getCmp("details-date-textfield").getValue();
+		var time = Ext.getCmp("details-time-textfield").getValue();
+		
+		function isEqual( first, second ){
+			return  first === second || (first === undefined && second === '') || (second === undefined && first === '');
+		};
+
+		if ( this.feature.geometry instanceof OpenLayers.Geometry.Point ){
+			if ( this.oldX !== this.feature.geometry.x || this.oldY !== this.feature.geometry.y)
+			 	return true; // has been moved
 		}
+
+		if ( this.feature.isNew === false ){
+			// return	(data.name !== name || data.description !== description || data.date !== date || data.time !== time );
+			return	! isEqual(data.name, name) 
+					|| ! isEqual( data.description, description) 
+					|| ! isEqual( data.date, date )
+					|| ! isEqual( data.time, time );
+		} else {
+			return ( name !== '' || description !== '' || date !== '' || time !== '');
+		}
+		
 		return true;
+		
 	},
 	
 	copyFromSelectedToForm: function(selected){
@@ -288,7 +348,6 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 			Ext.getCmp("details-date-textfield").setValue( selected.attributes.date );
 			Ext.getCmp("details-time-textfield").setValue( selected.attributes.time );
 		}
-		
 		if ( selected.geometry instanceof OpenLayers.Geometry.Point ){
 			var point = selected.geometry.clone(); 
 			Ext.getCmp("latitude-textfield").setVisible(true);
@@ -370,9 +429,8 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 			}*/
 			
 			this.copyFromFormToSelected( this.feature, this.container );
-			this.container.saveFeature(this.feature);
-			// disable form
-			this.disable();
+			// this.container.saveFeature(this.feature);
+			// this.disable();
 		}
 	},
 

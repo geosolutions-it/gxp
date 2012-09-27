@@ -214,7 +214,16 @@ gxp.LegendPanel = Ext.extend(Ext.Panel, {
                     hidden: !((!layer.map && layer.visibility) ||
                         (layer.getVisibility() && layer.calculateInRange()))
                 });
-            }
+            } else if(layer.displayInLayerSwitcher && !record.get('hideInLegend') && layer instanceof OpenLayers.Layer.Vector ) {
+                this.insert(index, {
+                    xtype: 'gx_vectorlegend',
+                    id: this.getIdForLayer(layer),
+                    layerRecord: record,
+					untitledPrefix: '',
+                    hidden: !((!layer.map && layer.visibility) ||
+                        (layer.getVisibility() && layer.calculateInRange()))
+                });	
+			}
         }
     },
 
