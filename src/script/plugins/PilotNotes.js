@@ -230,6 +230,13 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 				}
 		});
 		
+		this.target.on("notefeaturechanged", function selectFeature(container, feature){
+				if ( feature.geometry instanceof OpenLayers.Geometry.Point ){
+					Ext.getCmp("pn-latitude-textfield").setValue(  feature.geometry.x );
+					Ext.getCmp("pn-longitude-textfield").setValue( feature.geometry.y );
+				}
+		});
+		
 		this.target.on("notefeaturesaved", function saveFeature(container, feature){
 
 		

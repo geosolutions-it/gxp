@@ -196,7 +196,7 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
             "ready",
 
 			"timemanager",
-			
+            
 			"refreshToolActivated",
             
             /** api: event[portalready]
@@ -243,7 +243,8 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
              */
             "authorizationchange",
 	    
-	    "groupselectionChange"
+	    "groupselectionChange",
+        "layerselectionchangeproperties"
         );
         
         Ext.apply(this, {
@@ -266,7 +267,7 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
      *
      *  TODO: change to selectLayers (plural)
      */
-    selectLayer: function(record) {
+    selectLayer: function(record,disZoom) {
         for(var tool in this.tools){
             if(this.tools[tool].ptype == "gxp_layerproperties"){
                 this.tools[tool].actions[0].show();
@@ -301,7 +302,17 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
             /*if (this.selectedLayer) {
                 this.selectedLayer.set("selected", true);
             }*/
-            this.fireEvent("layerselectionchange", record);
+            if (disZoom){
+                for(var tool in this.tools){
+                    if(this.tools[tool].ptype == "gxp_zoomtolayerextent"){            
+                        this.tools[tool].actions[0].disable();
+                    }              
+                }
+                this.fireEvent("layerselectionchangeproperties", record);
+            }else{
+                this.fireEvent("layerselectionchange", record);
+                this.fireEvent("layerselectionchangeproperties", record);                
+            }
         }
         return changed;
     },
@@ -329,8 +340,8 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
                     this.tools[tool].actions[0].hide();
                 }
                 if(this.tools[tool].ptype == "gxp_zoomtolayerextent"){            
-                this.tools[tool].actions[0].hide();
-            }
+                    this.tools[tool].actions[0].hide();
+                }
             }
             
             this.fireEvent("groupselectionChange", groupNode); 
@@ -470,7 +481,8 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
                     new OpenLayers.Control.Navigation({zoomWheelOptions: {interval: 250}}),
                     new OpenLayers.Control.PanPanel(),
                     new OpenLayers.Control.ZoomPanel(),
-                    new OpenLayers.Control.Attribution()
+                    new OpenLayers.Control.Attribution(),
+					new OpenLayers.Control.LoadingPanel()
                 ],
                 maxExtent: mapConfig.maxExtent && OpenLayers.Bounds.fromArray(mapConfig.maxExtent),
                 restrictedExtent: mapConfig.restrictedExtent && OpenLayers.Bounds.fromArray(mapConfig.restrictedExtent),

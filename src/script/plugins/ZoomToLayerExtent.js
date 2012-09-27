@@ -65,6 +65,7 @@ gxp.plugins.ZoomToLayerExtent = Ext.extend(gxp.plugins.ZoomToExtent, {
     /** api: method[addActions]
      */
     addActions: function() {
+        var self = this;
         var actions = gxp.plugins.ZoomToLayerExtent.superclass.addActions.apply(this, arguments);
         actions[0].disable();
 

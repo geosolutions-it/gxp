@@ -167,6 +167,7 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 	                                    if (checked) {
 	                                        this.button.setIconClass(item.iconCls);
 	                                    } else {	
+											this.newSelection = false;
 											this.selectorControl.unselectAll();
 											this.onUnselected(self);
 										}
@@ -267,7 +268,7 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 
 						
 					  },
-					
+
 						'featureunselected': function(unselected){
 							self.modifyControl.unselectFeature(unselected.feature);
 						},
@@ -276,6 +277,7 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 							self.newSelection = false;
 							self.modifyControl.unselectFeature(deleted.feature);
 						},
+
 						
 						// drag events
 						'featuremodified': function(selected){
@@ -347,6 +349,10 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 	   this.modifyControl.deactivate();
 	   this.selectorControl.unselectAll();
    },
+
+  redraw: function(){
+		this.layer.redraw();
+	},
 
    	undoSelection: function(selectedFeature, oldFeature){
 		

@@ -79,8 +79,9 @@ gxp.plugins.LayerProperties = Ext.extend(gxp.plugins.Tool, {
             scope: this
         }]);
         var layerPropertiesAction = actions[0];
-
-        this.target.on("layerselectionchange", function(record) {
+        
+        //change layerselectionchange in layerselectionchangeproperties
+        this.target.on("layerselectionchangeproperties", function(record) {
             layerPropertiesAction.setDisabled(
                 !record || !record.get("properties")
             );

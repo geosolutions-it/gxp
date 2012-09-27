@@ -94,7 +94,7 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
      *  :arg config: ``Object``
      */
     addOutput: function(config) {
-
+        var self = this;
         var target = this.target, me = this;
         var addListeners = function(node, record) {
             if (record) {
@@ -213,6 +213,13 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
             selModel: new Ext.tree.DefaultSelectionModel({
                 listeners: {
                     beforeselect: function(selModel, node) {
+                    for(var tool in this.target.tools){
+                        if(this.target.tools[tool].ptype == "gxp_synchronizer"){  
+                            if (this.target.tools[tool].button.pressed){
+                                    var sync = true;
+                            }
+                        }                                                       
+                    }                        
                         var changed = true;
                         var layer = node && node.layer;
                         if (layer) {
@@ -220,11 +227,20 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                             var record = store.getAt(store.findBy(function(r) {
                                 return r.getLayer() === layer;
                             }));
-                            this.selectionChanging = true;
-                            changed = this.target.selectLayer(record);
-                            this.selectionChanging = false;
-                            
-                            this.target.selectGroup(null);
+                            if (this.timeManager.timer || sync){
+                                var disZoom = true;
+                                this.selectionChanging = true;
+                                changed = this.target.selectLayer(record,disZoom);
+                                this.selectionChanging = false;
+                                
+                                this.target.selectGroup(null);
+                            }else{
+                                this.selectionChanging = true;
+                                changed = this.target.selectLayer(record);
+                                this.selectionChanging = false;
+                                
+                                this.target.selectGroup(null); 
+                            }
                         }else{
                             this.target.selectGroup(node);
                         }
@@ -430,7 +446,32 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
         
         var layerTree = gxp.plugins.LayerTree.superclass.addOutput.call(this, config);
         
+        this.target.on("timemanager", function(){
+                self.getTimeManager();
+        });  
+            
         return layerTree;
+    },
+    getTimeManager: function(){
+	    if ( ! this.timeManager ){ // if it is not initialized
+			var timeManagers = this.target.mapPanel.map.getControlsByClass('OpenLayers.Control.TimeManager');
+			if (timeManagers.length <= 0){
+				console.error('Cannot init Synchronizer: no TimeManager found');
+				return;
+			}
+			this.timeManager = timeManagers[0];
+			var self = this;
+			// listen to play events
+			/*this.timeManager.events.register('play', this, 
+					function(){ 
+                        self.output[0].contextMenu.items.items[0].disable();
+					});	
+			this.timeManager.events.register('stop', this, 
+					function(){ 
+						self.output[0].contextMenu.items.items[0].enable();
+					});*/	
+	    }
+		return this.timeManager;
     }
 });
 

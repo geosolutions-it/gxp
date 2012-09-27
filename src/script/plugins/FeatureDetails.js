@@ -56,6 +56,8 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 	deleteButtonText:"Delete",
 	deleteButtonTooltip:"Delete this feature",
 
+	oldX: null,
+	oldY: null,
     feature: null,
     container: null,
   
@@ -184,6 +186,11 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 			self.oldX = feature.geometry.x;
 			self.oldY = feature.geometry.y;
 			
+			if ( feature.geometry instanceof OpenLayers.Geometry.Point ){
+				self.oldX = feature.geometry.x;
+				self.oldY = feature.geometry.y;	
+			}
+			
 			self.feature = feature;
 			self.container = container;
 			
@@ -217,6 +224,12 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 			self.disable();
 			self.resetForm();
 		});
+		this.target.on("featurechanged", function selectFeature(container, feature){
+				if ( feature.geometry instanceof OpenLayers.Geometry.Point ){
+					Ext.getCmp("latitude-textfield").setValue(  feature.geometry.x );
+					Ext.getCmp("longitude-textfield").setValue( feature.geometry.y );
+				}
+		});
 		
 		this.target.on("featurechanged", function selectFeature(container, feature){
 				if ( feature.geometry instanceof OpenLayers.Geometry.Point ){
@@ -246,6 +259,7 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 						
 					 } else if (btn==='no'){ // no
 						
+
 						// we need to remove and add again feature to force redrawing in previous position
 						container.layer.removeFeatures( [self.feature] );
 						
@@ -254,7 +268,7 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 						self.feature.geometry.y = self.oldY;
 						
 						container.layer.addFeatures( [self.feature] );
-						
+
 						self.resetForm();
 						self.feature = feature;
 						self.container = container;
