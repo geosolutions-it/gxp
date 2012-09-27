@@ -534,7 +534,8 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
                 dimensions: original.data.dimensions,
                 transitionEffect: null, //singleTile ? 'resize' : null,
                 minScale: config.minscale,
-                maxScale: config.maxscale
+                maxScale: config.maxscale,
+				displayInLayerSwitcher: ("displayInLayerSwitcher" in config) ? config.displayInLayerSwitcher : true
             });
             
             // data for the new record
