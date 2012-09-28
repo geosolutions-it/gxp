@@ -93,6 +93,8 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 				scope: this
 			  }		
 		);
+		
+		
         var panel = gxp.plugins.FeatureDetails.superclass.addOutput.call(this, 
 			
 			new Ext.FormPanel({

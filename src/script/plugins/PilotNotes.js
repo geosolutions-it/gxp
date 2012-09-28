@@ -85,6 +85,8 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 				scope: this
 			  }		
 		);
+		
+		
         var panel = gxp.plugins.PilotNotes.superclass.addOutput.call(this, 
 			// TODO crea un widget
 			new Ext.FormPanel({
