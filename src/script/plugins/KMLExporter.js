@@ -49,18 +49,18 @@ gxp.plugins.KMLExporter = Ext.extend(gxp.plugins.Tool, {
      */
     downloadWindowTitle: 'Download KML file',
 
+	alternativeStyle: false,
     
     /** private: method[constructor]
      */
     constructor: function(config) {
         gxp.plugins.KMLExporter.superclass.constructor.apply(this, arguments);
-		this.layer = config.layer;
+		// this.layer = config.layer;
+		this.alternativeStyle = config.alternativeStyle || false;
+		this.srs = config.srs || "EPSG:4326";
     },
 
-    /** api: method[addActions]
-     */
-    addActions: function() {
-	
+	addOutput: function(config){
 		var map = this.target.mapPanel.map;
 		var xmlJsonTranslateService = this.target.proxy + encodeURIComponent(this.target.xmlJsonTranslateService);
 		
@@ -113,8 +113,73 @@ gxp.plugins.KMLExporter = Ext.extend(gxp.plugins.Tool, {
             },
             scope: this
         }];
-        return gxp.plugins.KMLExporter.superclass.addActions.apply(this, [actions]);
-    }
+        return gxp.plugins.KMLExporter.superclass.addActions.apply(this, [actions]);		
+	},
+
+    /** api: method[addActions]
+     */
+    addActions: function() {
+	
+		this.target.on('ready', function(){
+			
+				this.layer = this.createLayer( this.target.mapPanel.map);
+				this.addOutput();
+
+		}, this);
+	
+
+    },
+
+    /**
+     *  create a custom layer or it returns an existing one
+     */
+  createLayer: function( map ){
+		var layers = map.getLayersByName( this.layerName );
+		if ( layers.length > 0 ){
+			return layers[0]; // return the first layer with the given name
+		} else {
+			var layer;
+			if ( this.alternativeStyle ){
+				layer = new OpenLayers.Layer.Vector( this.layerName, {
+					projection: new OpenLayers.Projection(this.srs), 
+					styleMap: new OpenLayers.StyleMap({
+						"default": new OpenLayers.Style({
+							strokeColor: "red",
+							strokeOpacity: .7,
+							strokeWidth: 2,
+							fillColor: "red",
+							fillOpacity: 0,
+							cursor: "pointer"
+						}),
+						"temporary": new OpenLayers.Style({
+							strokeColor: "#ffff33",
+							strokeOpacity: .9,
+							strokeWidth: 2,
+							fillColor: "#ffff33",
+							fillOpacity: .3,
+							cursor: "pointer"
+						}),
+						"select": new OpenLayers.Style({
+							strokeColor: "#0033ff",
+							strokeOpacity: .7,
+							strokeWidth: 3,
+							fillColor: "#0033ff",
+							fillOpacity: 0,
+							graphicZIndex: 2,
+							cursor: "pointer"
+						})
+					})
+				});				
+			} else {
+				layer = new OpenLayers.Layer.Vector( this.layerName, {
+					projection: new OpenLayers.Projection(this.srs)
+				});	
+			}
+
+			map.addLayer( layer );
+			return layer;
+		}
+	}
 
 
 });

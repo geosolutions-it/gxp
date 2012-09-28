@@ -29,6 +29,12 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
     
     /** api: ptype = gxp_pilot_notes */
     ptype: "gxp_feature_selector",
+
+    /**
+     *  prefix to identify events risen by an instance of the Feature Selector
+     *  default is empty
+     */
+    prefix: '',
     
     /** api: config[featureSelectorText]
      *  ``String``
@@ -45,6 +51,8 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 	newSelection: false,
 	
 	undo:false,
+	
+	alternativeStyle: false,
 
 
     /** api: config[ featureSelectorTooltip]
@@ -59,25 +67,21 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
      */
     constructor: function(config) {
         gxp.plugins.FeatureSelector.superclass.constructor.apply(this, arguments);
-		this.layer = config.layer;
-		this.onSelected = config.onSelected;
-		this.onUnselected = config.onUnselected;
+		// this.layer = config.layer;
+		this.layerName = config.layerName;
+		this.alternativeStyle = config.alternativeStyle || false;
+		this.srs = config.srs || "EPSG:4326";
     },
 
     /** api: method[addActions]
      */
     addActions: function() {
+	
 	    
-		var map = this.target.mapPanel.map;
+		   
 		var self = this;
-		this.selectorControl = this.createSelectorControl();
-		this.modifyControl = this.createModifyControl( OpenLayers.Control.ModifyFeature.DRAG | OpenLayers.Control.ModifyFeature.ROTATE);
-		this.deleteControl = this.createDeleteControl( );
-	
-		map.addControl(this.modifyControl);
-		map.addControl( this.selectorControl );
-		map.addControl(this.deleteControl);
-	
+		var map = this.target.mapPanel.map;
+		
 		this.selectButton = new Ext.Button({
                 // text: this.featureSelectorText,
                 iconCls: "gxp-icon-select-feature",
@@ -99,10 +103,10 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 					} 
 				},
 				scope:this
-            		
+
 		});
-		
-		this.deleteButton = new Ext.Button({
+
+		/*this.deleteButton = new Ext.Button({
 			 // text: this.deleteFeatureText,
              iconCls: "gxp-icon-delete-feature",
              toggleGroup: this.toggleGroup,
@@ -119,96 +123,86 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 						this.onUnselected(self);	
 					} else {
 						this.deleteControl.activate();
-						
+
 					}
 			 },
 			scope:this
-		});
-	
-		// this.activeIndex = 0;
-	        /*this.button = new Ext.SplitButton({
-	            iconCls: "gxp-icon-select-feature",
-	            tooltip: this.featureSelectorTooltip,
-	            enableToggle: true,
-	            toggleGroup: this.toggleGroup,
-	            allowDepress: true,
-	            handler: function(button, event) {
-	                if(button.pressed) {
-	                    button.menu.items.itemAt(this.activeIndex).setChecked(true);
-	                }
-	            },
-	            scope: this,
-	            listeners: {
-	                toggle: function(button, pressed) {
-	                    // toggleGroup should handle this
-	                    if(!pressed) {
-	                        button.menu.items.each(function(i) {
-	                            i.setChecked(false);
-	                        });
-	                    }
-	                },
-	                render: function(button) {
-	                    // toggleGroup should handle this
-	                    Ext.ButtonToggleMgr.register(button);
-	                }
-	            },
-	            menu: new Ext.menu.Menu({
-	                items: [
-	                    new Ext.menu.CheckItem(
-	                        new GeoExt.Action({
-	                            text: this.featureSelectorText,
-	                            iconCls: "gxp-icon-select-feature",
-	                            toggleGroup: this.toggleGroup,
-	                            group: this.toggleGroup,
-	                            listeners: {
-	                                checkchange: function(item, checked) {
-	                                    this.activeIndex = 0;
-	                                    this.button.toggle(checked);
-	                                    if (checked) {
-	                                        this.button.setIconClass(item.iconCls);
-	                                    } else {	
-											this.newSelection = false;
-											this.selectorControl.unselectAll();
-											this.onUnselected(self);
-										}
-	                                },
-	                                scope: this
-	                            },
-	                            map: this.target.mapPanel.map,
-	                            // control: this.selectorControl
-								control: this.modifyControl
-	                        })
-						), new Ext.menu.CheckItem(
-			                        new GeoExt.Action({
-			                            text: this.deleteFeatureText,
-			                            iconCls: "gxp-icon-delete-feature",
-			                            toggleGroup: this.toggleGroup,
-			                            group: this.toggleGroup,
-			                            listeners: {
-			                                checkchange: function(item, checked) {
-			                                    this.activeIndex = 3;
-			                                    this.button.toggle(checked);
-			                                    if (checked) {
-			                                        this.button.setIconClass(item.iconCls);
-			                                    }
-			                                },
-			                                scope: this
-			                            },
-			                            map: this.target.mapPanel.map,
-			                            control: this.createDeleteControl( )
-			                        })
-	                        )							 
-	                ]
-	            })
-	        });		*/
-	
-	
+		});*/
+		
+		
+		// when map is created and layers are loaded
+		this.target.on('ready', function(){
+			
+				this.layer = this.createLayer( this.target.mapPanel.map);
+				this.selectorControl = this.createSelectorControl();
+				this.modifyControl = this.createModifyControl( OpenLayers.Control.ModifyFeature.DRAG | OpenLayers.Control.ModifyFeature.ROTATE);
+				this.deleteControl = this.createDeleteControl( );
+
+				map.addControl(this.modifyControl);
+				map.addControl( this.selectorControl );
+				map.addControl(this.deleteControl);
+
+
+
+		}, this);    
+
         var actions = [
-			// this.button
 			this.selectButton 
 		];
         return gxp.plugins.FeatureSelector.superclass.addActions.apply(this, [actions]);
     },
+
+    /**
+     *  create a custom layer or it returns an existing one
+     *  TODO externalize this method because it is the same for many classes
+     */
+    createLayer: function( map ){
+		var layers = map.getLayersByName( this.layerName );
+		if ( layers.length > 0 ){
+			return layers[0]; // return the first layer with the given name
+		} else {
+			var layer;
+			if ( this.alternativeStyle ){
+				layer = new OpenLayers.Layer.Vector( this.layerName, {
+					projection: new OpenLayers.Projection(this.srs), 
+					styleMap: new OpenLayers.StyleMap({
+						"default": new OpenLayers.Style({
+							strokeColor: "red",
+							strokeOpacity: .7,
+							strokeWidth: 2,
+							fillColor: "red",
+							fillOpacity: 0,
+							cursor: "pointer"
+						}),
+						"temporary": new OpenLayers.Style({
+							strokeColor: "#ffff33",
+							strokeOpacity: .9,
+							strokeWidth: 2,
+							fillColor: "#ffff33",
+							fillOpacity: .3,
+							cursor: "pointer"
+						}),
+						"select": new OpenLayers.Style({
+							strokeColor: "#0033ff",
+							strokeOpacity: .7,
+							strokeWidth: 3,
+							fillColor: "#0033ff",
+							fillOpacity: 0,
+							graphicZIndex: 2,
+							cursor: "pointer"
+						})
+					})
+				});				
+			} else {
+				layer = new OpenLayers.Layer.Vector( this.layerName, {
+					projection: new OpenLayers.Projection(this.srs)
+				});	
+			}
+
+			map.addLayer( layer );
+			return layer;
+		}
+	},
 
 	createModifyControl: function(mode){
 		var self = this;
@@ -349,35 +343,18 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 	   this.modifyControl.deactivate();
 	   this.selectorControl.unselectAll();
    },
-
-  redraw: function(){
-		this.layer.redraw();
-	},
-
-   	undoSelection: function(selectedFeature, oldFeature){
-		
-		
-		//this.modifyControl.unselectFeature(selectedFeature);
-		//this.modifyControl.selectFeature(oldFeature);
-		
-		// this.modifyControl.deactivate();
-		// this.selectorControl.unselect(selectedFeature);
-		// this.modifyControl.unselectFeature(selectedFeature);
-		
-		// this.modifyControl.activate();
-		
-		// TODO hack to avoid infinite recursion, is there a better way?
-		// this.undo = true;
-		
-		// this.selectorControl.select(oldFeature);
-		
-		// this.undo = true;
-		
-		// this.modifyControl.selectFeature(oldFeature);
-		
-		// this.undo = false;
-		
-		
+	
+    onSelected: function( target, feature ){
+        this.target.fireEvent( this.prefix + "selected", target, feature);
+    },
+    onUnselected: function( target ){
+        this.target.fireEvent( this.prefix + "unselected", target);
+    },
+	onSave: function( target, feature ){
+        this.target.fireEvent( this.prefix + "saved", target, feature);
+    },
+	onChanged: function(target, feature){
+		this.target.fireEvent( this.prefix + "changed", target, feature);
 	}
 
 });

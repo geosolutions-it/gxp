@@ -48,127 +48,144 @@ gxp.plugins.KMLImporter = Ext.extend(gxp.plugins.Tool, {
      *  Title of the window (i18n).
      */
     uploadWindowTitle: 'Upload KML file',
+
+	alternativeStyle: false,
     
     /** private: method[constructor]
      */
     constructor: function(config) {
         gxp.plugins.KMLImporter.superclass.constructor.apply(this, arguments);
-		this.layer = config.layer;
+		// this.layer = config.layer;
+		this.alternativeStyle = config.alternativeStyle || false;
+		this.srs = config.srs || "EPSG:4326";
     },
+
+	addOutput: function(config){
+			var self = this;
+			var map = this.target.mapPanel.map;
+			var xmlJsonTranslateService = this.target.proxy + this.target.xmlJsonTranslateService;
+			// open an upload file window
+	        var actions = [{
+	            menuText: this.importKMLMenuText,
+	            iconCls: "gxp-icon-import-kml",
+	            tooltip: this.importKMLTooltip,
+	            handler: function() {
+		            var self = this;
+					// create an upload file form
+					var form = new gxp.KMLFileUploadPanel( {
+						xmlJsonTranslateService: xmlJsonTranslateService
+					} );
+					// open a modal window
+					var win = new Ext.Window({
+						       closable:true,
+							   title: this.uploadWindowTitle,
+							   iconCls: "gxp-icon-import-kml",
+							   border:false,
+							   modal: true, 
+							   bodyBorder: false,
+							   resizable: false,
+							   width: 500,
+						       items: [ form ]
+						});		
+					form.on("uploadcomplete", function addKMLToLayer(caller, response){
+							// the code to access the uploaded file
+							var code = response.code;
+
+							var Request = Ext.Ajax.request({
+						       url: xmlJsonTranslateService+'/FileUploader?code='+code,
+						       method: 'GET',
+						       headers:{
+						          'Content-Type' : 'application/xml'
+						       },
+						       scope: this,
+						       success: function(response, opts){
+									var format = new OpenLayers.Format.KML({
+								    	extractStyles: true, 
+										extractAttributes: true,
+										maxDepth: 2 //,
+										// externalProjection: new OpenLayers.Projection("EPSG:4326"),
+										// internalProjection: map.getProjection()
+								    });
+								    var features = format.read(response.responseText);
+									// console.log(features);
+								    self.layer.addFeatures( features );
+						       },
+						       failure:  function(response, opts){
+						       		console.error(response);
+						       }
+						    });
+
+							// destroy the window
+							win.destroy();
+						});
+					// show window
+					win.show(); 
+
+	            },
+	            scope: this
+	        }];
+	        return gxp.plugins.KMLImporter.superclass.addActions.apply(this, [actions]);		
+		
+	},
 
     /** api: method[addActions]
      */
     addActions: function() {
-		var self = this;
-		var map = this.target.mapPanel.map;
-		var xmlJsonTranslateService = this.target.proxy + this.target.xmlJsonTranslateService;
-		// open an upload file window
-        var actions = [{
-            menuText: this.importKMLMenuText,
-            iconCls: "gxp-icon-import-kml",
-            tooltip: this.importKMLTooltip,
-            handler: function() {
-	            var self = this;
-				// create an upload file form
-				var form = new gxp.KMLFileUploadPanel( {
-					xmlJsonTranslateService: xmlJsonTranslateService
-				} );
-				// open a modal window
-				var win = new Ext.Window({
-					       closable:true,
-						   title: this.uploadWindowTitle,
-						   iconCls: "gxp-icon-import-kml",
-						   border:false,
-						   modal: true, 
-						   bodyBorder: false,
-						   resizable: false,
-						   width: 500,
-					       items: [ form ]
-					});		
-				form.on("uploadcomplete", function addKMLToLayer(caller, response){
-						// the code to access the uploaded file
-						var code = response.code;
-						/*var layername = self.createLayerName( response.filename );
-						// see this: http://gis.stackexchange.com/questions/16629/how-to-add-kml-data-but-from-variable-not-from-url
-						// create a new layer from uploaded file
-						var kmlLayer = new OpenLayers.Layer.Vector(layername, {
-											projection: new OpenLayers.Projection("EPSG:4326"),
-											strategies: [new OpenLayers.Strategy.Fixed()],
-											protocol: new OpenLayers.Protocol.HTTP({
-												url: xmlJsonTranslateService+'/FileUploader?code='+code,
-												format: new OpenLayers.Format.KML({
-														extractStyles: true, 
-														extractAttributes: true,
-														maxDepth: 2
-													})
-											})
-										});
-						kmlLayer.events.register("beforefeaturesadded", kmlLayer, function (features) {
-							console.log('featuresadded');
-							layer.addFeatures( features );
-						});*/
-						
-						
-						var Request = Ext.Ajax.request({
-					       url: xmlJsonTranslateService+'/FileUploader?code='+code,
-					       method: 'GET',
-					       headers:{
-					          'Content-Type' : 'application/xml'
-					       },
-					       scope: this,
-					       success: function(response, opts){
-								var format = new OpenLayers.Format.KML({
-							    	extractStyles: true, 
-									extractAttributes: true,
-									maxDepth: 2 //,
-									// externalProjection: new OpenLayers.Projection("EPSG:4326"),
-									// internalProjection: map.getProjection()
-							    });
-							    var features = format.read(response.responseText);
-								// console.log(features);
-							    self.layer.addFeatures( features );
-					       },
-					       failure:  function(response, opts){
-					       		console.error(response);
-					       }
-					    });
-						
-										
-						// add the new layer to current map
-						// self.target.mapPanel.map.addLayer(kmlLayer);
-						// console.log( kmlLayer );
-						
-						
-						// destroy the window
-						win.destroy();
-					});
-				// show window
-				win.show(); 
-
-            },
-            scope: this
-        }];
-        return gxp.plugins.KMLImporter.superclass.addActions.apply(this, [actions]);
+		this.target.on('ready', function(){
+				this.layer = this.createLayer( this.target.mapPanel.map);
+				this.addOutput();
+		}, this);	
     },
 
- 	/** private: method[createLayerName]
-     * utility method to create unique names for layers: add a progressive number.
+    /**
+     *  create a custom layer or it returns an existing one
      */
-	createLayerName: function(name){
-		var map = this.target.mapPanel.map;
-		var i = 2;
-		var trial = name;
-		while(true){
-			var layers = map.getLayersByName( trial );
-			if (layers.length === 0){
-				return trial;
+  createLayer: function( map ){
+		var layers = map.getLayersByName( this.layerName );
+		if ( layers.length > 0 ){
+			return layers[0]; // return the first layer with the given name
+		} else {
+			var layer;
+			if ( this.alternativeStyle ){
+				layer = new OpenLayers.Layer.Vector( this.layerName, {
+					projection: new OpenLayers.Projection( this.srs ), 
+					styleMap: new OpenLayers.StyleMap({
+						"default": new OpenLayers.Style({
+							strokeColor: "red",
+							strokeOpacity: .7,
+							strokeWidth: 2,
+							fillColor: "red",
+							fillOpacity: 0,
+							cursor: "pointer"
+						}),
+						"temporary": new OpenLayers.Style({
+							strokeColor: "#ffff33",
+							strokeOpacity: .9,
+							strokeWidth: 2,
+							fillColor: "#ffff33",
+							fillOpacity: .3,
+							cursor: "pointer"
+						}),
+						"select": new OpenLayers.Style({
+							strokeColor: "#0033ff",
+							strokeOpacity: .7,
+							strokeWidth: 3,
+							fillColor: "#0033ff",
+							fillOpacity: 0,
+							graphicZIndex: 2,
+							cursor: "pointer"
+						})
+					})
+				});				
 			} else {
-				trial = name + ' ('+i+')';
-				i++;
+				layer = new OpenLayers.Layer.Vector( this.layerName, {
+					projection: new OpenLayers.Projection( this.srs )
+				});	
 			}
+
+			map.addLayer( layer );
+			return layer;
 		}
-			
-		
 	}
 
 });

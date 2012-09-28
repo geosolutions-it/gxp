@@ -78,142 +78,24 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 
 	customLayerDefaultName: "Custom layer",
   
+	alternativeStyle: false,
     
     /** private: method[constructor]
      */
     constructor: function(config) {
         gxp.plugins.AddGeometry.superclass.constructor.apply(this, arguments);
-		this.layer = config.layer;
+		// this.layer = config.layer;
+		this.alternativeStyle = config.alternativeStyle || false;
+		this.srs = config.srs || "EPSG:4326";
     },
 
-
-
-    /** api: method[addActions]
+   /** private: method[addOutput]
+     *  :arg config: ``Object``
      */
-    addActions: function() {
-	
-	   
-	
-       this.activeIndex = 0;
-       this.button = new Ext.SplitButton({
-            iconCls: "gxp-icon-add-point",
-            tooltip: this.addPointTooltip,
-            enableToggle: true,
-            toggleGroup: this.toggleGroup,
-            allowDepress: true,
-            handler: function(button, event) {
-                if(button.pressed) {
-                    button.menu.items.itemAt(this.activeIndex).setChecked(true);
-                }
-            },
-            scope: this,
-            listeners: {
-                toggle: function(button, pressed) {
-                    // toggleGroup should handle this
-                    if(!pressed) {
-                        button.menu.items.each(function(i) {
-							if (i.setChecked){
-								i.setChecked(false);
-							}
-                            
-                        });
-                    }
-                },
-                render: function(button) {
-                    // toggleGroup should handle this
-                    Ext.ButtonToggleMgr.register(button);
-                }
-            },
-            menu: new Ext.menu.Menu({
-                items: [
-                    new Ext.menu.CheckItem(
-                        new GeoExt.Action({
-                            text: this.addPointMenuText,
-                            iconCls: "gxp-icon-add-point",
-                            toggleGroup: this.toggleGroup,
-                            group: this.toggleGroup,
-                            listeners: {
-                                checkchange: function(item, checked) {
-								//	map.addLayer( layer );
-                                    this.activeIndex = 0;
-                                    this.button.toggle(checked);
-                                    if (checked) {
-                                        this.button.setIconClass(item.iconCls);
-                                    }
-                                },
-                                scope: this
-                            },
-                            map: this.target.mapPanel.map,
-                            control: this.createDrawControl(
-                                OpenLayers.Handler.Point, this.addPointMenuTooltip
-                            )
-                        })
-                    ),
-                    new Ext.menu.CheckItem(
-                        new GeoExt.Action({
-                            text: this.addLinesMenuText,
-                            iconCls: "gxp-icon-add-lines",
-                            toggleGroup: this.toggleGroup,
-                            group: this.toggleGroup,
-                            listeners: {
-                                checkchange: function(item, checked) {
-                                    this.activeIndex = 1;
-                                    this.button.toggle(checked);
-                                    if (checked) {
-                                        this.button.setIconClass(item.iconCls);
-										
-                                    }
-                                },
-                                scope: this
-                            },
-                            map: this.target.mapPanel.map,
-                            control: this.createDrawControl(
-                                OpenLayers.Handler.Path, this.addLinesMenuTooltip
-                            )
-                        })
-                    ),
-					new Ext.menu.CheckItem(
-                        new GeoExt.Action({
-                            text: this.addPolygonMenuText,
-                            iconCls: "gxp-icon-add-polygon",
-                            toggleGroup: this.toggleGroup,
-                            group: this.toggleGroup,
-                            listeners: {
-                                checkchange: function(item, checked) {
-                                    this.activeIndex = 2;
-                                    this.button.toggle(checked);
-                                    if (checked) {
-                                        this.button.setIconClass(item.iconCls);
-                                    }
-                                },
-                                scope: this
-                            },
-                            map: this.target.mapPanel.map,
-                            control: this.createDrawControl(
-                                OpenLayers.Handler.Polygon, this.addPolygonMenuTooltip
-                            )
-                        })
-                    ),{
-						text: this.addPointFromCoordsMenuText,
-                        iconCls: "gxp-icon-add-point-from-coords",
-                        toggleGroup: this.toggleGroup,
-                        group: this.toggleGroup,
-                        handler:this.handleAddPointFromCoords,
-						scope:this	
-					}/*,{
-                            text: this.clearAllMenuText,
-                            iconCls: "gxp-icon-removeall",
-                            toggleGroup: this.toggleGroup,
-                            group: this.toggleGroup,
-							handler:this.handleRemoveFeatures,
-							scope:this
-                        }      */
-                ]
-            })
-        });
-
-		 this.deleteButton = new Ext.SplitButton({
-	            iconCls: "gxp-icon-removeall",
+    addOutput: function(config){
+		  this.activeIndex = 0;
+	       this.button = new Ext.SplitButton({
+	            iconCls: "gxp-icon-add-point",
 	            tooltip: this.addPointTooltip,
 	            enableToggle: true,
 	            toggleGroup: this.toggleGroup,
@@ -243,34 +125,209 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 	            },
 	            menu: new Ext.menu.Menu({
 	                items: [
-	                  {
-	                            text: this.clearAllMenuText,
-	                            iconCls: "gxp-icon-removeall",
+	                    new Ext.menu.CheckItem(
+	                        new GeoExt.Action({
+	                            text: this.addPointMenuText,
+	                            iconCls: "gxp-icon-add-point",
 	                            toggleGroup: this.toggleGroup,
 	                            group: this.toggleGroup,
-								handler:this.handleRemoveFeatures,
-								scope:this
-	                  },
-	                  {
-	                            text: 'Delete all selected',
-	                            iconCls: "gxp-icon-delete-feature",
+	                            listeners: {
+	                                checkchange: function(item, checked) {
+									//	map.addLayer( layer );
+	                                    this.activeIndex = 0;
+	                                    this.button.toggle(checked);
+	                                    if (checked) {
+	                                        this.button.setIconClass(item.iconCls);
+	                                    }
+	                                },
+	                                scope: this
+	                            },
+	                            map: this.target.mapPanel.map,
+	                            control: this.createDrawControl(
+	                                OpenLayers.Handler.Point, this.addPointMenuTooltip
+	                            )
+	                        })
+	                    ),
+	                    new Ext.menu.CheckItem(
+	                        new GeoExt.Action({
+	                            text: this.addLinesMenuText,
+	                            iconCls: "gxp-icon-add-lines",
 	                            toggleGroup: this.toggleGroup,
 	                            group: this.toggleGroup,
-								handler:this.handleRemoveSelectedFeatures,
-								scope:this
-	                   }      
+	                            listeners: {
+	                                checkchange: function(item, checked) {
+	                                    this.activeIndex = 1;
+	                                    this.button.toggle(checked);
+	                                    if (checked) {
+	                                        this.button.setIconClass(item.iconCls);
+
+	                                    }
+	                                },
+	                                scope: this
+	                            },
+	                            map: this.target.mapPanel.map,
+	                            control: this.createDrawControl(
+	                                OpenLayers.Handler.Path, this.addLinesMenuTooltip
+	                            )
+	                        })
+	                    ),
+						new Ext.menu.CheckItem(
+	                        new GeoExt.Action({
+	                            text: this.addPolygonMenuText,
+	                            iconCls: "gxp-icon-add-polygon",
+	                            toggleGroup: this.toggleGroup,
+	                            group: this.toggleGroup,
+	                            listeners: {
+	                                checkchange: function(item, checked) {
+	                                    this.activeIndex = 2;
+	                                    this.button.toggle(checked);
+	                                    if (checked) {
+	                                        this.button.setIconClass(item.iconCls);
+	                                    }
+	                                },
+	                                scope: this
+	                            },
+	                            map: this.target.mapPanel.map,
+	                            control: this.createDrawControl(
+	                                OpenLayers.Handler.Polygon, this.addPolygonMenuTooltip
+	                            )
+	                        })
+	                    ),{
+							text: this.addPointFromCoordsMenuText,
+	                        iconCls: "gxp-icon-add-point-from-coords",
+	                        toggleGroup: this.toggleGroup,
+	                        group: this.toggleGroup,
+	                        handler:this.handleAddPointFromCoords,
+							scope:this	
+						}
 	                ]
 	            })
 	        });
+
+			 this.deleteButton = new Ext.SplitButton({
+		            iconCls: "gxp-icon-removeall",
+		            tooltip: this.addPointTooltip,
+		            enableToggle: true,
+		            toggleGroup: this.toggleGroup,
+		            allowDepress: true,
+		            handler: function(button, event) {
+		                if(button.pressed) {
+		                    button.menu.items.itemAt(this.activeIndex).setChecked(true);
+		                }
+		            },
+		            scope: this,
+		            listeners: {
+		                toggle: function(button, pressed) {
+		                    // toggleGroup should handle this
+		                    if(!pressed) {
+		                        button.menu.items.each(function(i) {
+									if (i.setChecked){
+										i.setChecked(false);
+									}
+
+		                        });
+		                    }
+		                },
+		                render: function(button) {
+		                    // toggleGroup should handle this
+		                    Ext.ButtonToggleMgr.register(button);
+		                }
+		            },
+		            menu: new Ext.menu.Menu({
+		                items: [
+		                  {
+		                            text: this.clearAllMenuText,
+		                            iconCls: "gxp-icon-removeall",
+		                            toggleGroup: this.toggleGroup,
+		                            group: this.toggleGroup,
+									handler:this.handleRemoveFeatures,
+									scope:this
+		                  },
+		                  {
+		                            text: 'Delete all selected',
+		                            iconCls: "gxp-icon-delete-feature",
+		                            toggleGroup: this.toggleGroup,
+		                            group: this.toggleGroup,
+									handler:this.handleRemoveSelectedFeatures,
+									scope:this
+		                   }      
+		                ]
+		            })
+		        });
+
+			var actions = [
+				this.button,
+				this.deleteButton
+			];
+
+
+	        return gxp.plugins.AddGeometry.superclass.addActions.apply(this, [actions]);	
 	
-		var actions = [
-			this.button,
-			this.deleteButton
-		];
-		
-		
-        return gxp.plugins.AddGeometry.superclass.addActions.apply(this, [actions]);
+	},
+
+
+    /** api: method[addActions]
+     */
+    addActions: function() {
+	
+		this.target.on('ready', function(){
+				this.layer = this.createLayer( this.target.mapPanel.map );
+				this.addOutput();
+		}, this);	   
+	
+     
     },
+
+    /**
+     *  create a custom layer or it returns an existing one
+     */
+    createLayer: function( map ){
+		var layers = map.getLayersByName( this.layerName );
+		if ( layers.length > 0 ){
+			return layers[0]; // return the first layer with the given name
+		} else {
+			var layer;
+			if ( this.alternativeStyle ){
+				layer = new OpenLayers.Layer.Vector( this.layerName, {
+					projection: new OpenLayers.Projection(this.srs), 
+					styleMap: new OpenLayers.StyleMap({
+						"default": new OpenLayers.Style({
+							strokeColor: "red",
+							strokeOpacity: .7,
+							strokeWidth: 2,
+							fillColor: "red",
+							fillOpacity: 0,
+							cursor: "pointer"
+						}),
+						"temporary": new OpenLayers.Style({
+							strokeColor: "#ffff33",
+							strokeOpacity: .9,
+							strokeWidth: 2,
+							fillColor: "#ffff33",
+							fillOpacity: .3,
+							cursor: "pointer"
+						}),
+						"select": new OpenLayers.Style({
+							strokeColor: "#0033ff",
+							strokeOpacity: .7,
+							strokeWidth: 3,
+							fillColor: "#0033ff",
+							fillOpacity: 0,
+							graphicZIndex: 2,
+							cursor: "pointer"
+						})
+					})
+				});				
+			} else {
+				layer = new OpenLayers.Layer.Vector( this.layerName, {
+					projection: new OpenLayers.Projection(this.srs)
+				});	
+			}
+
+			map.addLayer( layer );
+			return layer;
+		}
+	},
 
     handleRemoveSelectedFeatures: function(){
 	
@@ -453,7 +510,7 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 		return control;
 	},
 
-	activateDrawing: function( controlName ){
+	/* activateDrawing: function( controlName ){
 
 		if ( ! this.drawControls ){
 			var map = this.target.mapPanel.map;
@@ -481,7 +538,7 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 		}
 
 		this.drawControls[ controlName ].activate();	
-	}
+	} */
 
 
 });

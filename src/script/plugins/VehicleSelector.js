@@ -54,7 +54,6 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
      */
     constructor: function(config) {
         gxp.plugins.VehicleSelector.superclass.constructor.apply(this, arguments);
-		this.vehicles = config.vehicles;
 		this.cruiseName = config.cruiseName;
     },
 
