@@ -103,37 +103,11 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
 	
         this.control.events.on({
             'play':function(evt){
-				if (this.tooltip===null){
-					this.tooltip = new Ext.ToolTip({
-								        target: 'sync-button',
-								        html:  '1 sec to refresh',
-								        title: 'Working interval: ' + Ext.util.Format.date(this.control.range[0], "d/m/Y") + ' to ' 
-													+ Ext.util.Format.date(this.control.range[1], "d/m/Y" ),
-								        autoHide: false,
-								        closable: true,
-								        draggable:true,
-										width: 400,
-										anchor: 'bottom',
-										closable: true
-									});	
-					// force show now
-					this.tooltip.showAt( [ this.getEl().getX()-50,  this.getEl().getY()+50 ]);
-								
-				}
                 this.playing = true;
             },
             'stop':function(evt){
-				if (this.tooltip){
-					this.tooltip.destroy();
-					this.tooltip = null;
-				}
-					
                 this.playing = false;
             },
-			'tick': function(evt){
-				if (this.tooltip)
-					this.tooltip.update( evt.currentTime );
-			},
             scope: this
         });
         
@@ -262,7 +236,9 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
 		this.btnPlay.enable();
 		this.btnNext.enable();
 		this.btnLoop.enable();
-		this.btnFastforward.enable();
+        if(this.btnFastforward.active){
+            this.btnFastforward.enable();
+        }
 		this.slider.enable();
         this.btnSettings.enable();
         this.btnCurrentTime.enable();
@@ -482,9 +458,6 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
         ctl.setTime(new Date(ctl.range[(ctl.step < 0) ? 0 : 1].getTime()));
     },
     toggleAnimation:function(btn,pressed){
-        var navigation = this.mapPanel.map.getControlsByClass('OpenLayers.Control.Navigation');
-        var panPanel = this.mapPanel.map.getControlsByClass('OpenLayers.Control.PanPanel');
-        var zoomPanel = this.mapPanel.map.getControlsByClass('OpenLayers.Control.ZoomPanel');
         
         if(!btn.bound && pressed){
             this.control.events.on({
@@ -507,39 +480,33 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
         
         if(pressed){
             if(!this.control.timer){
+                this.btnNext.disable();
+                this.btnLoop.disable();
+                this.btnFastforward.disable();
+                this.slider.disable();
+                this.btnSettings.disable();
+                this.btnCurrentTime.disable();
+                this.btnBack.disable();                
                 //don't start playing again if it is already playing
                 this.control.stepType = "next";
                 this.control.play();
-
-                for(var a=0;a<this.mapPanel.items.items.length;a++){
-                    if(this.mapPanel.items.items[a].baseCls == "gx-zoomslider"){  
-                        this.mapPanel.items.items[a].hide();
-                    }                                                              
-                }                
-                
-                navigation[0].deactivate();
-                navigation[1].deactivate();
-                panPanel[0].deactivate();
-                zoomPanel[0].deactivate();                   
+                 
             }
+             
             btn.btnEl.removeClass('gxp-icon-play');
             btn.btnEl.addClass('gxp-icon-pause');
             btn.setTooltip(this.pauseTooltip);
         } else {
+                this.btnNext.enable();
+                this.btnLoop.enable();
+                this.btnFastforward.enable();
+                this.slider.enable();
+                this.btnSettings.enable();
+                this.btnCurrentTime.enable();
+                this.btnBack.enable();             
             //if(this.control.timer){
                 //don't stop playing again if it is already stopped
                 this.control.stop();
-                
-                for(var a=0;a<this.mapPanel.items.items.length;a++){
-                    if(this.mapPanel.items.items[a].baseCls == "gx-zoomslider"){  
-                        this.mapPanel.items.items[a].show();
-                    }                                                              
-                }
-                
-                navigation[0].activate();
-                navigation[1].activate();             
-                panPanel[0].activate();
-                zoomPanel[0].activate();                   
                 
             //}
             btn.btnEl.addClass('gxp-icon-play');
@@ -561,8 +528,13 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
         }
     },
     toggleDoubleSpeed:function(btn,pressed){
-        var framerate = this.control.frameRate / ((pressed) ? 2 : 0.5);
-        this.control.setFrameRate(framerate);
+        var framerate = this.control.frameRate; // ((pressed) ? 2 : 0.5);
+        if(pressed){
+            this.control.setFrameRate(framerate,true);            
+        }else{
+            this.control.setFrameRate(framerate,false);            
+        }
+
         btn.setTooltip((pressed) ? this.normalTooltip : this.fastforwardTooltip);
     },
     toggleOptionsWindow:function(btn,pressed){

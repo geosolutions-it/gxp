@@ -8,17 +8,17 @@
 
 /** api: (define)
  *  module = gxp
- *  class = Watermark
+ *  class = TimeVisualization
  *  base_link = `Ext.Panel <http://dev.sencha.com/deploy/dev/docs/?class=Ext.Panel>`_
  */
 Ext.namespace("gxp");
 
 /** api: constructor
- *  .. class::Watermark(config)
+ *  .. class::TimeVisualization(config)
  *   
  *      create a panel to display a watermark on the map
  */
-gxp.Watermark = Ext.extend(Ext.Panel, {
+gxp.TimeVisualization = Ext.extend(Ext.Panel, {
 	/** api: config[map]
      *  ``OpenLayers.Map`` or :class:`GeoExt.MapPanel`
      *  The map where to show the watermark.
@@ -39,7 +39,7 @@ gxp.Watermark = Ext.extend(Ext.Panel, {
      *  Initialize the component.
      */
     initComponent: function() {
-        gxp.Watermark.superclass.initComponent.call(this);
+        gxp.TimeVisualization.superclass.initComponent.call(this);
         if(this.map) {
             if(this.map instanceof GeoExt.MapPanel) {
                 this.map = this.map.map;
@@ -72,28 +72,29 @@ gxp.Watermark = Ext.extend(Ext.Panel, {
         this.unbind();
     },
 
-    /** private: method[addWatermark]
+    /** private: method[addTimeVisualization]
      *  
      *  Create the watermark and add it to the map.
      */
-    addWatermark: function() {
-		var self = this;
-        var watermarkPanel = new Ext.BoxComponent({});
-        watermarkPanel.on('render', function(){
-	
-			var poweredByControl = new OpenLayers.Control({displayClass: "olControl_Watermark", name: "olWatermark"});
-			OpenLayers.Util.extend(poweredByControl, {
-			        draw: function () {
-			          OpenLayers.Control.prototype.draw.apply(this, arguments);
-			          this.div.innerHTML = '<div class=\"olPoweredBy\" id=\"olPoweredBy\" style=\"'+ self.position +'\" ><img src=\"' + self.url + '\" width=\"60\" height=\"60\"  title=\"Powered by NURC\" /></div>';
-			          return this.div;
-			        }
+    addTimeVisualization: function() {
+        var self = this;
+        var timeVisualizationPanel = new Ext.BoxComponent({});
+        timeVisualizationPanel.on('render', function(){
 
-			    });
-			this.map.addControl(poweredByControl);	
-	
+            var timeVisualizationControl = new OpenLayers.Control({CLASS_NAME: "OpenLayers.Control.OlTime",displayClass: "olControl_TimeVisualization", name: "olTime"});
+            OpenLayers.Util.extend(timeVisualizationControl, {
+                draw: function () {
+                    OpenLayers.Control.prototype.draw.apply(this, arguments);
+                    this.div.innerHTML = '<div class=\"olTime\" id=\"olTime\" style=\"'+ self.position +'\" ></div>';
+
+                    return this.div;
+                }
+
+            });
+            this.map.addControl(timeVisualizationControl);	
+
         }, this);
-        this.add(watermarkPanel);
+        this.add(timeVisualizationPanel);
     },
 
     /** private: method[bind]
@@ -101,7 +102,7 @@ gxp.Watermark = Ext.extend(Ext.Panel, {
      */
     bind: function(map) {
         this.map = map;
-        this.addWatermark();
+        this.addTimeVisualization();
     },
     
     /** private: method[unbind]
@@ -113,4 +114,4 @@ gxp.Watermark = Ext.extend(Ext.Panel, {
 });
 
 /** api: xtype = gxp_watermark */
-Ext.reg('gxp_watermark', gxp.Watermark);
+Ext.reg('gxp_timevisualization', gxp.TimeVisualization);

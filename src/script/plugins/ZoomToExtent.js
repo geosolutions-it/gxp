@@ -84,12 +84,6 @@ gxp.plugins.ZoomToExtent = Ext.extend(gxp.plugins.Tool, {
     /** api: method[addActions]
      */
     addActions: function() {
-        var self = this;
-        
-        this.target.on("timemanager", function(){
-                self.getTimeManager();
-        });           
-        
         return gxp.plugins.ZoomToExtent.superclass.addActions.apply(this, [{
             text: this.buttonText,
             menuText: this.menuText,
@@ -129,30 +123,6 @@ gxp.plugins.ZoomToExtent = Ext.extend(gxp.plugins.Tool, {
             },
             scope: this
         }]);
-    },
-    getTimeManager: function(){
-	    if ( ! this.timeManager ){ // if it is not initialized
-			var timeManagers = this.target.mapPanel.map.getControlsByClass('OpenLayers.Control.TimeManager');
-			if (timeManagers.length <= 0){
-				console.error('Cannot init Synchronizer: no TimeManager found');
-				return;
-			}
-			this.timeManager = timeManagers[0];
-			var self = this;
-			// listen to play events
-			this.timeManager.events.register('play', this, 
-					function(){ 
-						if (self.actions[0].items[0].pressed){
-							self.actions[0].items[0].toggle();
-						}
-						self.actions[0].items[0].disable();
-					});	
-			this.timeManager.events.register('stop', this, 
-					function(){ 
-						self.actions[0].items[0].enable();
-					});	
-	    }
-		return this.timeManager;
     }
         
 });

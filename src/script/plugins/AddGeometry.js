@@ -508,7 +508,7 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 	createDrawControl: function(handler, tooltip){
 		var control = new OpenLayers.Control.DrawFeature(this.layer, handler);
 		return control;
-	},
+	}
 
 	/* activateDrawing: function( controlName ){
 
