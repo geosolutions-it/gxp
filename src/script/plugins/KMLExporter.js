@@ -64,6 +64,7 @@ gxp.plugins.KMLExporter = Ext.extend(gxp.plugins.Tool, {
 		var map = this.target.mapPanel.map;
 		var xmlJsonTranslateService = this.target.proxy + encodeURIComponent(this.target.xmlJsonTranslateService);
 		
+		
 		var self = this;
 		// open an upload file window
         var actions = [{

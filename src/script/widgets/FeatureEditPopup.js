@@ -338,8 +338,18 @@ gxp.FeatureEditPopup = Ext.extend(GeoExt.Popup, {
             scope: this
         });
         
-        var ucExcludeFields = this.excludeFields ?
-            this.excludeFields.join(",").toUpperCase().split(",") : [];
+        /*var ucExcludeFields = this.excludeFields ?
+            this.excludeFields.join(",").toUpperCase().split(",") : [];*/
+			
+	    // Fixed Bug
+		var ucExcludeFields;
+		if(this.excludeFields)
+			ucExcludeFields = this.excludeFields.length ?
+				this.excludeFields.join(",").toUpperCase().split(",") : [];
+		else
+			ucExcludeFields = this.excludeFields ?
+				this.excludeFields.join(",").toUpperCase().split(",") : [];
+			
         this.grid = new Ext.grid.PropertyGrid({
             border: false,
             source: feature.attributes,

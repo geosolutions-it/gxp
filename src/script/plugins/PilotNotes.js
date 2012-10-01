@@ -90,8 +90,12 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
         var panel = gxp.plugins.PilotNotes.superclass.addOutput.call(this, 
 			// TODO crea un widget
 			new Ext.FormPanel({
-					frame:false,  border:false, labelAlign:'top', 
-			        // title:self.pilotNotesMenuText,
+					frame:false,  
+					border:false, 
+					labelAlign:'top', 
+			        title: "Pilot Notes", //self.pilotNotesMenuText,
+					id: this.id,
+					tbar:[],
 					items:[{
                       xtype: 'fieldset',
                       id: 'field-set',

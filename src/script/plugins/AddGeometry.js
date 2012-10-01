@@ -133,7 +133,6 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 	                            group: this.toggleGroup,
 	                            listeners: {
 	                                checkchange: function(item, checked) {
-									//	map.addLayer( layer );
 	                                    this.activeIndex = 0;
 	                                    this.button.toggle(checked);
 	                                    if (checked) {
@@ -156,6 +155,7 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 	                            group: this.toggleGroup,
 	                            listeners: {
 	                                checkchange: function(item, checked) {
+
 	                                    this.activeIndex = 1;
 	                                    this.button.toggle(checked);
 	                                    if (checked) {
@@ -509,36 +509,6 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 		var control = new OpenLayers.Control.DrawFeature(this.layer, handler);
 		return control;
 	}
-
-	/* activateDrawing: function( controlName ){
-
-		if ( ! this.drawControls ){
-			var map = this.target.mapPanel.map;
-			// create a custom layer
-			var customLayer = new OpenLayers.Layer.Vector(this.customLayerDefaultName);
-			map.addLayer(customLayer);
-			// map.addControl(new OpenLayers.Control.LayerSwitcher());
-			// prepare controls for the custom layers
-			this.drawControls = {
-			                point: new OpenLayers.Control.DrawFeature(
-										customLayer, OpenLayers.Handler.Point
-			                ),
-			                line: new OpenLayers.Control.DrawFeature(
-			                    customLayer, OpenLayers.Handler.Path
-			                ),
-			                polygon: new OpenLayers.Control.DrawFeature(
-			                    customLayer, OpenLayers.Handler.Polygon
-			                )
-			            };
-
-
-				for(var key in this.drawControls) {
-			       map.addControl(this.drawControls[key]);
-			    }			
-		}
-
-		this.drawControls[ controlName ].activate();	
-	} */
 
 
 });

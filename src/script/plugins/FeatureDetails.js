@@ -98,8 +98,12 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
         var panel = gxp.plugins.FeatureDetails.superclass.addOutput.call(this, 
 			
 			new Ext.FormPanel({
-					frame:false,  border:false, labelAlign:'top', 
-			        // title:self.pilotNotesMenuText,
+					frame:false,  
+					border:false, 
+					labelAlign:'top', 
+			        title: "Custom Features", //self.pilotNotesMenuText,
+					id: this.id,
+					tbar: [],
 					items:[{
                       xtype: 'fieldset',
                       id: 'details-field-set',
@@ -304,8 +308,7 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 				self.copyFromSelectedToForm( feature );
 				container.modifyControl.selectFeature(feature);
 			}
-
-		
+			
 			self.enable();
 			/*self.copyFromFormToSelected( self.feature, container );
 			
@@ -317,12 +320,8 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 				
 			// fill in form with new values
 			self.copyFromSelectedToForm( feature );*/
-		
-
 		});
-		
-
-		
+	
 		return panel;
 	},
 	

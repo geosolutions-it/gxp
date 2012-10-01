@@ -46,11 +46,14 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 	
 	wfsVersion: '1.1.0',
 	
+	featureEditor: null,
+	
+	enableAoi: false,
+	
     /** private: method[constructor]
      */
     constructor: function(config) {
         gxp.plugins.VehicleSelector.superclass.constructor.apply(this, arguments);
-		this.vehicles = config.vehicles;
 		this.cruiseName = config.cruiseName;
     },
 
@@ -59,7 +62,7 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
      */
     init: function(target) {
 		gxp.plugins.VehicleSelector.superclass.init.apply(this, arguments);
-		this.layers = target.mapPanel.layers.data.items;		
+		this.layers = target.mapPanel.layers.data.items;
 	},
 	
     addOutput: function() {
@@ -98,9 +101,10 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 			}			
 			return val;
 		}
-	
+					
 	    var xg = Ext.grid;
 		this.grid = new xg.GridPanel({
+			id: "vselector",
 		    border: false,
 			store: new Ext.data.Store({
 				reader: reader,
@@ -110,6 +114,29 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 			    scope: this, 
 				afterrender: function(g){	
 					this.refreshRecords();	
+				},
+				rowclick: function(g, rowIndex, e){				    
+					if(this.enableAoi){
+						var store = g.getStore();		
+						var record = store.getAt(rowIndex);						
+						var vehicle = record.get("vehicle");
+			
+						var manager = this.featureEditor.getFeatureManager();
+						var schema = manager.schema;
+							
+						if(!schema){  			
+							this.pluginMask = new Ext.LoadMask(g.getEl(), {msg:"Please wait..."});
+							this.pluginMask.show();					
+							manager.activate();
+						}else{					
+							this.setEditorButtons(vehicle, manager);
+						}		
+
+						var popup = this.featureEditor.popup;
+						if(popup && popup.isVisible()){
+							popup.hide();
+						}	
+					}			
 				}
 			},
 			cm: new xg.ColumnModel({
@@ -151,7 +178,12 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 						xtype: 'actioncolumn',
 						sortable : false, 
 						width: 30,
-						id: 'av_icon',
+						listeners: {
+							scope: this,
+							click: function(column, grd, row, e){
+								grd.getSelectionModel().selectRow(row);
+							}
+						},
 						items: [{
 							tooltip: 'Availability'
 						}, {
@@ -170,6 +202,12 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 						xtype: 'actioncolumn',
 						sortable : false, 
 						width: 30,
+						listeners: {
+							scope: this,
+							click: function(column, grd, row, e){
+								grd.getSelectionModel().selectRow(row);
+							}
+						},
 						items: [{
 							icon   : this.refreshIconPath,  
 							tooltip: 'Refresh',
@@ -219,7 +257,7 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 										
 									var numberOfFeatures = rootNode.getAttribute('numberOfFeatures');
 									
-									if(numberOfFeatures == 1){	
+									if(numberOfFeatures > 0){	
 										var record = store.getAt(rowIndex);
 										record.set('availability', true);
 									}
@@ -231,7 +269,7 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 								var response = protocol.read({
 									callback: callback,
 									resultType: "hits" 
-								});										
+								});						
 							}
 						}]
 					}
@@ -246,7 +284,14 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 				tooltip: 'Refresh All Vehicles',
 				scope: this,
 				handler : function(){
-					this.refreshRecords();								
+				    this.grid.getSelectionModel().deselectRange(0, this.data.length - 1); 
+					
+					if(this.enableAoi){
+						var manager = this.featureEditor.getFeatureManager();
+						this.setEditorButtons(undefined, manager);	
+					}							
+					
+					this.refreshRecords();
 				}
 			}]
 		});
@@ -254,29 +299,98 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 		//
 		// Synchup when the Real Time Synch is enabled
 		//
-		this.target.on('refreshToolActivated', function(){
-		    var tabPanel = Ext.getCmp('west').setActiveTab(1);
-			this.refreshRecords();
-		}, this);
+		this.target.on({
+			refreshToolActivated: function() {
+				var tabPanel = Ext.getCmp('west').setActiveTab(1);
+				this.refreshRecords();
+			},
+			ready: function() {
+				var tabPanel = Ext.getCmp('west').setActiveTab(1);
+				var tabPanel = Ext.getCmp('west').setActiveTab(0);
+			},
+			scope: this
+		});
 		
-		//
-		// Synchup at startup
-		//
-	    this.target.on('ready', function(){
-		    var tabPanel = Ext.getCmp('west').setActiveTab(1);
-			this.refreshRecords();
-			var tabPanel = Ext.getCmp('west').setActiveTab(0);
-		}, this);
+		if(this.enableAoi){
+			//
+			// Synchup at startup
+			//
+			this.target.on({
+				ready: function() {
+					//
+					// Activate the editor
+					//
+					for(var tool in this.target.tools){
+						if(this.target.tools[tool].ptype == "gxp_nurcfeatureeditor"){
+							this.featureEditor = this.target.tools[tool];
+						}
+					}
+					
+					this.featureEditor.getFeatureManager().on("layerchange", function(){
+						var m = this.featureEditor.getFeatureManager();
+						if(m.featureStore.getCount() < 1){
+							this.featureEditor.actions[1].disable();
+						}							
+					}, this);
+					
+					this.featureEditor.getFeatureManager().featureLayer.events.register("featuresadded", this, function(evt) {	
+						var record = this.grid.getSelectionModel().getSelected();					
+						var vehicle = record.get("vehicle");
+						
+						var m = this.featureEditor.getFeatureManager();
+						this.setEditorButtons(vehicle, m);
+						
+						this.pluginMask.hide();
+					});
+				},
+				scope: this
+			});
+		}
 		
 	    var panel = gxp.plugins.VehicleSelector.superclass.addOutput.call(this, this.grid);
         return panel;
     },
 	
-	refreshLayers: function(col, rowIndex){
+	setEditorButtons: function(vehicle, manager){
 		
-		var store = this.grid.getStore();
-								
+		//
+		// Check if feature exists to enable only relative button
+		//
+		if(vehicle){
+			var features = manager.featureLayer.features;
+			
+			if(features.length < 1){
+				this.featureEditor.actions[0].enable();
+				this.featureEditor.actions[1].disable();
+			}
+			
+			for(var i=0; i<features.length; i++){
+				var vname = features[i].attributes[this.gliderPropertyName.toLowerCase()];
+				if(vname == vehicle.toLowerCase()){
+					this.featureEditor.actions[0].disable();
+					this.featureEditor.actions[1].enable();
+					
+					manager.showLayer(this.featureEditor.id, null);
+					this.featureEditor.select(features[i]);
+					
+					break;
+				}else{
+					this.featureEditor.actions[0].enable();
+					this.featureEditor.actions[1].disable();
+					this.featureEditor.selectControl.unselectAll();
+				}
+			}
+		}else{
+			this.featureEditor.actions[0].disable();
+			this.featureEditor.actions[1].disable();
+			this.featureEditor.selectControl.unselectAll();
+		}
+	},
+	
+	refreshLayers: function(col, rowIndex){		
+		var store = this.grid.getStore();								
 		var records = store.getRange(0, this.data.length - 1);
+		
 		var checked = [];
 		for(var i=0; i<records.length; i++){
 			var selected = records[i].get("selected");
@@ -296,27 +410,26 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 			clause += ')';
 
 			for (var l=0; l<this.layers.length; l++){
-					if ( this.layers[l].data ){
-						var layer = this.layers[l].data.layer;
-						if ( layer instanceof OpenLayers.Layer.WMS && layer.name !== "Nurc Background" ){
-							if (layer.params.CQL_FILTER){
+				if ( this.layers[l].data ){
+					var layer = this.layers[l].data.layer;
+					if ( layer instanceof OpenLayers.Layer.WMS && layer.name !== "Nurc Background" ){
+						if (layer.params.CQL_FILTER){
+						
+							var type = this.getType(layer.params.CQL_FILTER);
+							var cruiseName = this.getCruiseName(layer.params.CQL_FILTER);
 							
-								var type = this.getType(layer.params.CQL_FILTER);
-								var cruiseName = this.getCruiseName(layer.params.CQL_FILTER);
-								
-								var filter = this.cruisePropertyName + " = "+ cruiseName + " AND " + clause;
-								
-								if ( type ){
-									filter += " AND type=" + type;
-								}
-								
-								layer.mergeNewParams({
-									"cql_filter": filter
-								});	
-							}													
-						}									
-
-					}
+							var filter = this.cruisePropertyName + " = "+ cruiseName + " AND " + clause;
+							
+							if ( type ){
+								filter += " AND type=" + type;
+							}
+							
+							layer.mergeNewParams({
+								"cql_filter": filter
+							});	
+						}													
+					}			
+				}
 			}			
 			  
 		} else {
