@@ -243,8 +243,7 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
              */
             "authorizationchange",
 	    
-	    "groupselectionChange",
-        "layerselectionchangeproperties"
+	    "groupselectionChange"
         );
         
         Ext.apply(this, {
@@ -267,7 +266,7 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
      *
      *  TODO: change to selectLayers (plural)
      */
-    selectLayer: function(record,disZoom) {
+    selectLayer: function(record) {
         for(var tool in this.tools){
             if(this.tools[tool].ptype == "gxp_layerproperties"){
                 this.tools[tool].actions[0].show();
@@ -302,17 +301,7 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
             /*if (this.selectedLayer) {
                 this.selectedLayer.set("selected", true);
             }*/
-            if (disZoom){
-                for(var tool in this.tools){
-                    if(this.tools[tool].ptype == "gxp_zoomtolayerextent"){            
-                        this.tools[tool].actions[0].disable();
-                    }              
-                }
-                this.fireEvent("layerselectionchangeproperties", record);
-            }else{
-                this.fireEvent("layerselectionchange", record);
-                this.fireEvent("layerselectionchangeproperties", record);                
-            }
+            this.fireEvent("layerselectionchange", record);
         }
         return changed;
     },

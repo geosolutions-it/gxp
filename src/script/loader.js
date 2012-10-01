@@ -44,6 +44,7 @@
         "widgets/PlaybackToolbar.js",
 		"widgets/Watermark.js",
 		"widgets/MousePosition.js",
+        "widgets/TimeVisualization.js",
         "plugins/LayerSource.js",
         "plugins/BingSource.js",
         "plugins/WMSSource.js",

@@ -82,8 +82,8 @@ gxp.plugins.Playback = Ext.extend(gxp.plugins.Tool, {
      */
     addOutput: function(config){
         delete this._ready;
-        OpenLayers.Control.TimeManager.prototype.maxFrameDelay = 
-            (this.target.tests && this.target.tests.dropFrames) ? 10 : NaN;
+        //set maxFrameDelay to advance frame even if the layer is not loaded
+        OpenLayers.Control.TimeManager.prototype.maxFrameDelay = (this.target.tests && this.target.tests.dropFrames) ? 10 : NaN;
         config = Ext.applyIf(config || this.outputConfig || {}, {
             xtype: 'gxp_playbacktoolbar',
             mapPanel:this.target.mapPanel,
@@ -145,9 +145,33 @@ gxp.plugins.Playback = Ext.extend(gxp.plugins.Tool, {
             if (this._ready > 1) {
                 this.addOutput();
 				self.target.fireEvent("timemanager");
+                self.getTimeManager();
             }
         }, this);
     },
+    getTimeManager: function(){
+	    if ( ! this.timeManager ){ // if it is not initialized
+			var timeManagers = this.target.mapPanel.map.getControlsByClass('OpenLayers.Control.TimeManager');
+			if (timeManagers.length <= 0){
+				console.error('Error: no TimeManager found');
+				return;
+			}
+			this.timeManager = timeManagers[0];
+			var self = this;
+			// listen to play events
+			this.timeManager.events.register('play', this, 
+					function(){ 
+                        //call function in composer.js to disable al functionality
+                        this.target.disableAllFunc();  
+					});	
+			this.timeManager.events.register('stop', this, 
+					function(){ 
+                        //call function in composer.js to disable al functionality
+                        this.target.enableAllFunc();  
+					});	
+	    }
+		return this.timeManager;
+    },    
     /** api: method[setTime]
      *  :arg time: {Date}
      *  :return: {Boolean} - true if the time could be set to the supplied value

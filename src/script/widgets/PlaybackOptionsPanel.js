@@ -49,7 +49,7 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
     listOnlyText:'Use Exact List Values Only',
     stepText:'Animation Step',
     unitsText:'Animation Units',
-    frameRateText:'Animation Request',
+    frameRateText:'Animation Delay (s)',
     noUnitsText:'Snap To Time List',
     loopText:'Loop Animation',
     reverseText:'Reverse Animation',
@@ -314,8 +314,8 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
             // this.reverseModeCheck.setValue(this.timeManager.step<0);
             // this.reverseModeCheck.originalValue=this.reverseModeCheck.getValue();
             //set min and max for not negative ranges.
-            this.rangeStartField.setMaxValue(this.timeManager.range[1]);
-            this.rangeEndField.setMinValue(this.timeManager.range[0]);
+            //this.rangeStartField.setMaxValue(this.timeManager.range[1]);
+            //this.rangeEndField.setMinValue(this.timeManager.range[0]);
             //disable if range mode 
              /*if(playbackMode == "range"){
                 this.listOnlyCheck.setDisabled(true);

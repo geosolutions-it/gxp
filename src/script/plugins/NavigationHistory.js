@@ -63,7 +63,6 @@ gxp.plugins.NavigationHistory = Ext.extend(gxp.plugins.Tool, {
     /** api: method[addActions]
      */
     addActions: function() {
-        var self = this;
         var historyControl = new OpenLayers.Control.NavigationHistory();
         this.target.mapPanel.map.addControl(historyControl);
         var actions = [new GeoExt.Action({
@@ -79,47 +78,8 @@ gxp.plugins.NavigationHistory = Ext.extend(gxp.plugins.Tool, {
             disabled: true,
             control: historyControl.next
         })];
-        
-        this.target.on("timemanager", function(){
-                self.getTimeManager();
-        });           
-        
+
         return gxp.plugins.NavigationHistory.superclass.addActions.apply(this, [actions]);
-    },
-    getTimeManager: function(){
-	    if ( ! this.timeManager ){ // if it is not initialized
-			var timeManagers = this.target.mapPanel.map.getControlsByClass('OpenLayers.Control.TimeManager');
-			if (timeManagers.length <= 0){
-				console.error('Cannot init Synchronizer: no TimeManager found');
-				return;
-			}
-			this.timeManager = timeManagers[0];
-			var self = this;
-			// listen to play events
-			this.timeManager.events.register('play', this, 
-					function(){ 
-						if (self.actions[0].items[0].pressed){
-							self.actions[0].items[0].toggle();
-						}
-						if (self.actions[1].items[0].pressed){
-							self.actions[1].items[0].toggle();
-						}                        
-						self.actions[0].items[0].disable();
-                        self.actions[1].items[0].disable();
-					});	
-			this.timeManager.events.register('stop', this, 
-					function(){ 
-						if (self.actions[0].control.active){
-							self.actions[0].items[0].enable();
-						}
-						if (self.actions[1].control.active){
-							self.actions[1].items[0].enable();
-						}                    
-						
-                        
-					});	
-	    }
-		return this.timeManager;
     }
         
 });
