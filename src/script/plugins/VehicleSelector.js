@@ -342,6 +342,12 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 						
 						this.pluginMask.hide();
 					});
+					
+				    this.featureEditor.getFeatureManager().on("query", function() {	
+						if(this.pluginMask){
+							this.pluginMask.hide();
+						}						
+					}, this);
 				},
 				scope: this
 			});
