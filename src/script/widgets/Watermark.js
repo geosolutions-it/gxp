@@ -78,13 +78,19 @@ gxp.Watermark = Ext.extend(Ext.Panel, {
      */
     addWatermark: function() {
 		var self = this;
-        var watermarkPanel = new Ext.BoxComponent({});
+        var watermarkPanel = new Ext.BoxComponent({
+			style: {
+				bottom:'0px',
+			    right:'0px'
+			}
+		});
         watermarkPanel.on('render', function(){
 	
 			var poweredByControl = new OpenLayers.Control({displayClass: "olControl_Watermark", name: "olWatermark"});
 			OpenLayers.Util.extend(poweredByControl, {
 			        draw: function () {
-			          OpenLayers.Control.prototype.draw.apply(this, arguments);
+			          var wrapdiv =OpenLayers.Control.prototype.draw.apply(this, arguments);
+					  wrapdiv.setAttribute("style",self.position);
 			          this.div.innerHTML = '<div class=\"olPoweredBy\" id=\"olPoweredBy\" style=\"'+ self.position +'\" ><img src=\"' + self.url + '\" width=\"60\" height=\"60\"  title=\"Powered by NURC\" /></div>';
 			          return this.div;
 			        }

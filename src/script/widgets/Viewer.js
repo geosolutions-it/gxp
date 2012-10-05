@@ -348,8 +348,10 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
     },
     
     applyConfig: function(config) {
+	
         this.initialConfig = Ext.apply({}, config);
         Ext.apply(this, this.initialConfig);
+
         this.load();
     },
     

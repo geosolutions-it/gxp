@@ -92,6 +92,10 @@
     background-image: url(img/pencil.png);
 }
 
+.x-btn .view {
+    background-image: url(img/silk/map.png);
+}
+
 .x-btn .process, .x-menu-item .process {
     background-image: url(img/silk/cog.png);
 }
@@ -293,6 +297,10 @@
 /* gxp_import_kml */
 .x-btn .gxp-icon-import-kml, .x-tree-node .gxp-icon-import-kml, .gxp-icon-import-kml {
     background-image: url(img/silk/application_get.png);
+}
+
+.x-btn .gxp-icon-view-map, .x-tree-node .gxp-icon-view-map, .gxp-icon-view-map {
+    background-image: url(img/silk/map.png);
 }
 
 /* gxp_export_kml */

@@ -78,9 +78,10 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 		            + this.pad(this.d.getUTCDate()) + 'T'
 		            + this.pad(this.d.getUTCHours()) + ':'
 		            + this.pad(this.d.getUTCMinutes()) + ':'
-		            + this.pad(this.d.getUTCSeconds()) + 'Z';        
+		            + this.pad(this.d.getUTCSeconds()) + 'Z';     
 		//this.endTime = Date.fromISO( this.range[1] );
         this.endTime = Date.fromISO( this.UTC );
+		
     },
 
     /** private: method[init]
