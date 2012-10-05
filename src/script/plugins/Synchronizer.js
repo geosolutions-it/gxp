@@ -68,7 +68,6 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 		this.timeInterval = config.refreshTimeInterval*1000;
 		this.range = config.range;
 		this.startTime = Date.fromISO( this.range[0] );
-        
         //
         //set endTime == currentTime;
         //
@@ -78,10 +77,17 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 		            + this.pad(this.d.getUTCDate()) + 'T'
 		            + this.pad(this.d.getUTCHours()) + ':'
 		            + this.pad(this.d.getUTCMinutes()) + ':'
-		            + this.pad(this.d.getUTCSeconds()) + 'Z';     
-		//this.endTime = Date.fromISO( this.range[1] );
-        this.endTime = Date.fromISO( this.UTC );
-		
+		            + this.pad(this.d.getUTCSeconds()) + 'Z';
+                    
+        // current date           
+        this.currentTime = Date.fromISO( this.UTC );
+        
+        // config date
+        this.configEndTime = Date.fromISO( this.range[1] );
+        
+        //set endTime equal to configTime only if currentTime is greater than configTime
+        this.endTime = this.currentTime > this.configEndTime ? this.configEndTime : this.currentTime ;
+
     },
 
     /** private: method[init]
@@ -97,7 +103,8 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 		var interval;
 		var tooltipInterval;
 		var self = this;
-
+        var timeVisualization = map.getControlsByClass('OpenLayers.Control.OlTime');
+        
 		this.activeIndex = 0;
 		this.button = new Ext.SplitButton({
 				id:"sync-button",
@@ -180,6 +187,8 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 													timeManager.toolbar.disable();
                                                     item.ownerCt.items.items[1].disable();
                                                     
+                                                    timeVisualization[0].div.style.visibility = "hidden";                                                       
+                                                    
                                                     //call function in composer.js to disable al functionality
                                                     this.target.disableAllFunc();                                                     
                                                     
@@ -210,6 +219,8 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 											var timeManager = self.getTimeManager();
 											timeManager.toolbar.enable();
                                             item.ownerCt.items.items[1].enable();
+                                            
+                                            timeVisualization[0].div.style.visibility = "visible";     
                                             
                                             //call function in composer.js to enable al functionality
                                             this.target.enableAllFunc();
@@ -272,7 +283,7 @@ gxp.plugins.Synchronizer = Ext.extend(gxp.plugins.Tool, {
 														maxValue: self.range[1],
 														minValue: self.range[0],
 														format:"d/m/Y",
-														value:Ext.util.Format.date( self.endTime > self.range[1] ? self.range[1] : self.endTime, "d/m/Y"),
+														value:Ext.util.Format.date( self.endTime , "d/m/Y"),
 														width:5
 													 },{  
 														id:"interval-numberfield",

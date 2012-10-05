@@ -227,6 +227,7 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
 		this.btnLoop.disable();
 		this.btnFastforward.disable();
 		this.slider.disable();
+        this.slider.sliderTip.hide();
         this.btnSettings.disable();
         this.btnCurrentTime.disable();
         this.btnBack.disable();
@@ -240,6 +241,7 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
             this.btnFastforward.enable();
         }
 		this.slider.enable();
+        this.slider.sliderTip.show();
         this.btnSettings.enable();
         this.btnCurrentTime.enable();
         this.btnBack.enable();
