@@ -14,17 +14,12 @@
  *  module = gxp.plugins
  *  class = ComputeStatsAction
  */
-/** IMPORTANT NOTE: this is a temporaney plugin waiting for fixes in extjs charts module
- *  When fixed:
- *  * replace it with ComputeStatsAction-old.js
- *  * remove meta IE8 compatibility tag from base.js
- *  * remove script and link tags to yui in composer.js
- */
- /** api: (extends)
+
+/** api: (extends)
  *  plugins/Tool.js
  */
 Ext.namespace("gxp.plugins");
-YAHOO.widget.Chart.SWFURL = "http://yui.yahooapis.com/2.9.0/build/charts/assets/charts.swf";
+
 /** api: constructor
  *  .. class:: ComputeStatAction(config)
  *
@@ -277,76 +272,49 @@ gxp.plugins.ComputeStatsAction = Ext.extend(gxp.plugins.Tool, {
 				}
 			},
 			items: {
-				xtype:"panel",
-				
-				listeners: {
-					afterrender: function() {
-					  this.getEl().unmask();
-					},
-					render: function(){
-						this.getEl().mask();
-						
-						
-
-						var currencyAxis = new YAHOO.widget.NumericAxis();
-						currencyAxis.stackingEnabled = true;
-						//currencyAxis.labelFunction = YAHOO.example.numberToCurrency;
-						var stat = new YAHOO.util.DataSource(statElements);
-						this.getEl().setHeight(545);
-						stat.responseType = YAHOO.util.DataSource.TYPE_JSARRAY; 
-						stat.responseSchema = { 
-							fields: fields
-						}; 
-						var conf = {
-							series: series,
-							categoryKey : options.xField,
-							xAxes: new YAHOO.widget.CategoryAxis(),
-							xField: options.xField,
-							yAxes: new YAHOO.widget.NumericAxis(),
-							style: {
-								xAxis: {
-									labelRotation: -45
-								},
-								
-								dataTip: {
-									padding: 5,
-									border: {
-										color: 0x99bbe8,
-										size:1
-									},
-									background: {
-										color: 0xDAE7F6,
-										alpha: .8
-									},
-									font: {
-										name: 'Tahoma',
-										color: 0x15428B,
-										size: 10,
-										bold: true
-									}
-								},
-								padding: 10,
-								animationEnabled: true,
-								font: {
-									name: 'Tahoma',
-									color: 0x444444,
-									size: 11
-								}
-							}
-							
-							
-						};
-						//stat.responseSchema = { fields:fields };
-						if(options.stackCountries){
-							new YAHOO.widget.StackedColumnChart( this.getId(), stat,conf);
-						}else{
-							new YAHOO.widget.ColumnChart( this.getId(), stat,conf);
-						}
-						
+				xtype: 'stackedcolumnchart',
+				store: store,
+				xField: options.xField,
+				yAxis: new Ext.chart.NumericAxis({
+					stackingEnabled: options.stackCountries
+					
+					
+				}),
+				xAxis:  new Ext.chart.CategoryAxis({}),
+				series: series,
+				 extraStyle: {
+				   xAxis: {
+						labelRotation: -45
 					}
-					
-					
+				},
+				chartStyle: {
+					padding: 10,
+					animationEnabled: true,
+					font: {
+						name: 'Tahoma',
+						color: 0x444444,
+						size: 11
+					},
+					dataTip: {
+						padding: 5,
+						border: {
+							color: 0x99bbe8,
+							size:1
+						},
+						background: {
+							color: 0xDAE7F6,
+							alpha: .8
+						},
+						font: {
+							name: 'Tahoma',
+							color: 0x15428B,
+							size: 10,
+							bold: true
+						}
+					}
 				}
+				
+				
 			}
 		});
 	},
