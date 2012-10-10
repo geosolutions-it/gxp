@@ -206,6 +206,7 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 
 			 this.deleteButton = new Ext.SplitButton({
 		            iconCls: "gxp-icon-removeall",
+					disabled: true,
 		            tooltip: this.addPointTooltip,
 		            enableToggle: true,
 		            toggleGroup: this.toggleGroup,
@@ -260,7 +261,6 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 				this.deleteButton
 			];
 
-
 	        return gxp.plugins.AddGeometry.superclass.addActions.apply(this, [actions]);	
 	
 	},
@@ -272,6 +272,26 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 	
 		this.target.on('ready', function(){
 				this.layer = this.createLayer( this.target.mapPanel.map );
+				
+				var self = this;
+				this.layer.events.on({
+					'featureadded': function(feature){
+						self.deleteButton.enable();
+					},
+					'featuresremoved': function( features ){
+						if ( self.layer.features.length <= 0 ){
+							self.deleteButton.toggle( false );
+							self.deleteButton.disable();
+						}
+					},
+					'featureremoved': function(deleted){
+						if ( self.layer.features.length <= 0 ){
+							self.deleteButton.toggle( false );
+							self.deleteButton.disable();
+						}
+					}
+				});
+				
 				this.addOutput();
 		}, this);	   
 	

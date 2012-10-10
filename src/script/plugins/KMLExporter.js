@@ -64,13 +64,12 @@ gxp.plugins.KMLExporter = Ext.extend(gxp.plugins.Tool, {
 		var map = this.target.mapPanel.map;
 		var xmlJsonTranslateService = this.target.proxy + encodeURIComponent(this.target.xmlJsonTranslateService);
 		
-		
-		var self = this;
-		// open an upload file window
-        var actions = [{
-            menuText: this.exportKMLMenuText,
+		this.exportButton = new Ext.Button({
+			menuText: this.exportKMLMenuText,
+			disabled: true,
             iconCls: "gxp-icon-export-kml",
             tooltip: this.exportKMLTooltip,
+			scope: this,
             handler: function() {
 				// create kml string from layer features
 				var format = new OpenLayers.Format.KML({
@@ -109,11 +108,15 @@ gxp.plugins.KMLExporter = Ext.extend(gxp.plugins.Tool, {
 					location.href = xmlJsonTranslateService+'FileDownloader' + encodeURIComponent('?code=' + code +'&filename='+filename);
 					win.destroy();
 				});
-				win.show(); 
-
-            },
-            scope: this
-        }];
+				win.show();
+			}
+		});
+		
+		var self = this;
+		// open an upload file window
+        var actions = [
+			this.exportButton
+      	];
         return gxp.plugins.KMLExporter.superclass.addActions.apply(this, [actions]);		
 	},
 
@@ -124,6 +127,26 @@ gxp.plugins.KMLExporter = Ext.extend(gxp.plugins.Tool, {
 		this.target.on('ready', function(){
 			
 				this.layer = this.createLayer( this.target.mapPanel.map);
+				
+						var self = this;
+						this.layer.events.on({
+							'featureadded': function(feature){
+								self.exportButton.enable();
+							},
+							'featuresremoved': function( features ){
+								if ( self.layer.features.length <= 0 ){
+									self.exportButton.toggle( false );
+									self.exportButton.disable();
+								}
+							},
+							'featureremoved': function(deleted){
+								if ( self.layer.features.length <= 0 ){
+									self.exportButton.toggle( false );
+									self.exportButton.disable();
+								}
+							}
+						});				
+				
 				this.addOutput();
 
 		}, this);

@@ -87,6 +87,7 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
                 iconCls: "gxp-icon-select-feature",
                 toggleGroup: this.toggleGroup,
                 group: this.toggleGroup,
+				disabled: true,
 				tooltip: 'Select',
 				enableToggle: true,
 				toggleHandler: function(button, pressed){
@@ -223,6 +224,9 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 		var self = this;
 		this.layer.events.on(
 					{
+					'featureadded': function(feature){
+						self.selectButton.enable();
+					},
 					'featureselected': function(selected) {
 							
 							if ( selected.feature.isNew === undefined ){
@@ -262,6 +266,13 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 
 						
 					  },
+					
+					   'featuresremoved': function( features ){
+							if ( self.layer.features.length <= 0 ){
+								self.selectButton.toggle( false );
+								self.selectButton.disable();
+							}
+						},
 
 						'featureunselected': function(unselected){
 							self.modifyControl.unselectFeature(unselected.feature);
@@ -270,6 +281,10 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 						'featureremoved': function(deleted){
 							self.newSelection = false;
 							self.modifyControl.unselectFeature(deleted.feature);
+							if ( self.layer.features.length <= 0 ){
+								self.selectButton.toggle( false );
+								self.selectButton.disable();
+							}
 						},
 
 						
