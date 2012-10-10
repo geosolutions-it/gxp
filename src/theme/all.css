@@ -303,6 +303,14 @@
     background-image: url(img/silk/map.png);
 }
 
+.x-btn .gxp-icon-user, .x-tree-node .gxp-icon-user, .gxp-icon-user {
+    background-image: url(img/silk/user.png);
+}
+
+.x-btn .gxp-icon-refresh, .x-tree-node .gxp-icon-refresh, .gxp-icon-refresh {
+    background-image: url(img/silk/arrow_refresh.png);
+}
+
 /* gxp_export_kml */
 .x-btn .gxp-icon-export-kml, .x-tree-node .gxp-icon-export-kml, .gxp-icon-export-kml {
     background-image: url(img/silk/application_put.png);
