@@ -147,10 +147,12 @@ gxp.plugins.NURCFeatureEditor = Ext.extend(gxp.plugins.FeatureEditor, {
 									var vname = features[i].attributes[this.gliderPropertyName];
 									if(vname == vehicle.toLowerCase()){
 										var geom = features[i].geometry;
+										//alert(geom.getBounds().toBBOX());
 										var c = geom.getCentroid();
 										var pixel = this.target.mapPanel.map.getLayerPxFromLonLat(new OpenLayers.LonLat(c.x, c.y));
 										var evt = {
-											xy: pixel
+											xy: pixel,
+											bbox: geom.getBounds().toBBOX()
 										};									
 										this.noFeatureClick(evt);
 										break;
@@ -544,7 +546,7 @@ gxp.plugins.NURCFeatureEditor = Ext.extend(gxp.plugins.FeatureEditor, {
         var size = map.getSize();
         var params = Ext.applyIf({
             REQUEST: "GetFeatureInfo",
-            BBOX: map.getExtent().toBBOX(),
+            BBOX: evt.bbox, //map.getExtent().toBBOX(),
             WIDTH: size.w,
             HEIGHT: size.h,
             X: parseInt(evt.xy.x),
