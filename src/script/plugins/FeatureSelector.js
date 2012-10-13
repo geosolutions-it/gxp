@@ -68,6 +68,7 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
     constructor: function(config) {
         gxp.plugins.FeatureSelector.superclass.constructor.apply(this, arguments);
 		// this.layer = config.layer;
+		this.toggleGroup = config.toggleGroup;
 		this.layerName = config.layerName;
 		this.alternativeStyle = config.alternativeStyle || false;
 		this.srs = config.srs || "EPSG:4326";
