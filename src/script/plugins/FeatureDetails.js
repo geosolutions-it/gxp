@@ -326,34 +326,48 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 		return panel;
 	},
 	
+	isEqual: function (first, second){
+		var eq = false;
+		
+		if((first == undefined && second == '') || (second == undefined && first == '')){
+			eq = true;
+		}
+		
+		if(first == second){
+			eq = true;
+		}
+		return  eq; //first === second || (first === undefined && second === '') || (second === undefined && first === '');
+	},
+	
 	isChanged: function(){
-		
-		var data = this.feature.attributes;
-		var name = Ext.getCmp("details-name-textfield").getValue();
-		var description = Ext.getCmp("details-description-textfield").getValue();
-		var date = Ext.getCmp("details-date-textfield").getValue();
-		var time = Ext.getCmp("details-time-textfield").getValue();
-		
-		function isEqual( first, second ){
-			return  first === second || (first === undefined && second === '') || (second === undefined && first === '');
-		};
+		if (!this.feature.isNew){ 
+			var data = this.feature.attributes;
+			var name = Ext.getCmp("details-name-textfield").getValue();
+			var description = Ext.getCmp("details-description-textfield").getValue();
+			var date = Ext.getCmp("details-date-textfield").getRawValue();
+			var time = Ext.getCmp("details-time-textfield").getValue();
 
-		if ( this.feature.geometry instanceof OpenLayers.Geometry.Point ){
-			if ( this.oldX !== this.feature.geometry.x || this.oldY !== this.feature.geometry.y)
-			 	return true; // has been moved
+			if ( this.feature.geometry instanceof OpenLayers.Geometry.Point ){
+				if ( this.oldX !== this.feature.geometry.x || this.oldY !== this.feature.geometry.y)
+					return true; // has been moved
+			}
+
+			//if ( this.feature.isNew === false ){
+				// return	(data.name !== name || data.description !== description || data.date !== date || data.time !== time );	
+			
+			if((data.name == "" && name == "") || (data.description == "" && description == "") || (data.date == "" && date == "") || (data.time == "" && time == "")){
+				return false;
+			}
+			
+				var eq = !this.isEqual(data.name, name) || !this.isEqual(data.description, description) || !this.isEqual(data.date, date) || !this.isEqual(data.time, time );
+				return	eq;
+			//} 
+		}else {
+			return false; //( name !== '' || description !== '' || date !== '' || time !== '');
 		}
 
-		if ( this.feature.isNew === false ){
-			// return	(data.name !== name || data.description !== description || data.date !== date || data.time !== time );
-			return	! isEqual(data.name, name) 
-					|| ! isEqual( data.description, description) 
-					|| ! isEqual( data.date, date )
-					|| ! isEqual( data.time, time );
-		} else {
-			return ( name !== '' || description !== '' || date !== '' || time !== '');
-		}
 		
-		return true;
+		//return true;
 		
 	},
 	
