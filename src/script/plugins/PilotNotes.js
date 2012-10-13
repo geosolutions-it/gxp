@@ -163,7 +163,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 							            xtype     : 'timefield',
 										// allowBlank:false,
 							            fieldLabel: 'Time',
-										editable: false,
+										readOnly: true,
 										format: 'H:i:s',
 										width:80,
 										//anchor:'100%',

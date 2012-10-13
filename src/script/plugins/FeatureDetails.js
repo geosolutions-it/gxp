@@ -171,7 +171,7 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 												editable: false,
 												allowBlank:true,
 									            fieldLabel: 'Time',
-												editable: true,
+												readOnly: true,
 												format: 'H:i:s',
 												width:80,
 												//anchor:'100%',
