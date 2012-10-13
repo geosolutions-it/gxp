@@ -242,7 +242,7 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 							if (self.layer.selectedFeatures.length === 1 ){
 								
 								// self.modifyControl.selectFeature(selected.feature);
-							
+								
 								
 									if ( self.newSelection ){
 										self.onSave( self, selected.feature );

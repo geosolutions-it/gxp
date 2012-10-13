@@ -163,7 +163,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 							            xtype     : 'timefield',
 										// allowBlank:false,
 							            fieldLabel: 'Time',
-										editable: true,
+										editable: false,
 										format: 'H:i:s',
 										width:80,
 										//anchor:'100%',
@@ -392,7 +392,10 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		var date = Ext.getCmp("date-textfield").getValue();
 		var time = Ext.getCmp("time-textfield").getValue();
 		var vehicle  = Ext.getCmp("vehicle-textfield").getValue();
-		selected.attributes = { name:name, description:description, date: date.format('d/m/Y'), time:time, vehicle:vehicle };
+		
+		date = date.format ? date.format('d/m/Y') : date;
+		
+		selected.attributes = { name:name, description:description, date: date, time:time, vehicle:vehicle };
 		if ( selected.geometry instanceof OpenLayers.Geometry.Point ){
 				var latField = Ext.getCmp("pn-latitude-textfield");
 				var lngField = Ext.getCmp("pn-longitude-textfield");

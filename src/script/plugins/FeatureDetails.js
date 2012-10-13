@@ -168,6 +168,7 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 									        {
 												id:'details-time-textfield',
 									            xtype     : 'timefield',
+												editable: false,
 												allowBlank:true,
 									            fieldLabel: 'Time',
 												editable: true,
@@ -377,7 +378,10 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 		var description = Ext.getCmp("details-description-textfield").getValue();
 		var date = Ext.getCmp("details-date-textfield").getValue();
 		var time = Ext.getCmp("details-time-textfield").getValue();
-		selected.attributes = { name:name, description:description, date:date.format('d/m/Y'), time:time };
+		
+		date = date.format ? date.format('d/m/Y') : date;
+		
+		selected.attributes = { name:name, description:description, date:date, time:time };
 		if ( selected.geometry instanceof OpenLayers.Geometry.Point ){
 				var latField = Ext.getCmp("latitude-textfield");
 				var lngField = Ext.getCmp("longitude-textfield");
