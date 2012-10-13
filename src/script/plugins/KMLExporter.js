@@ -57,6 +57,7 @@ gxp.plugins.KMLExporter = Ext.extend(gxp.plugins.Tool, {
         gxp.plugins.KMLExporter.superclass.constructor.apply(this, arguments);
 		// this.layer = config.layer;
 		this.alternativeStyle = config.alternativeStyle || false;
+		this.toggleGroup = config.toggleGroup;
 		this.srs = config.srs || "EPSG:4326";
     },
 
@@ -66,6 +67,7 @@ gxp.plugins.KMLExporter = Ext.extend(gxp.plugins.Tool, {
 		
 		var self = this;
 		this.exportButton = new Ext.Button({
+			toggleGroup: self.toggleGroup,
 			menuText: this.exportKMLMenuText,
 			disabled: true,
             iconCls: "gxp-icon-export-kml",

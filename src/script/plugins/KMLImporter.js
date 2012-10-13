@@ -58,6 +58,7 @@ gxp.plugins.KMLImporter = Ext.extend(gxp.plugins.Tool, {
 		// this.layer = config.layer;
 		this.alternativeStyle = config.alternativeStyle || false;
 		this.srs = config.srs || "EPSG:4326";
+		this.toggleGroup = config.toggleGroup;
     },
 
 	addOutput: function(config){
@@ -66,6 +67,7 @@ gxp.plugins.KMLImporter = Ext.extend(gxp.plugins.Tool, {
 			var xmlJsonTranslateService = this.target.proxy + this.target.xmlJsonTranslateService;
 			// open an upload file window
 	        var actions = [{
+				toggleGroup: self.toggleGroup,
 	            menuText: this.importKMLMenuText,
 	            iconCls: "gxp-icon-import-kml",
 	            tooltip: this.importKMLTooltip,
