@@ -207,17 +207,17 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 			 this.deleteButton = new Ext.SplitButton({
 		            iconCls: "gxp-icon-removeall",
 					disabled: true,
-		            tooltip: this.addPointTooltip,
-		            enableToggle: true,
-		            toggleGroup: this.toggleGroup,
-		            allowDepress: true,
-		            handler: function(button, event) {
+		            tooltip: 'Remove features',
+		            // enableToggle: true,
+		            // toggleGroup: this.toggleGroup,
+		            // allowDepress: true,
+		            /*handler: function(button, event) {
 		                if(button.pressed) {
 		                    button.menu.items.itemAt(this.activeIndex).setChecked(true);
 		                }
-		            },
+		            },*/
 		            scope: this,
-		            listeners: {
+		            /*listeners: {
 		                toggle: function(button, pressed) {
 		                    // toggleGroup should handle this
 		                    if(!pressed) {
@@ -233,7 +233,7 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 		                    // toggleGroup should handle this
 		                    Ext.ButtonToggleMgr.register(button);
 		                }
-		            },
+		            },*/
 		            menu: new Ext.menu.Menu({
 		                items: [
 		                  {
