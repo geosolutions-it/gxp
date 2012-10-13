@@ -368,9 +368,12 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 	
 	copyFromSelectedToForm: function(selected){
 		if ( selected.attributes ){
+			
+			// console.log( selected.attributes );
+			
 			Ext.getCmp("name-textfield").setValue( selected.attributes.name );
 			Ext.getCmp("description-textfield").setValue( selected.attributes.description );
-			Ext.getCmp("date-textfield").setValue( selected.attributes.date );
+			Ext.getCmp("date-textfield").setValue( Date.parseDate(selected.attributes.date, 'd/m/Y')  );
 			Ext.getCmp("time-textfield").setValue( selected.attributes.time );
 			Ext.getCmp("vehicle-textfield").setValue( selected.attributes.vehicle );
 		}
@@ -389,7 +392,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		var date = Ext.getCmp("date-textfield").getValue();
 		var time = Ext.getCmp("time-textfield").getValue();
 		var vehicle  = Ext.getCmp("vehicle-textfield").getValue();
-		selected.attributes = { name:name, description:description, date:date, time:time, vehicle:vehicle };
+		selected.attributes = { name:name, description:description, date: date.format('d/m/Y'), time:time, vehicle:vehicle };
 		if ( selected.geometry instanceof OpenLayers.Geometry.Point ){
 				var latField = Ext.getCmp("pn-latitude-textfield");
 				var lngField = Ext.getCmp("pn-longitude-textfield");

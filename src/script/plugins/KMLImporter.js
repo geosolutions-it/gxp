@@ -108,6 +108,20 @@ gxp.plugins.KMLImporter = Ext.extend(gxp.plugins.Tool, {
 								    });
 									// console.log( response.responseText );
 								    var features = format.read(response.responseText);
+								
+									// for imported features create a string represention of their value
+									for (var i=0; i<features.length; i++){
+										var attributes = features[i].attributes;
+										for (var attributeName in attributes ){
+											// console.log(attributeName);
+											if (typeof attributes[attributeName] == "object") {
+												if (attributes[attributeName].value) {
+													attributes[attributeName] = attributes[attributeName].value;
+												}
+											}
+										}
+									}
+								
 									// console.log(features);
 								    self.layer.addFeatures( features );
 						       },

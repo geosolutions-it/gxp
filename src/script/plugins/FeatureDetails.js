@@ -360,7 +360,7 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 		if ( selected.attributes ){
 			Ext.getCmp("details-name-textfield").setValue( selected.attributes.name );
 			Ext.getCmp("details-description-textfield").setValue( selected.attributes.description );
-			Ext.getCmp("details-date-textfield").setValue( selected.attributes.date );
+			Ext.getCmp("details-date-textfield").setValue( Date.parseDate(selected.attributes.date, 'd/m/Y') );
 			Ext.getCmp("details-time-textfield").setValue( selected.attributes.time );
 		}
 		if ( selected.geometry instanceof OpenLayers.Geometry.Point ){
@@ -377,7 +377,7 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 		var description = Ext.getCmp("details-description-textfield").getValue();
 		var date = Ext.getCmp("details-date-textfield").getValue();
 		var time = Ext.getCmp("details-time-textfield").getValue();
-		selected.attributes = { name:name, description:description, date:date, time:time };
+		selected.attributes = { name:name, description:description, date:date.format('d/m/Y'), time:time };
 		if ( selected.geometry instanceof OpenLayers.Geometry.Point ){
 				var latField = Ext.getCmp("latitude-textfield");
 				var lngField = Ext.getCmp("longitude-textfield");
