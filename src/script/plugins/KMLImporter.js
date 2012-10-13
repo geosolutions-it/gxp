@@ -106,6 +106,7 @@ gxp.plugins.KMLImporter = Ext.extend(gxp.plugins.Tool, {
 										// externalProjection: new OpenLayers.Projection("EPSG:4326"),
 										// internalProjection: map.getProjection()
 								    });
+									// console.log( response.responseText );
 								    var features = format.read(response.responseText);
 									// console.log(features);
 								    self.layer.addFeatures( features );

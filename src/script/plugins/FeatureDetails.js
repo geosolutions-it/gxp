@@ -444,8 +444,22 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 			}*/
 			
 			this.copyFromFormToSelected( this.feature, this.container );
+			Ext.Msg.show({
+					title: 'Feature saved',
+					msg: 'Your changes has been saved successfully.',
+					buttons: Ext.Msg.OK,
+					icon: Ext.MessageBox.INFO
+			});
 			// this.container.saveFeature(this.feature);
 			// this.disable();
+		} else {
+			// this code should never be reached
+			Ext.Msg.show({
+					title: 'Cannot save feature',
+					msg: 'No feature exists.',
+					buttons: Ext.Msg.OK,
+					icon: Ext.MessageBox.ERROR
+			});
 		}
 	},
 
@@ -453,11 +467,28 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
      *  callback when Cancel Button is pressed
      */
 	handleCancel: function(){
-		this.disable();
-		if (this.feature && this.container){
-			this.container.discardUpdates(this.feature);
-			this.resetForm();
-		}
+
+		var self = this;
+		Ext.MessageBox.show({
+		           title:'Cancel',
+		           msg: 'Every changes you made will be lost. <br/>Are you sure?',
+		           buttons: Ext.MessageBox.YESNO,
+		           fn: function(btn){
+						if ( btn === 'yes' ){
+							self.disable();
+							if (self.feature && self.container){
+								self.container.discardUpdates(self.feature);
+								self.resetForm();
+							}	else {
+								// this code should never be reached
+								console.error('Something went wrong: no feature selected.');
+							}					
+						} 
+
+				   },
+		           icon: Ext.MessageBox.QUESTION
+		       });		
+		
 	},
 	
 	/** private: method[disable]
