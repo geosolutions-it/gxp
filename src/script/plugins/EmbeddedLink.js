@@ -92,6 +92,7 @@ gxp.plugins.EmbeddedLink = Ext.extend(gxp.plugins.Tool, {
 					});
 					// open a modal window
 					var win = new Ext.Window({
+								   width: 500,
 							       closable:true,
 								   title: this.embeddedLinkMenuText,
 								   iconCls: "gxp-icon-embedded-link",
