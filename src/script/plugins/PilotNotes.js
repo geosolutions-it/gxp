@@ -163,7 +163,9 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 							            xtype     : 'timefield',
 										// allowBlank:false,
 							            fieldLabel: 'Time',
-										readOnly: true,
+										// TOFIX readOnly does not allow to select a time!
+										// we need to find another way to disallow keyboard editing
+										// readOnly: true,
 										format: 'H:i:s',
 										width:80,
 										//anchor:'100%',
