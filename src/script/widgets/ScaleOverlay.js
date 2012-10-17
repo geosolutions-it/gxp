@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
  * 
- * Published under the BSD license.
+ * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
  */
@@ -26,7 +26,15 @@ gxp.ScaleOverlay = Ext.extend(Ext.Panel, {
      *  The map for which to show the scale info.
      */
     map: null,
-
+    
+    topOutUnits: null, //'nmi',
+    
+    topInUnits: null, //'nmi',
+    
+    bottomInUnits: null,  //'m',
+    
+    bottomOutUnits: null, //'km',
+    
     /** i18n */
     zoomLevelText: "Zoom level",
 
@@ -82,29 +90,49 @@ gxp.ScaleOverlay = Ext.extend(Ext.Panel, {
      *  
      *  Create the scale line control and add it to the panel.
      */
-    addScaleLine: function() {
-        var scaleLinePanel = new Ext.BoxComponent({
+    addScaleLine: function(topOutUnits,topInUnits,bottomInUnits,bottomOutUnits) {
+        if(topOutUnits){
+            Ext.getCmp("id_box").destroy();
+        }
+        
+        this.scaleLinePanel = new Ext.BoxComponent({
+            id: "id_box",
             autoEl: {
                 tag: "div",
                 cls: "olControlScaleLine overlay-element overlay-scaleline"
             }
         });
+        
         this.on("afterlayout", function(){
-            scaleLinePanel.getEl().dom.style.position = 'relative';
-            scaleLinePanel.getEl().dom.style.display = 'inline';
-
+            if(!topOutUnits){
+                this.scaleLinePanel.getEl().dom.style.position = 'relative';
+                this.scaleLinePanel.getEl().dom.style.display = 'inline';
+            }else{ 
+                Ext.get("id_box").insertBefore(Ext.get("zoom_selector"));               
+            }
             this.getEl().on("click", this.stopMouseEvents, this);
             this.getEl().on("mousedown", this.stopMouseEvents, this);
         }, this);
-        scaleLinePanel.on('render', function(){
+        
+        this.scaleLinePanel.on('render', function(){
+            var scaleLineControl = this.map.getControlsByClass('OpenLayers.Control.ScaleLine');
+            if(topOutUnits){
+                this.map.removeControl(scaleLineControl[0]);
+            }
             var scaleLine = new OpenLayers.Control.ScaleLine({
-                div: scaleLinePanel.getEl().dom
+                geodesic: true,
+				topOutUnits:topOutUnits ? topOutUnits : this.topOutUnits, //'nmi',
+				topInUnits: topInUnits ? topInUnits : this.topInUnits, //'nmi',
+				bottomInUnits: bottomInUnits ? bottomInUnits : this.bottomInUnits, //'m',
+				bottomOutUnits: bottomOutUnits ? bottomOutUnits : this.bottomOutUnits, //'km',
+                div: this.scaleLinePanel.getEl().dom
             });
-
+           
             this.map.addControl(scaleLine);
             scaleLine.activate();
         }, this);
-        this.add(scaleLinePanel);
+
+        this.add(this.scaleLinePanel);
     },
 
     /** private: method[handleZoomEnd]
@@ -133,7 +161,7 @@ gxp.ScaleOverlay = Ext.extend(Ext.Panel, {
     addScaleCombo: function() {
         this.zoomStore = new GeoExt.data.ScaleStore({
             map: this.map
-        });
+        });       
         this.zoomSelector = new Ext.form.ComboBox({
             emptyText: this.zoomLevelText,
             tpl: '<tpl for="."><div class="x-combo-list-item">1 : {[parseInt(values.scale)]}</div></tpl>',
@@ -153,13 +181,61 @@ gxp.ScaleOverlay = Ext.extend(Ext.Panel, {
         });
         this.map.events.register('zoomend', this, this.handleZoomEnd);
         var zoomSelectorWrapper = new Ext.Panel({
+            id: "zoom_selector",
             items: [this.zoomSelector],
             cls: 'overlay-element overlay-scalechooser',
             border: false
         });
         this.add(zoomSelectorWrapper);
     },
+    /** private: method[addComboUnits]
+     *  
+     *  Create the scale combo units and add it to the panel.
+     */
+    addComboUnits: function() {
+        var comboUnits = this;
+        this.unitsSelector = new Ext.form.ComboBox({
+            editable: false,
+            typeAhead: true,
+            forceSelection: true,
+            selectOnFocus:false,                
+            triggerAction: 'all',
+            mode: 'local',
+            emptyText:this.topOutUnits,
+            startValue:this.topOutUnits,
+            displayField: 'unitsName',
+            valueField: 'unitsValue',           
+            store: new Ext.data.SimpleStore({
+                fields: ['unitsValue', 'unitsName'],
+                data: [['km;m;ft;mi','Km'],['nmi;nmi;m;km','Nmi']]
+            }),
+            width: 90
+        });
+        this.unitsSelector.on({
+            click: this.stopMouseEvents,
+            mousedown: this.stopMouseEvents,
+            select: function(combo, record, index) {
+                    var valueUnits = this.unitsSelector.getValue().split(";");                 
+                    comboUnits.updateScaleUnits(valueUnits[0],valueUnits[1],valueUnits[2],valueUnits[3]);
 
+            },            
+            scope: this
+        });
+        var unitsSelectorWrapper = new Ext.Panel({
+            id: "id_units",            
+            items: [this.unitsSelector],
+            cls: 'overlay-element overlay-unitschooser',
+            border: false
+        });
+        this.add(unitsSelectorWrapper);
+    },    
+    /** private: method[updateScaleUnits]
+     *  :params topOutUnits,topInUnits,bottomInUnits,bottomOutUnits: ``OpenLayers.Map``
+     */
+    updateScaleUnits: function(topOutUnits,topInUnits,bottomInUnits,bottomOutUnits) {
+        this.addScaleLine(topOutUnits,topInUnits,bottomInUnits,bottomOutUnits);
+        this.doLayout();
+    },
     /** private: method[bind]
      *  :param map: ``OpenLayers.Map``
      */
@@ -167,6 +243,7 @@ gxp.ScaleOverlay = Ext.extend(Ext.Panel, {
         this.map = map;
         this.addScaleLine();
         this.addScaleCombo();
+        this.addComboUnits();
         this.doLayout();
     },
     
@@ -178,6 +255,7 @@ gxp.ScaleOverlay = Ext.extend(Ext.Panel, {
         }
         this.zoomStore = null;
         this.zoomSelector = null;
+        this.unitsSelector = null;
     }
 
 });
