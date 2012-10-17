@@ -148,7 +148,10 @@ gxp.plugins.NURCFeatureEditor = Ext.extend(gxp.plugins.FeatureEditor, {
 									if(vname == vehicle.toLowerCase()){
 										var geom = features[i].geometry;
 										//alert(geom.getBounds().toBBOX());
-										var c = geom.getCentroid();
+										//var c = geom.getCentroid();
+										
+										var c = geom.getVertices()[0];
+										
 										var pixel = this.target.mapPanel.map.getLayerPxFromLonLat(new OpenLayers.LonLat(c.x, c.y));
 										var evt = {
 											xy: pixel,
@@ -546,7 +549,7 @@ gxp.plugins.NURCFeatureEditor = Ext.extend(gxp.plugins.FeatureEditor, {
         var size = map.getSize();
         var params = Ext.applyIf({
             REQUEST: "GetFeatureInfo",
-            BBOX: evt.bbox, //map.getExtent().toBBOX(),
+            BBOX: map.getExtent().toBBOX(), // evt.bbox,
             WIDTH: size.w,
             HEIGHT: size.h,
             X: parseInt(evt.xy.x),
@@ -554,7 +557,8 @@ gxp.plugins.NURCFeatureEditor = Ext.extend(gxp.plugins.FeatureEditor, {
             QUERY_LAYERS: layer.params.LAYERS,
             INFO_FORMAT: "application/vnd.ogc.gml",
             EXCEPTIONS: "application/vnd.ogc.se_xml",
-            FEATURE_COUNT: 1
+            FEATURE_COUNT: 1,
+			BUFFER: 15
         }, layer.params);
         if (typeof this.tolerance === "number") {
             for (var i=0, ii=this.toleranceParameters.length; i<ii; ++i) {
