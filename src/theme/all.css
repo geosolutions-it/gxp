@@ -263,6 +263,10 @@
    background-image: url(img/geosilk/ruler_square.png) !important;
 }
 
+.x-btn .gxp-icon-measure-bearing, .x-menu-item .gxp-icon-measure-bearing, .x-tree-node .gxp-icon-measure-bearing {
+   background-image: url(img/geosilk/ruler_triangle.png) !important;
+}
+
 /* gxp_styler */
 .x-btn .gxp-icon-palette, .x-menu-item .gxp-icon-palette, .x-tree-node .gxp-icon-palette {
    background-image: url(img/silk/palette.png);
@@ -327,4 +331,9 @@ div.map-overlay div.overlay-element {
     bottom: 0px;
     left: 0px;
     margin-top: 0px;
+}
+
+/* gxp_googleearth */
+.x-btn .gxp-icon-maritim-link {
+    background-image: url(img/silk/world_link.png);
 }
