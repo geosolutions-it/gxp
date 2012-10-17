@@ -79,6 +79,9 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
      */
     constructor: function(config) {
         gxp.plugins.LayerTree.superclass.constructor.apply(this, arguments);
+        this.addEvents(
+            "check"
+        );
         if (!this.groups) {
             this.groups = {
                 "default": this.overlayNodeText,
@@ -392,6 +395,14 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                         }
                     }else{
                         var parent = node.parentNode;
+                        
+                        //check and uncheck tabPanel checkbox
+                        if(checked){    
+                            this.fireEvent("check", node.layer.name, checked);
+                        }else{
+                            this.fireEvent("check", node.layer.name, checked);
+                        }
+                        
                         if(checked && !parent.getUI().isChecked()){
                             parent.getUI().toggleCheck(checked);
                         }else if(!checked && parent.getUI().isChecked()){
