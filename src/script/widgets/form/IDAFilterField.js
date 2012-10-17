@@ -188,16 +188,22 @@ gxp.form.IDAFilterField = Ext.extend(Ext.form.CompositeField, {
 				
 				
 			}else{
-				this.multislider.setMaxValue(max);
-				this.multislider.setMinValue(min);
-				this.multislider.values = [min, max];
-				
+
+                this.multislider.setMaxValue(max);
+                this.multislider.setMinValue(min);
+                this.multislider.values = [min, max];
+                
+                //fix slider overlap
+                this.multislider.setValue(0,min);         
+                this.multislider.setValue(1,max);                  
+
 			    if((max - min) == 1){
 					this.multislider.decimalPrecision = 2;
 				}
-				
-				this.items.get(2).setValue(min);
-				this.items.get(3).setValue(max);
+
+                this.items.get(3).setValue(max);                     
+                this.items.get(2).setValue(min);
+
 			}
 		}else{
 			this.slider.setMinValue(min);
@@ -246,7 +252,7 @@ gxp.form.IDAFilterField = Ext.extend(Ext.form.CompositeField, {
 						this.items.get(3).setValue(field.getValues()[1]);
 						this.items.get(2).fireEvent("change", this.items.get(2).getEl(), field.getValues()[0]);
 						this.items.get(3).fireEvent("change", this.items.get(3).getEl(), field.getValues()[1]);
-				  },
+				  },                
 				  scope: this
 			}
 		});
