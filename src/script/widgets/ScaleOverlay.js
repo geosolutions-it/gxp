@@ -191,6 +191,7 @@ gxp.ScaleOverlay = Ext.extend(Ext.Panel, {
     /** private: method[addComboUnits]
      *  
      *  Create the scale combo units and add it to the panel.
+     *  deve comparire solo se lo definisco in configurazione
      */
     addComboUnits: function() {
         var comboUnits = this;
@@ -217,7 +218,6 @@ gxp.ScaleOverlay = Ext.extend(Ext.Panel, {
             select: function(combo, record, index) {
                     var valueUnits = this.unitsSelector.getValue().split(";");                 
                     comboUnits.updateScaleUnits(valueUnits[0],valueUnits[1],valueUnits[2],valueUnits[3]);
-
             },            
             scope: this
         });

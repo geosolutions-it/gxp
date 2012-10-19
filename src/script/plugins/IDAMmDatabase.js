@@ -116,7 +116,8 @@ gxp.plugins.IDAMmDatabase = Ext.extend(gxp.plugins.Tool, {
                                     var store = gpanel.getStore();		
                                     var record = store.getAt(rowIndex);
                                     var link = record.get("link");
-                                    window.open(link,"_blank");
+                                    var title = record.get("species");
+                                    this.target.viewIdaLink(link, title);
                                 }
                             }]
                       }
@@ -182,7 +183,8 @@ gxp.plugins.IDAMmDatabase = Ext.extend(gxp.plugins.Tool, {
 							    var store = gpanel.getStore();		
 								var record = store.getAt(rowIndex);
                                 var link = record.get("link");
-                                window.open(link,"_blank");
+                                var title = record.get("layer");
+                                this.target.viewIdaLink(link, title);
                             }
                         }
                             ]
