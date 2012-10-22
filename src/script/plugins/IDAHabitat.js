@@ -38,7 +38,7 @@ gxp.plugins.IDAHabitat = Ext.extend(gxp.plugins.Tool, {
      */
     init: function(target) {
 		gxp.plugins.IDAHabitat.superclass.init.apply(this, arguments);
-		this.layers = target.mapPanel.layers.data.items;
+		this.layers = target.map.layers; 
 	},    
     
     /** private: method[addOutput]
@@ -46,7 +46,30 @@ gxp.plugins.IDAHabitat = Ext.extend(gxp.plugins.Tool, {
      */
     addOutput: function(config) {
 
-        this.sightingsStrandingsData = this.target.habitatData.habitatData;
+        this.habitatData = [];
+        
+        //set data from layer configuration showInTab and link
+        var str = "";
+        for (var i=0; i<this.layers.length; i++){
+            if(this.layers[i].showInTab && this.layers[i].link){
+                str += this.layers[i].visibility + ","  + this.layers[i].title + "," + this.layers[i].link;
+                str += "|";
+            }
+        }
+        
+        var delLastChar = function (str){
+            len = str.length;
+            str = str.substring(0,len-1);
+            return str;
+        }
+        
+        var strFin = delLastChar(str);
+        
+        var tempArray = strFin.split('|');
+
+        for (var i = 0; i < tempArray.length; i++) {
+            this.habitatData[i] = tempArray[i].split(',');
+        }
         
 		var sightingsStrandingsDataReader = new Ext.data.ArrayReader({}, [
 		       {name: 'selected', type: 'bool'},
@@ -56,7 +79,7 @@ gxp.plugins.IDAHabitat = Ext.extend(gxp.plugins.Tool, {
             
         this.sightingsStrandingsStore = new Ext.data.Store({
                 reader: sightingsStrandingsDataReader,
-                data: this.sightingsStrandingsData
+                data: this.habitatData
             });            
             
         var xg = Ext.grid;
@@ -80,7 +103,7 @@ gxp.plugins.IDAHabitat = Ext.extend(gxp.plugins.Tool, {
 							'checkchange': function(col, gpanel, rowIndex, evt){
                                 var map = this.target.mapPanel.map;
                                 var store = gpanel.getStore();
-                                var records = store.getRange(0, this.sightingsStrandingsData.length -1);
+                                var records = store.getRange(0, this.habitatData.length -1);
 
                                 for (var i=0; i<records.length; i++){
                                     var selected = records[i].get("selected");
@@ -146,7 +169,7 @@ gxp.plugins.IDAHabitat = Ext.extend(gxp.plugins.Tool, {
             if(this.target.tools[tool].ptype == "gxp_layertree"){  
                 this.target.tools[tool].on("check", function(layer, checked){
                         var store = this.habitatGrid.getStore();
-                        var records = store.getRange(0, this.sightingsStrandingsData.length -1);
+                        var records = store.getRange(0, this.habitatData.length -1);
                         for (var i=0; i<records.length; i++){
                             var record = store.getAt(i);
                             var layerName = record.get("layer");

@@ -38,8 +38,7 @@ gxp.plugins.IDAMmDatabase = Ext.extend(gxp.plugins.Tool, {
      */
     init: function(target) {
 		gxp.plugins.IDAMmDatabase.superclass.init.apply(this, arguments);
-		this.layers = target.mapPanel.layers.data.items;
-   
+		this.layers = target.map.layers;    
 	},    
     
     /** private: method[addOutput]
@@ -48,7 +47,30 @@ gxp.plugins.IDAMmDatabase = Ext.extend(gxp.plugins.Tool, {
     addOutput: function(config) {
         var self = this;   
         this.speciesInformationData = this.target.mammalData.speciesInformationData;
-        this.sightingsStrandingsData = this.target.mammalData.sightingsStrandingsData;
+        this.sightingsStrandingsData = [];
+        
+        //set data from layer configuration showInTab and link
+        var str = "";
+        for (var i=0; i<this.layers.length; i++){
+            if(this.layers[i].showInTab && this.layers[i].link){
+                str += this.layers[i].visibility + ","  + this.layers[i].title + "," + this.layers[i].link;
+                str += "|";
+            }
+        }
+        
+        var delLastChar = function (str){
+            len = str.length;
+            str = str.substring(0,len-1);
+            return str;
+        }
+        
+        var strFin = delLastChar(str);
+        
+        var tempArray = strFin.split('|');
+
+        for (var i = 0; i < tempArray.length; i++) {
+            this.sightingsStrandingsData[i] = tempArray[i].split(',');
+        }        
         
 		var speciesInformationDataReader = new Ext.data.ArrayReader({}, [
 			   {name: 'faoNames', type: 'string'},
