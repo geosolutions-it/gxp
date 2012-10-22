@@ -26,14 +26,31 @@ gxp.ScaleOverlay = Ext.extend(Ext.Panel, {
      *  The map for which to show the scale info.
      */
     map: null,
+
+    /** api: config[topOutUnits]
+     *  {String} Units for zoomed out on top bar. Default is km.
+     */    
+    topOutUnits: null,
     
-    topOutUnits: null, //'nmi',
+    /** api: config[topInUnits]
+     *  {String} Units for zoomed in on top bar. Default is m.
+     */    
+    topInUnits: null,
     
-    topInUnits: null, //'nmi',
+    /** api: config[bottomInUnits]
+     *  {String} Units for zoomed in on bottom bar. Default is ft.
+     */    
+    bottomInUnits: null,
     
-    bottomInUnits: null,  //'m',
-    
-    bottomOutUnits: null, //'km',
+    /** api: config[bottomOutUnits]
+     *  {String} Units for zoomed out on bottom bar. Default is mi.
+     */    
+    bottomOutUnits: null,
+
+    /** api: config[enableSetScaleUnits]
+     *  {boolean} Enable or disable ComboUnits.
+     */        
+    enableSetScaleUnits: false,
     
     /** i18n */
     zoomLevelText: "Zoom level",
@@ -43,6 +60,20 @@ gxp.ScaleOverlay = Ext.extend(Ext.Panel, {
      */
     initComponent: function() {
         gxp.ScaleOverlay.superclass.initComponent.call(this);
+        
+        if(!this.topOutUnits){
+            this.topOutUnits = "km";
+        }
+        if(!this.topInUnits){
+            this.topInUnits = "m";
+        }
+        if(!this.bottomInUnits){
+            this.bottomInUnits = "ft";
+        }
+        if(!this.bottomOutUnits){
+            this.bottomOutUnits = "mi";
+        }
+        
         this.cls = 'map-overlay';
         if(this.map) {
             if(this.map instanceof GeoExt.MapPanel) {
@@ -91,7 +122,7 @@ gxp.ScaleOverlay = Ext.extend(Ext.Panel, {
      *  Create the scale line control and add it to the panel.
      */
     addScaleLine: function(topOutUnits,topInUnits,bottomInUnits,bottomOutUnits) {
-        if(topOutUnits){
+        if(topOutUnits && topInUnits && bottomInUnits && bottomOutUnits){
             Ext.getCmp("id_box").destroy();
         }
         
@@ -116,15 +147,15 @@ gxp.ScaleOverlay = Ext.extend(Ext.Panel, {
         
         this.scaleLinePanel.on('render', function(){
             var scaleLineControl = this.map.getControlsByClass('OpenLayers.Control.ScaleLine');
-            if(topOutUnits){
+            if(topOutUnits && topInUnits && bottomInUnits && bottomOutUnits){
                 this.map.removeControl(scaleLineControl[0]);
             }
             var scaleLine = new OpenLayers.Control.ScaleLine({
                 geodesic: true,
-				topOutUnits:topOutUnits ? topOutUnits : this.topOutUnits, //'nmi',
-				topInUnits: topInUnits ? topInUnits : this.topInUnits, //'nmi',
-				bottomInUnits: bottomInUnits ? bottomInUnits : this.bottomInUnits, //'m',
-				bottomOutUnits: bottomOutUnits ? bottomOutUnits : this.bottomOutUnits, //'km',
+				topOutUnits:topOutUnits ? topOutUnits : this.topOutUnits,
+				topInUnits: topInUnits ? topInUnits : this.topInUnits,
+				bottomInUnits: bottomInUnits ? bottomInUnits : this.bottomInUnits,
+				bottomOutUnits: bottomOutUnits ? bottomOutUnits : this.bottomOutUnits,
                 div: this.scaleLinePanel.getEl().dom
             });
            
@@ -203,7 +234,6 @@ gxp.ScaleOverlay = Ext.extend(Ext.Panel, {
             triggerAction: 'all',
             mode: 'local',
             emptyText:this.topOutUnits,
-            startValue:this.topOutUnits,
             displayField: 'unitsName',
             valueField: 'unitsValue',           
             store: new Ext.data.SimpleStore({
@@ -230,7 +260,7 @@ gxp.ScaleOverlay = Ext.extend(Ext.Panel, {
         this.add(unitsSelectorWrapper);
     },    
     /** private: method[updateScaleUnits]
-     *  :params topOutUnits,topInUnits,bottomInUnits,bottomOutUnits: ``OpenLayers.Map``
+     *  :params topOutUnits,topInUnits,bottomInUnits,bottomOutUnits
      */
     updateScaleUnits: function(topOutUnits,topInUnits,bottomInUnits,bottomOutUnits) {
         this.addScaleLine(topOutUnits,topInUnits,bottomInUnits,bottomOutUnits);
@@ -243,7 +273,9 @@ gxp.ScaleOverlay = Ext.extend(Ext.Panel, {
         this.map = map;
         this.addScaleLine();
         this.addScaleCombo();
-        this.addComboUnits();
+        if(this.enableSetScaleUnits){
+            this.addComboUnits();
+        }
         this.doLayout();
     },
     
