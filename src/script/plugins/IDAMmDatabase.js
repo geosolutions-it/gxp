@@ -52,7 +52,7 @@ gxp.plugins.IDAMmDatabase = Ext.extend(gxp.plugins.Tool, {
         //set data from layer configuration showInTab and link
         var str = "";
         for (var i=0; i<this.layers.length; i++){
-            if(this.layers[i].showInTab == true && this.layers[i].link){
+            if(this.layers[i].showInTabM == true && this.layers[i].link){
                 str += this.layers[i].visibility + ","  + this.layers[i].title + "," + this.layers[i].link;
                 str += "|";
             }
