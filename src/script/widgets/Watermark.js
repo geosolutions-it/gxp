@@ -91,7 +91,7 @@ gxp.Watermark = Ext.extend(Ext.Panel, {
 			        draw: function () {
 			          var wrapdiv =OpenLayers.Control.prototype.draw.apply(this, arguments);
 					  wrapdiv.setAttribute("style",self.position);
-			          this.div.innerHTML = '<div class=\"olPoweredBy\" id=\"olPoweredBy\" style=\"'+ self.position +'\" ><img src=\"' + self.url + '\" width=\"60\" height=\"60\"  title=\"Powered by NURC\" /></div>';
+			          this.div.innerHTML = '<img src=\"' + self.url + '\" width=\"60\" height=\"60\"  /><br/><div style=\"background:#999999;filter:alpha(opacity=30);-moz-opacity:30%;\">' + self.text + '</div><br/>';
 			          return this.div;
 			        }
 

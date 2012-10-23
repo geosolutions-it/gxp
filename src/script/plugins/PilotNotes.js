@@ -102,7 +102,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
                       border:false,
 			          items:[
 							{   xtype: 'textfield',
-				                fieldLabel: 'Name',
+				                fieldLabel: 'Title',
 								width: 200,
 				                name:'loginUsername', 
 				                // allowBlank:false,
@@ -177,6 +177,14 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 										// allowBlank:false,
 										width: 200,
 										id:'vehicle-textfield',
+										anchor:'100%',
+										disabled:true
+						     }
+							,{   xtype: 'textfield',
+						                fieldLabel: 'Operator',
+										// allowBlank:false,
+										width: 200,
+										id:'operator-textfield',
 										anchor:'100%',
 										disabled:true
 						     }
@@ -335,6 +343,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 			var description = Ext.getCmp("description-textfield").getValue();
 			var date = Ext.getCmp("date-textfield").getRawValue();
 			var time = Ext.getCmp("time-textfield").getValue();
+			var operator = Ext.getCmp("operator-textfield").getValue();
 			var vehicle = Ext.getCmp("vehicle-textfield").getValue();
 		    var lat = Ext.getCmp("pn-latitude-textfield").getValue();
 		    var lng =  Ext.getCmp("pn-longitude-textfield").getValue();
@@ -351,7 +360,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 				return false;
 			}
 			
-			var eq = !this.isEqual(data.name, name) || !this.isEqual(data.description, description) || !this.isEqual(data.date, date) || !this.isEqual(data.time, time ) || ! this.isEqual( data.vehicle, vehicle );;
+			var eq = !this.isEqual(data.name, name) || !this.isEqual(data.description, description) || !this.isEqual(data.date, date) || !this.isEqual(data.time, time ) || ! this.isEqual( data.vehicle, vehicle )|| ! this.isEqual( data.operator, operator );;
 			return	eq;
 			//} 
 		}else {
@@ -407,6 +416,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 			Ext.getCmp("date-textfield").setValue( Date.parseDate(selected.attributes.date, 'd/m/Y')  );
 			Ext.getCmp("time-textfield").setValue( selected.attributes.time );
 			Ext.getCmp("vehicle-textfield").setValue( selected.attributes.vehicle );
+			Ext.getCmp("operator-textfield").setValue( selected.attributes.operator );
 		}
 		if ( selected.geometry instanceof OpenLayers.Geometry.Point ){
 			var point = selected.geometry.clone(); 
@@ -423,10 +433,11 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		var date = Ext.getCmp("date-textfield").getValue();
 		var time = Ext.getCmp("time-textfield").getValue();
 		var vehicle  = Ext.getCmp("vehicle-textfield").getValue();
+		var operator  = Ext.getCmp("operator-textfield").getValue();
 		
 		date = date.format ? date.format('d/m/Y') : date;
 		
-		selected.attributes = { name:name, description:description, date: date, time:time, vehicle:vehicle };
+		selected.attributes = { name:name, description:description, date: date, time:time, vehicle:vehicle, operator:operator };
 		if ( selected.geometry instanceof OpenLayers.Geometry.Point ){
 				var latField = Ext.getCmp("pn-latitude-textfield");
 				var lngField = Ext.getCmp("pn-longitude-textfield");
@@ -578,6 +589,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		Ext.getCmp("name-textfield").disable();
 		Ext.getCmp("description-textfield").disable();
 		Ext.getCmp("vehicle-textfield").disable();
+		Ext.getCmp("operator-textfield").disable();
 		Ext.getCmp("date-textfield").disable();
 		Ext.getCmp("time-textfield").disable();
 		Ext.getCmp("pn-latitude-textfield").setVisible(false);
@@ -595,6 +607,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		Ext.getCmp("name-textfield").enable();
 		Ext.getCmp("description-textfield").enable();
 		Ext.getCmp("vehicle-textfield").enable();
+		Ext.getCmp("operator-textfield").enable();
 		Ext.getCmp("date-textfield").enable();
 		Ext.getCmp("time-textfield").enable();
 		Ext.getCmp("pn-latitude-textfield").enable();
@@ -605,6 +618,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		Ext.getCmp("name-textfield").setValue( '' );
 		Ext.getCmp("description-textfield").setValue( '' );
 		Ext.getCmp("vehicle-textfield").setValue( '' );
+		Ext.getCmp("operator-textfield").setValue( '' );
 		Ext.getCmp("date-textfield").setValue( '' );
 		Ext.getCmp("time-textfield").setValue( '' );
 		Ext.getCmp("pn-latitude-textfield").setValue( '' );

@@ -31,7 +31,7 @@ gxp.plugins.NURCFeatureEditor = Ext.extend(gxp.plugins.FeatureEditor, {
     /** private: method[constructor]
      */
     constructor: function(config) {
-        gxp.plugins.NURCFeatureEditor.superclass.constructor.apply(this, arguments);        
+        gxp.plugins.NURCFeatureEditor.superclass.constructor.apply(this, arguments);       
     },
 	
 	/** api: method[addActions]
@@ -542,6 +542,8 @@ gxp.plugins.NURCFeatureEditor = Ext.extend(gxp.plugins.FeatureEditor, {
             // if the feature manager has no layer currently set, do nothing
             return;
         }
+
+	
         
         // construct params for GetFeatureInfo request
         // layer is not added to map, so we do this manually
@@ -558,7 +560,8 @@ gxp.plugins.NURCFeatureEditor = Ext.extend(gxp.plugins.FeatureEditor, {
             INFO_FORMAT: "application/vnd.ogc.gml",
             EXCEPTIONS: "application/vnd.ogc.se_xml",
             FEATURE_COUNT: 1,
-			BUFFER: 15
+			// BUFFER: 15
+			BUFFER: this.featureInfoBuffer
         }, layer.params);
         if (typeof this.tolerance === "number") {
             for (var i=0, ii=this.toleranceParameters.length; i<ii; ++i) {

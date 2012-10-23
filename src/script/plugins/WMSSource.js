@@ -491,15 +491,19 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
                     }
                 }
             }
+
+				var params = Ext.applyIf({
+	                STYLES: config.styles,
+	                FORMAT: config.format,
+	                TRANSPARENT: config.transparent,
+	                CQL_FILTER: config.cql_filter,
+					ELEVATION: config.elevation
+	            }, this.layerBaseParams);
+			
+			
             
 			
-			var params = Ext.applyIf({
-                STYLES: config.styles,
-                FORMAT: config.format,
-                TRANSPARENT: config.transparent,
-                CQL_FILTER: config.cql_filter,
-				ELEVATION: config.elevation
-            }, this.layerBaseParams);
+
 			
             // update params from config
 			layer.mergeNewParams(params);

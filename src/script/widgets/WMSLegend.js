@@ -131,7 +131,7 @@ gxp.WMSLegend = Ext.extend(GeoExt.LayerLegend, {
         }
 
 		var style = rec.json.style;
-        if(!url) {
+        /* if(!url) { */
             url = layer.getFullRequestString({
                 REQUEST: "GetLegendGraphic",
                 WIDTH: null,
@@ -146,7 +146,7 @@ gxp.WMSLegend = Ext.extend(GeoExt.LayerLegend, {
                 FORMAT: null,
                 TIME: null
             });
-        }
+        /* } */
         var params = Ext.apply({}, this.baseParams);
         if (layer.params._OLSALT) {
             // update legend after a forced layer redraw
