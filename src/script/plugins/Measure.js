@@ -1,19 +1,13 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
  * 
- * Published under the GPL license.
+ * Published under the BSD license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
  */
 
 /**
  * @requires plugins/Tool.js
- * @requires OpenLayers/StyleMap.js
- * @requires OpenLayers/Rule.js
- * @requires OpenLayers/Control/Measure.js
- * @requires OpenLayers/Renderer/SVG.js
- * @requires OpenLayers/Renderer/VML.js
- * @requires OpenLayers/Renderer/Canvas.js
  */
 
 /** api: (define)
@@ -40,12 +34,6 @@ gxp.plugins.Measure = Ext.extend(gxp.plugins.Tool, {
      *  ``String`` Popups created by this tool are added to the map by default.
      */
     outputTarget: "map",
-
-    /** api: config[buttonText]
-     *  ``String``
-     *  Text for the Measure button (i18n).
-     */
-    buttonText: "Measure",
 
     /** api: config[lengthMenuText]
      *  ``String``
@@ -159,8 +147,7 @@ gxp.plugins.Measure = Ext.extend(gxp.plugins.Tool, {
         };
 
         var measureToolTip;
-        var controlOptions = Ext.apply({}, this.initialConfig.controlOptions);
-        Ext.applyIf(controlOptions, {
+        var measureControl = new OpenLayers.Control.Measure(handlerType, {
             geodesic: true,
             persist: true,
             handlerOptions: {layerOptions: {styleMap: styleMap}},
@@ -185,12 +172,30 @@ gxp.plugins.Measure = Ext.extend(gxp.plugins.Tool, {
                         measureToolTip.show();
                     }
                 },
+                measure: function(event) {
+                    cleanup();
+                    measureToolTip = this.addOutput({
+                        xtype: 'tooltip',
+                        target: Ext.getBody(),
+                        html: makeString(event),
+                        title: title,
+                        autoHide: false,
+                        closable: true,
+                        draggable: false,
+                        mouseOffset: [0, 0],
+                        showDelay: 1,
+                        listeners: {
+                            hide: function() {
+                                measureControl.cancel();
+                                cleanup();
+                            }
+                        }
+                    });
+                },
                 deactivate: cleanup,
                 scope: this
             }
         });
-        var measureControl = new OpenLayers.Control.Measure(handlerType, 
-            controlOptions);
 
         return measureControl;
     },
@@ -202,7 +207,6 @@ gxp.plugins.Measure = Ext.extend(gxp.plugins.Tool, {
         this.button = new Ext.SplitButton({
             iconCls: "gxp-icon-measure-length",
             tooltip: this.measureTooltip,
-            buttonText: this.buttonText,
             enableToggle: true,
             toggleGroup: this.toggleGroup,
             allowDepress: true,

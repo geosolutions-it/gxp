@@ -1,14 +1,13 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
  * 
- * Published under the GPL license.
+ * Published under the BSD license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
  */
 
 /**
  * @requires plugins/Tool.js
- * @requires OpenLayers/Kinetic.js
  */
 
 /** api: (define)
@@ -53,19 +52,8 @@ gxp.plugins.Navigation = Ext.extend(gxp.plugins.Tool, {
     /** api: method[addActions]
      */
     addActions: function() {
-        var control;
-        // If no controlOptions are configured, try to find a Navigation
-        // control on the target map.
-        if (!this.controlOptions) {
-            candidates = this.target.mapPanel.map.getControlsByClass('OpenLayers.Control.Navigation');
-            if (candidates.length) {
-                control = candidates[0];
-            }
-        } else {
-            this.controlOptions = this.controlOptions || {};
-            Ext.applyIf(this.controlOptions, {dragPanOptions: {enableKinetic: true}});
-            control = new OpenLayers.Control.Navigation(this.controlOptions);
-        }
+        this.controlOptions = this.controlOptions || {};
+        Ext.applyIf(this.controlOptions, {zoomWheelEnabled: true});
         var actions = [new GeoExt.Action({
             tooltip: this.tooltip,
             menuText: this.menuText,
@@ -73,10 +61,9 @@ gxp.plugins.Navigation = Ext.extend(gxp.plugins.Tool, {
             enableToggle: true,
             pressed: true,
             allowDepress: false,
-            control: control,
-            map: control.map ? null : this.target.mapPanel.map,
-            toggleGroup: this.toggleGroup
-        })];
+            control: new OpenLayers.Control.Navigation(this.controlOptions),
+            map: this.target.mapPanel.map,
+            toggleGroup: this.toggleGroup})];
         return gxp.plugins.Navigation.superclass.addActions.apply(this, [actions]);
     }
         
