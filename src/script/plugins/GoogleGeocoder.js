@@ -61,9 +61,13 @@ gxp.plugins.GoogleGeocoder = Ext.extend(gxp.plugins.Tool, {
     
     backgroundGraphicMarkers: 'theme/app/img/markers/markers_shadow.png',
     
-    backgroundXOffsetMarkers: -7,
+    backgroundXOffsetMarkers: -8,
     
-    backgroundYOffsetMarkers: -7,
+    backgroundYOffsetMarkers: -21,
+    
+    graphicXOffsetMarkers: -13,
+    
+    graphicYOffsetMarkers: -28,        
     
     init: function(target) {
 
@@ -140,6 +144,8 @@ gxp.plugins.GoogleGeocoder = Ext.extend(gxp.plugins.Tool, {
                     backgroundGraphic: this.backgroundGraphicMarkers,
                     backgroundXOffset: this.backgroundXOffsetMarkers,
                     backgroundYOffset: this.backgroundYOffsetMarkers,
+                    graphicXOffset: this.graphicXOffsetMarkers,
+                    graphicYOffset: this.graphicYOffsetMarkers,                 
                     graphicZIndex: MARKER_Z_INDEX,
                     backgroundGraphicZIndex: SHADOW_Z_INDEX
                 });
