@@ -63,7 +63,20 @@ gxp.plugins.Navigation = Ext.extend(gxp.plugins.Tool, {
             allowDepress: false,
             control: new OpenLayers.Control.Navigation(this.controlOptions),
             map: this.target.mapPanel.map,
-            toggleGroup: this.toggleGroup})];
+            toggleGroup: this.toggleGroup,
+            listeners: {
+                scope: this,
+                toggle: function(button, pressed) {
+                    var selectMarkerControl = this.target.mapPanel.map.getControlsByClass('OpenLayers.Control.SelectFeature');
+                    if(selectMarkerControl[0]){
+                        if(pressed){
+                            selectMarkerControl[0].activate();  
+                        }else{
+                            selectMarkerControl[0].deactivate();
+                        }
+                    }                    
+                }
+            }})];
         return gxp.plugins.Navigation.superclass.addActions.apply(this, [actions]);
     }
         
