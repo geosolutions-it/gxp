@@ -283,7 +283,19 @@ NotePanel = Ext.extend( Ext.FormPanel, {
 	
 
 		initComponent: function( ){
-
+			
+			
+			
+			var vehicleStore = new Ext.data.Store({
+				reader: new Ext.data.ArrayReader({}, [
+				       {name: 'selected', type: 'bool'},
+					   {name: 'vehicle', type: 'string'},
+					   {name: 'style', type: 'string'},
+		               {name: 'availability', type: 'bool'}			   
+				]),
+				data: this.vehicles
+			});
+			
 				this.saveBtn = new Ext.Button({
 					text: 'Save',
 			        tooltip: 'Save locally',
@@ -377,14 +389,40 @@ NotePanel = Ext.extend( Ext.FormPanel, {
 											disabled:true
 								        }
 								    ]
-								},{ 
+								},
+								{
+									
+										xtype: "combo",
+										fieldLabel: 'Vehicle',
+										invalidText: 'A vehicle must be specified',
+										emptyText: 'Select a vehicle...',
+										store: vehicleStore,
+										/*store: [
+											["position:absolute;right:5px;top:5px", "North-East"],
+											["position:absolute;left:5px;top:5px", "North-West"],
+											["position:absolute;right:5px;bottom:5px", "South-East"],
+											["position:absolute;left:5px;bottom:5px", "South-West"]
+										],*/
+										mode: 'local',
+										displayField:'vehicle',
+										valueField:'vehicle',
+										editable: false,
+										forceSelection: true,
+										disabled: true,
+										triggerAction: 'all',
+										ref:'../vehicle',
+										width: 200
+										
+								},
+								
+								/*{ 
 									xtype: 'textfield',
 							        fieldLabel: 'Vehicle',
 									width: 200,
 									ref:'../vehicle',
 									anchor:'100%',
 									disabled:true
-							   },{   
+							   },*/{   
 									xtype: 'textfield',
 							        fieldLabel: 'Operator',
 									readOnly:true,
@@ -963,7 +1001,8 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		var self = this;
 		this.notePanel = new NotePanel({
 			id: this.id,
-			note:this.note
+			note:this.note,
+			vehicles: this.target.vehicleSelector.data
 		});
 		this.note.addListener('logbook_select', this.notePanel.load, this.notePanel);
 		this.note.addListener('map_select', this.notePanel.load, this.notePanel);
