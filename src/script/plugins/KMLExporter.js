@@ -82,7 +82,13 @@ gxp.plugins.KMLExporter = Ext.extend(gxp.plugins.Tool, {
 					       // 'internalProjection': map.getProjection(),
 					       // 'externalProjection': new OpenLayers.Projection("EPSG:4326")
 					    });
-				var kmlContent = format.write(self.layer.features);
+				var features = new Array;
+				for (var i=0; i<self.layer.features.length; i++){
+					var feature = self.layer.features[i].clone();
+					feature.attributes.name = feature.attributes.name || 'No name available';
+					features.push( feature );
+				}
+				var kmlContent = format.write( features );
 				// create an upload file form
 				var form = new gxp.KMLFileDownloadPanel( {
 					xmlJsonTranslateService: xmlJsonTranslateService,

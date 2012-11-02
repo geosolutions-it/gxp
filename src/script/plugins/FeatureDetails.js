@@ -247,6 +247,16 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 				}
 		});
 		
+		this.target.on("featuremultiselected", 
+			function selectFeatures(container, feature){
+						self.feature = null;
+						self.container = null;
+						self.oldX = null;
+						self.oldY = null;
+						self.disable();
+						self.resetForm();
+		});
+		
 		this.target.on("featuresaved", function saveFeature(container, feature){
 
 			self.disable();

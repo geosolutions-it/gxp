@@ -96,7 +96,7 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 						this.newSelection = false;
 						this.modifyControl.deactivate();
 						this.selectorControl.unselectAll();
-						this.onUnselected(self);	
+						// this.onUnselected(self);	
 						// this.deleteButton.disable();
 						this.newSelection = false;
 					} else {
@@ -137,7 +137,9 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 			
 				this.layer = this.createLayer( this.target.mapPanel.map);
 				this.selectorControl = this.createSelectorControl();
+				this.selectorControl.name = 'PilotNotes:SelectFeature';
 				this.modifyControl = this.createModifyControl( OpenLayers.Control.ModifyFeature.DRAG | OpenLayers.Control.ModifyFeature.ROTATE);
+				this.modifyControl.name = 'PilotNotes:ModifyFeature';
 				this.deleteControl = this.createDeleteControl( );
 
 				map.addControl(this.modifyControl);
@@ -230,6 +232,7 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 					},
 					'featureselected': function(selected) {
 							
+							
 							if ( selected.feature.isNew === undefined ){
 								selected.feature.isNew = true;
 							} else {
@@ -259,7 +262,9 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 									self.modifyControl.unselectFeature(feature);
 								}
 								// disable note panel
-								self.onUnselected(self);
+								// self.onUnselected(self);
+								self.onMultiSelected(self, selected.feature);
+								
 							}
 							
 							
@@ -277,6 +282,7 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 
 						'featureunselected': function(unselected){
 							self.modifyControl.unselectFeature(unselected.feature);
+							self.onUnselected(self, unselected.feature);
 						},
 						
 						'featureremoved': function(deleted){
@@ -286,6 +292,7 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 								self.selectButton.toggle( false );
 								self.selectButton.disable();
 							}
+							self.onUnselected(self, deleted.feature);
 						},
 
 						
@@ -298,7 +305,7 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 			                    this.layer,
 			                    {
 			                        clickout: false, toggle: false,
-			                        multiple: false, hover: false,
+			                        multiple:  false, hover: false,
 			                        toggleKey: "ctrlKey", // ctrl key removes from selection
 			                        multipleKey: "shiftKey", // shift key adds to selection
 			                        box: true
@@ -360,11 +367,15 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 	   this.selectorControl.unselectAll();
    },
 	
+	onMultiSelected: function( target, feature ){
+        this.target.fireEvent( this.prefix + "multiselected", target, feature);
+    },
+	
     onSelected: function( target, feature ){
         this.target.fireEvent( this.prefix + "selected", target, feature);
     },
-    onUnselected: function( target ){
-        this.target.fireEvent( this.prefix + "unselected", target);
+    onUnselected: function( target, feature ){
+        this.target.fireEvent( this.prefix + "unselected", target, feature);
     },
 	onSave: function( target, feature ){
         this.target.fireEvent( this.prefix + "saved", target, feature);
