@@ -21,6 +21,78 @@
 Ext.namespace("gxp.plugins");
 
 
+AccessControlManager = Ext.extend(Ext.util.Observable, {
+	
+	permissions: [
+		{
+			name:'Add to logbook',
+			condition: function( feature, isChanged ){
+				return ! Application.user.isGuest() && feature.attributes.logbookId === -1;
+			},
+			action: function(bus){
+				bus.fireEvent("grant_add_to_logbook", bus);
+			},
+			otherwise: function(bus){
+				bus.fireEvent("revoke_add_to_logbook", bus);
+			}
+		},
+		{
+			name:'Delete from logbook',
+			condition: function( feature, isChanged  ){
+				return ! Application.user.isGuest() && feature.attributes.logbookId !== -1 
+								/* && feature.attributes.owner === Application.user.username */;
+			},
+			action: function(bus){
+				bus.fireEvent("grant_delete_from_logbook", bus);
+			},
+			otherwise: function(bus){
+				bus.fireEvent("revoke_delete_from_logbook", bus);
+			}
+		},
+		{
+			name:'Update logbook',
+			condition: function( feature, isChanged ){
+				return ! Application.user.isGuest() && feature.attributes.logbookId !== -1
+				 			&& /* feature.attributes.owner === Application.user.username && */ isChanged==true;
+			},
+			action: function(bus){
+				bus.fireEvent("grant_update_logbook", bus);
+			},
+			otherwise: function( bus ){
+				bus.fireEvent("revoke_update_logbook", bus);
+			}
+		}
+	],
+	
+	constructor: function(config){
+		this.note = config.note;
+        this.addEvents({
+			"grant_add_to_logbook": true,
+            "grant_delete_from_logbook" : true,
+            "grant_update_logbook" : true,
+			"revoke_add_to_logbook": true,
+            "revoke_delete_from_logbook" : true,
+            "revoke_update_logbook" : true
+        });
+        AccessControlManager.superclass.constructor.apply(this, config);
+    },
+
+	change: function(feature){
+		for (var i=0; i<this.permissions.length; i++){
+			var permission = this.permissions[i];
+			if ( permission.condition( feature, this.note.isChanged ) ){
+				// console.log('grant ' + permission.name);
+				permission.action( this );
+			} else {
+				// console.log('revoke ' + permission.name);
+				permission.otherwise( this );
+			}
+		}
+	}
+
+	
+});
+
 /**
  *   represents the note currently loaded within the plugin
  */
@@ -49,7 +121,7 @@ Note = Ext.extend(Ext.util.Observable, {
 		this.fireEvent('reload', newFeature, oldFeature );
 	},
 	cancel: function(feature){
-		if ( this.isChanged ){
+		/*if ( this.isChanged ){
 			// it is changed without saving
 			
 			Ext.MessageBox.show({
@@ -82,12 +154,12 @@ Note = Ext.extend(Ext.util.Observable, {
 		           icon: Ext.MessageBox.QUESTION,
 				   scope:this
 		       });
-			} else {
+			} else {*/
 				this.old = null;
 				this.feature = null;
 				this.isChanged = false;
 				this.fireEvent('deactivate');		
-			}		
+			// }		
 	},
 	// TODO try to use only on select
 	// TODO pull out message boxes
@@ -97,7 +169,7 @@ Note = Ext.extend(Ext.util.Observable, {
 			feature.attributes.logbookId = -1;
 		}
 		
-		if ( this.isChanged ){
+		/*if ( this.isChanged ){
 			// it is changed without saving
 			Ext.MessageBox.show({
 	           title:'Save Changes?',
@@ -124,11 +196,12 @@ Note = Ext.extend(Ext.util.Observable, {
 	           icon: Ext.MessageBox.QUESTION,
 			   scope:this
 	       });
-		} else {
+		} else {*/
 			this.old = this.clone( feature );
 			this.feature = feature;
+			this.isChanged = false;
 			this.fireEvent('logbook_select', feature);		
-		}
+		//}
 
 	},
 	selectFromMap: function( feature ){
@@ -137,7 +210,7 @@ Note = Ext.extend(Ext.util.Observable, {
 			feature.attributes.logbookId = -1;
 		}
 		
-		if ( this.isChanged ){
+		/*if ( this.isChanged ){
 			// it is changed without saving
 			Ext.MessageBox.show({
 	           title:'Save Changes?',
@@ -163,13 +236,13 @@ Note = Ext.extend(Ext.util.Observable, {
 			   },
 	           icon: Ext.MessageBox.QUESTION,
 			   scope:this
-	       });
-		} else {
+	       });*/
+	/*	} else {  */
 			this.isChanged = false;
 			this.old = this.clone( feature );
 			this.feature = feature;
 			this.fireEvent('map_select', feature);		
-		}
+	//	}
 	},
 	// end todo
 	save: function( feature ){
@@ -178,6 +251,12 @@ Note = Ext.extend(Ext.util.Observable, {
 		this.isChanged = false;
 		this.fireEvent('save', feature);
 	},
+	remove: function(feature){
+		this.old = null;
+		this.feature = null;
+		this.isChanged = false;
+		this.fireEvent('remove', feature);		
+	},
 	persist: function(feature){
 		
 		this.old = this.clone( feature );
@@ -185,8 +264,19 @@ Note = Ext.extend(Ext.util.Observable, {
 		this.isChanged = false;
 		this.fireEvent('persist', feature);
 	},
+	refresh: function(feature){
+		this.fireEvent('change', feature);
+	},
 	change: function( feature, silent ){
 		this.isChanged = true;
+		this.feature.attributes = feature.attributes;
+		if ( this.feature.geometry instanceof OpenLayers.Geometry.Point ){
+			this.feature.geometry.x = feature.geometry.x;
+			this.feature.geometry.y = feature.geometry.y;
+		}
+		this.fireEvent('change', feature);
+		
+		/*this.isChanged = true;
 		// this.feature = feature;
 		this.feature.attributes = feature.attributes;
 		if ( this.feature.geometry instanceof OpenLayers.Geometry.Point ){
@@ -195,12 +285,14 @@ Note = Ext.extend(Ext.util.Observable, {
 		}		
 		if (! silent ){
 			this.fireEvent('change', feature);
-		}
+		}*/
 	},
 	// TODO pull out message box
 	unselect: function(){
+		
+	
 
-		if ( this.isChanged ){
+		/*if ( this.isChanged ){
 			// it is changed without saving
 			Ext.MessageBox.show({
 	           title:'Are you sure?',
@@ -225,12 +317,12 @@ Note = Ext.extend(Ext.util.Observable, {
 	           icon: Ext.MessageBox.QUESTION,
 			   scope:this
 	       });
-		} else {
+		} else {*/
 			this.old = null;
 			this.feature = null;
 			this.isChanged = false;
 			this.fireEvent('unselect', this.feature);	
-		}
+		// }
 		
 	},
 	deactivate: function(){
@@ -277,6 +369,8 @@ NotePanel = Ext.extend( Ext.FormPanel, {
 		region:'center',
 		frame:false,  
 		border:false, 
+		autoScroll:true,
+		height:300,
 		labelAlign:'top', 
 	    title: "Pilot Notes",
 		tbar:[],
@@ -313,14 +407,32 @@ NotePanel = Ext.extend( Ext.FormPanel, {
 						scope: this
 					  }		
 				);
+				this.removeFromLogbookBtn = new Ext.Button({
+						text: 'Delete from logbook',
+					    tooltip: 'Remove the current note from logbook',
+					    iconCls: 'delete',
+					    disabled: true,
+					    handler : this.handleRemoveFromLogbook,
+						scope: this
+					  }		
+				);
 				this.addToLogbookBtn = new Ext.Button({
 						text: 'Add to logbook',
-					    tooltip: 'Add the current note to the logbook',
-					    iconCls: 'edit',
+					    tooltip: 'Add the current note to logbook',
+					    iconCls: 'save',
 					    disabled: true,
 					    handler : this.handleAddToLogbook,
 						scope: this
-					  });			
+					  });	
+				this.updateLogbookBtn = new Ext.Button({
+							text: 'Update logbook',
+						    tooltip: 'Add the current note to logbook',
+						    iconCls: 'save',
+						    disabled: true,
+							hidden: true,
+						    handler : this.handleAddToLogbook,
+							scope: this
+						  });		
 			
 				Ext.apply(this, {
 					items:[{
@@ -331,6 +443,7 @@ NotePanel = Ext.extend( Ext.FormPanel, {
 								{   xtype: 'textfield',
 					                fieldLabel: 'Title',
 									width: 200,
+									allowBlank: false,
 									disabled: true,
 									anchor:'100%',
 									ref:'../name'
@@ -338,12 +451,14 @@ NotePanel = Ext.extend( Ext.FormPanel, {
 									xtype: 'textarea',
 									width: 200,
 									disabled: true,
+									allowBlank: false,
 					                fieldLabel:'Note', 
 									anchor:'100%',
 									ref: '../description'
 					            },{   
 									xtype: 'numberfield',
 								    fieldLabel: 'Latitude',
+									allowBlank: false,
 									width: 200,
 									decimalPrecision: 5,
 									maxValue:90,
@@ -355,6 +470,7 @@ NotePanel = Ext.extend( Ext.FormPanel, {
 								},{   
 									xtype: 'numberfield',
 									fieldLabel: 'Longitude',
+									allowBlank: false,
 									width: 200,
 									decimalPrecision: 5,
 									maxValue:180,
@@ -371,6 +487,7 @@ NotePanel = Ext.extend( Ext.FormPanel, {
 								        {
 											ref:'../../date',
 								            xtype     : 'datefield',
+											allowBlank: false,
 											editable: false,
 											format:"d/m/Y",
 								            fieldLabel: 'Day',
@@ -380,6 +497,7 @@ NotePanel = Ext.extend( Ext.FormPanel, {
 								        },{
 											ref:'../../time',
 								            xtype     : 'timefield',
+											allowBlank: false,
 								            fieldLabel: 'Time',
 											// TOFIX readOnly does not allow to select a time!
 											// we need to find another way to disallow keyboard editing
@@ -394,15 +512,10 @@ NotePanel = Ext.extend( Ext.FormPanel, {
 									
 										xtype: "combo",
 										fieldLabel: 'Vehicle',
+										allowBlank: false,
 										invalidText: 'A vehicle must be specified',
 										emptyText: 'Select a vehicle...',
 										store: vehicleStore,
-										/*store: [
-											["position:absolute;right:5px;top:5px", "North-East"],
-											["position:absolute;left:5px;top:5px", "North-West"],
-											["position:absolute;right:5px;bottom:5px", "South-East"],
-											["position:absolute;left:5px;bottom:5px", "South-West"]
-										],*/
 										mode: 'local',
 										displayField:'vehicle',
 										valueField:'vehicle',
@@ -434,7 +547,7 @@ NotePanel = Ext.extend( Ext.FormPanel, {
 
 						   ]
 						}],
-						buttons:[  this.addToLogbookBtn, this.saveBtn, this.cancelBtn ]
+						buttons:[  this.updateLogbookBtn, this.addToLogbookBtn, this.removeFromLogbookBtn /*, this.saveBtn, this.cancelBtn */ ]
 				});
 
 			  
@@ -455,6 +568,7 @@ NotePanel = Ext.extend( Ext.FormPanel, {
 					console.error('no feature to be saved');
 					return;
 				}
+				
 			
 				var values = new Object;
 				values.name = this.name.getValue();
@@ -474,23 +588,33 @@ NotePanel = Ext.extend( Ext.FormPanel, {
 				}
 				feature.attributes = values;			
 			
+				this.getForm().clearInvalid();
 			
 				this.note.change(feature, true);
 		   },
 		   refresh: function(){
-				if ( Application.user.isGuest() ){
+				this.note.refresh(this.feature);
+			/*	if ( Application.user.isGuest() ){
 					this.addToLogbookBtn.disable();
+					this.removeFromLogbookBtn.disable();
 				} else {
 					if ( this.feature && this.feature.attributes ){
 						if ( ! this.feature.attributes.owner  ){
 							this.feature.attributes.owner = Application.user.username;
 						}
 						if (  this.feature.attributes.owner === Application.user.username ){
+							
 							this.addToLogbookBtn.enable();
+							if ( this.feature.attributes.logbookId && this.feature.attributes.logbookId !== -1){
+								this.removeFromLogbookBtn.enable();
+								
+							}
+							
 						}					
 					}
 
-				}
+				} */
+				this.getForm().clearInvalid();
 		   },
 		   reset: function(){
 				this.name.reset();
@@ -504,6 +628,8 @@ NotePanel = Ext.extend( Ext.FormPanel, {
 				
 				this.latitude.setVisible(false);
 				this.longitude.setVisible(false);
+				
+				this.getForm().clearInvalid();
 		   },
 		
 		   load: function(feature){
@@ -535,16 +661,28 @@ NotePanel = Ext.extend( Ext.FormPanel, {
 				
 				this.enable();
 				
-				this.addToLogbookBtn.setText( feature.attributes.logbookId === -1 ? 'Add to Logbook' : 'Update Logbook');
-				if ( Application.user.isGuest() || ( Application.user.username !== feature.attributes.owner )){
+				// this.addToLogbookBtn.setText( feature.attributes.logbookId === -1 ? 'Add to Logbook' : 'Update Logbook');
+				/*if ( Application.user.isGuest() || ( Application.user.username !== feature.attributes.owner )){
 					this.addToLogbookBtn.disable();
+					this.removeFromLogbookBtn.disable();
 				}
+				if ( feature.attributes.logbookId === -1){
+					this.removeFromLogbookBtn.disable();
+				} else {
+					this.addToLogbookBtn.disable();
+				}*/
 				
+				this.getForm().clearInvalid();
+				this.date.clearInvalid();
+				this.time.clearInvalid();
+				
+				this.note.refresh(this.feature);
 		   },
 		
 		   unload: function(feature){
 				this.disable();
 				this.reset();
+				this.getForm().clearInvalid();
 		   },
 		
 		   disable: function(){
@@ -558,8 +696,11 @@ NotePanel = Ext.extend( Ext.FormPanel, {
 				this.operator.disable();
 				
 				this.addToLogbookBtn.disable();
+				this.updateLogbookBtn.disable();
+				this.removeFromLogbookBtn.disable();
 				this.saveBtn.disable();
 				this.cancelBtn.disable();
+				this.getForm().clearInvalid();
 				
 			
 		   },
@@ -574,11 +715,13 @@ NotePanel = Ext.extend( Ext.FormPanel, {
 				this.vehicle.enable();
 				this.operator.enable();
 				
-				this.addToLogbookBtn.enable();
+				/* this.addToLogbookBtn.enable();
+				this.removeFromLogbookBtn.enable();
 				this.saveBtn.enable();
-				this.cancelBtn.enable();
+				this.cancelBtn.enable(); */
 		   },
 		
+		   // deprecated
 		   handleSave: function(){
 			
 				if (!this.feature){
@@ -609,13 +752,34 @@ NotePanel = Ext.extend( Ext.FormPanel, {
 				this.feature.attributes = values;
 				
 				///
+				this.getForm().clearInvalid();
+				this.date.clearInvalid();
+				this.time.clearInvalid();
 				
 				this.note.save( this.feature );
 		   },
 		   handleCancel: function(){
 				this.note.unselect();
 		   },
+		   handleRemoveFromLogbook: function(){
+				if (!this.feature && ! this.feature.attributes.logbookId){
+					console.error('no feature to be removed from logbook');
+					return;
+				}
+				this.note.remove( this.feature );
+			
+		   },
 		   handleAddToLogbook: function(){
+			
+				if ( !this.getForm().isValid() ){
+					Ext.Msg.show({
+						title: 'Cannot save note to Logbook',
+						msg: 'Some fields are invalid',
+						buttons: Ext.Msg.OK,
+						icon: Ext.MessageBox.ERROR
+					});
+					return;
+				}
 
 				if (!this.feature){
 					// this code should never be executed
@@ -649,66 +813,115 @@ LogbookPanel = Ext.extend(
 		Ext.grid.GridPanel,
 	 	{
 			renderTo:'logbook-panel',
+			autoScroll:true,
 			region:'south',
 			height:300,
 			title:'Log Book',
+			
+			hideTooltip: 'Hide from map',
+			showTooltip: 'Show on map',
+			hideIcon: '../theme/app/img/silk/map_delete.png',
+			showIcon: '../theme/app/img/silk/map_add.png',
+			
 			sm: new Ext.grid.RowSelectionModel({
 		            singleSelect: true
 		    }),
-			colModel: new Ext.grid.ColumnModel({
-		            defaults: {
-		                width : 20
-		            },
-		            columns: [ 				
-					{
-		                id: 'id_resource',
-		                header: 'Id',
-		                dataIndex: 'id',
-		                sortable: true,
-		                align: 'left',
-		                hidden: true
-		            },
-					{
-		                id: 'id_name',
-		                header: 'Name',
-		                dataIndex: 'name',
-		                sortable: true,
-		                align: 'left'
-		            },{
-		                id: 'id_owner',
-		                header: 'Owner',
-		                dataIndex: 'owner',
-		                sortable: true,
-		                align: 'left'
-		            },{
-		                id: 'id_description',
-		                header: 'Description',
-		                dataIndex: 'description',
-		                sortable: true,
-		                align: 'left'
-		            },{
-		                id: 'creation',
-		                header: 'Creation',
-		                dataIndex: 'creation',
-		                sortable: true,
-		                renderer: Ext.util.Format.dateRenderer('Y-m-d H:i:s'),
-		                align: 'left'
-		            },{
-		                id: 'lastUpdate',
-		                header: 'Last update',
-		                dataIndex: 'lastUpdate',
-		                sortable: true,
-		                renderer: Ext.util.Format.dateRenderer('Y-m-d H:i:s'),
-		                align: 'left'
-		            }]
-		        }),
+			
 				viewConfig: {
 		            forceFit: true
 		        },
 				initComponent: function( ){
 					
+					this.colModel = new Ext.grid.ColumnModel({
+				            defaults: {
+				                width : 20
+				            },
+				            columns: [ 	
+							{
+				                xtype: 'actioncolumn',
+								width: 55,
+								fixed: true,
+								align: 'center',
+								items:[{
+	
+									getClass: function (value, metadata, record) {
+										
+										
+										if ( this.view === undefined ){
+											this.view = true;
+										}
+										
+								        if ( this.view === true ) {
+								           	this.items[0].tooltip = 'Show on map';
+											this.view = ! this.view ;
+							                return 'hide';
+								        } else {
+								           	this.items[0].tooltip = 'Hide from map';
+											this.view = ! this.view ;
+							                return 'view';
+								        }
+										
+								    },
+								  handler: function(grid, rowIndex, colIndex, record, event){
+							 		 grid.store.reload();
+									 if ( this.view === false ){
+										grid.fireEvent('show_on_map', grid, rowIndex, event);
+									 } else {
+										grid.fireEvent('hide_from_map', grid, rowIndex, event);
+									 }
+						             return false;
+								  }								
+								
+								}
+								
+								]
+
+				            },
+							{
+				                id: 'id_resource',
+				                header: 'Id',
+				                dataIndex: 'id',
+				                sortable: true,
+				                align: 'left',
+				                hidden: true
+				            },
+							{
+				                id: 'id_name',
+				                header: 'Name',
+				                dataIndex: 'name',
+				                sortable: true,
+				                align: 'left'
+				            },{
+				                id: 'id_owner',
+				                header: 'Owner',
+				                dataIndex: 'owner',
+				                sortable: true,
+				                align: 'left'
+				            },{
+				                id: 'id_description',
+				                header: 'Description',
+				                dataIndex: 'description',
+				                sortable: true,
+				                align: 'left'
+				            },{
+				                id: 'creation',
+				                header: 'Creation',
+				                dataIndex: 'creation',
+				                sortable: true,
+				                renderer: Ext.util.Format.dateRenderer('Y-m-d H:i:s'),
+				                align: 'left'
+				            },{
+				                id: 'lastUpdate',
+				                header: 'Last update',
+				                dataIndex: 'lastUpdate',
+				                sortable: true,
+				                renderer: Ext.util.Format.dateRenderer('Y-m-d H:i:s'),
+				                align: 'left'
+				            }]
+				        });
+					
 					this.bbar = new Ext.PagingToolbar({
-			            pageSize : 5,
+			            pageSize : 10,
 			            store : this.store,
 			            displayInfo: true
 			        });
@@ -765,6 +978,23 @@ FeatureLayer = Ext.extend(Ext.util.Observable, {
 			}
 		}
 		return null;
+	},
+	
+	addToMap: function( feature ){
+		this.note.suspendEvents(false);
+		var selector = this.getSelector();
+		var modifier = this.getModifier();
+
+
+		var layerFeature = this.findFeature( feature );
+
+		if ( layerFeature){
+			// do nothing		
+		} else {
+			var layer = this.getLayer();
+			layer.addFeatures( [feature] );
+		}		
+		this.note.resumeEvents();
 	},
 	
 	select: function(feature){	
@@ -854,6 +1084,35 @@ FeatureLayer = Ext.extend(Ext.util.Observable, {
 			features[0].geometry.y = feature.geometry.y;
 		}
 		
+	},
+	remove: function(feature){
+		this.bus.suspendEvents(false);
+		var layer = this.getLayer();
+		var features = layer.selectedFeatures;
+		if (features.length == 0){
+			console.error('Cannot remove feature: no feature found.');
+			return;
+		} else if ( features.length > 1){
+			console.error('Cannot remove feature: too many features selected.');
+			return;
+		}		
+		layer.removeFeatures( layer.selectedFeatures );
+		this.bus.resumeEvents();
+	},
+	removeByLogbookId: function( logbookId){
+		this.bus.suspendEvents(false);
+		var layer = this.getLayer();
+		var features = layer.features;
+		for (var i=0; i<features.length; i++){
+			var feature = features[i];
+			if ( feature.attributes.logbookId && feature.attributes.logbookId === logbookId ){
+				layer.removeFeatures( [ feature ] );
+				this.bus.resumeEvents();
+				return;
+			}
+		}
+		console.error('feature not found');
+		this.bus.resumeEvents();
 	},
 	getSelector: function(){
 		
@@ -979,6 +1238,12 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		// create an empty note
         this.note = new Note({});
 		this.note.addListener('save', this.handleSave, this);
+		this.note.addListener('remove', this.handleRemoveFromLogbook, this);
+		
+		this.manager = new AccessControlManager({
+			note: this.note
+		});
+		
 		gxp.plugins.PilotNotes.superclass.constructor.apply(this, arguments);
     },
 
@@ -991,12 +1256,14 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 				note: this.note,
 				bus: this.target
 		});
-		this.note.addListener('logbook_select', layer.select, layer);
+		// this.note.addListener('logbook_select', layer.select, layer);
 		this.note.addListener('unselect', layer.unselect, layer);
 		this.note.addListener('rewind', layer.rewind, layer);
 		this.note.addListener('map_select', layer.update, layer);
 		this.note.addListener('reload', layer.reload, layer);
+		this.note.addListener('remove', layer.remove, layer);
 		// this.note.addListener('save', layer.save, layer);
+		this.layer = layer;
 	
 		var self = this;
 		this.notePanel = new NotePanel({
@@ -1006,15 +1273,44 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		});
 		this.note.addListener('logbook_select', this.notePanel.load, this.notePanel);
 		this.note.addListener('map_select', this.notePanel.load, this.notePanel);
-		this.note.addListener('change', this.notePanel.load, this.notePanel);
+		// this.note.addListener('change', this.notePanel.load, this.notePanel);
 		this.note.addListener('rewind', this.notePanel.load, this.notePanel);
 		this.note.addListener('unselect', this.notePanel.unload, this.notePanel);
+		this.note.addListener('remove', this.notePanel.unload, this.notePanel);
 		this.note.addListener('deactivate', this.notePanel.unload, this.notePanel);
 		this.note.addListener('reload', this.notePanel.load, this.notePanel);
 		
+		this.note.addListener('change', this.manager.change, this.manager);
+		
+		// set up actions associated to permissions
+		this.manager.addListener('grant_add_to_logbook', function(){
+			self.notePanel.addToLogbookBtn.enable();
+			self.notePanel.updateLogbookBtn.disable();
+			self.notePanel.addToLogbookBtn.setVisible(true);
+			self.notePanel.updateLogbookBtn.setVisible(false);
+		});
+		this.manager.addListener('grant_delete_from_logbook', function(){
+			self.notePanel.removeFromLogbookBtn.enable();
+		});
+		this.manager.addListener('grant_update_logbook', function(){
+			self.notePanel.updateLogbookBtn.enable();
+			self.notePanel.addToLogbookBtn.disable();
+			self.notePanel.updateLogbookBtn.setVisible(true);
+			self.notePanel.addToLogbookBtn.setVisible(false);
+		});
+		this.manager.addListener('revoke_add_to_logbook', function(){
+			self.notePanel.addToLogbookBtn.disable();
+		});
+		this.manager.addListener('revoke_delete_from_logbook', function(){
+			self.notePanel.removeFromLogbookBtn.disable();
+		});
+		this.manager.addListener('revoke_update_logbook', function(){
+			self.notePanel.updateLogbookBtn.disable();
+		});
 			
 		var pn = new Ext.Panel({
 			margins: '0 0 0 0 ',
+			// layout: "border",
 			items:[
 				this.notePanel,
 				{
@@ -1047,7 +1343,8 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		
 		this.target.on("notefeaturechanged", 
 			function changeFeature(container, feature){
-				self.note.change( feature );
+				// self.note.change( feature );
+				self.note.selectFromMap( feature );
 		});
 
 		this.target.on("notefeaturesaved", function saveFeature(container, feature){
@@ -1073,33 +1370,81 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		this.note.addListener('unselect', this.logbookPanel.unselect, this.logbookPanel);
 		this.note.addListener('deactivate', this.logbookPanel.unselect, this.logbookPanel);
 		this.note.addListener('persist', this.handleAddToLogbook, this);
-		this.logbookPanel.on('rowclick', function(grid, rowIndex, columnIndex, e) {
-								var record = grid.getSelectionModel().getSelected();
-								var root = this;
-								this.logbook
-									.findById( record.id )
-									.success( function(data){ 
-										// convert KML blob to feature
-										var format = new OpenLayers.Format.KML({
-												    	extractStyles: true, 
-														extractAttributes: true,
-														maxDepth: 2 
-												    });
-										var features = format.read( data.blob );
-										var feature = features[0];
-										feature.attributes.logbookId = record.id;
-										feature.attributes.owner = data.owner;
-										var attributes = feature.attributes;
-										for (var attributeName in attributes ){
-											if (typeof attributes[attributeName] == "object") {
-												if (attributes[attributeName].value) {
-													attributes[attributeName] = attributes[attributeName].value;
+		this.note.addListener('remove', this.logbookPanel.unselect, this.logbookPanel);
+		this.logbookPanel.on('cellclick', function(grid, rowIndex, columnIndex, e) {
+								if ( columnIndex > 0 ){ // select only if one does not click on action column
+									var record = grid.getSelectionModel().getSelected();
+									var root = this;
+									this.logbook
+										.findById( record.id )
+										.success( function(data){ 
+											// convert KML blob to feature
+											var format = new OpenLayers.Format.KML({
+													    	extractStyles: true, 
+															extractAttributes: true,
+															maxDepth: 2 
+													    });
+											var features = format.read( data.blob );
+											var feature = features[0];
+											feature.attributes.logbookId = record.id;
+											feature.attributes.owner = data.owner;
+											var attributes = feature.attributes;
+											for (var attributeName in attributes ){
+												if (typeof attributes[attributeName] == "object") {
+													if (attributes[attributeName].value) {
+														attributes[attributeName] = attributes[attributeName].value;
+													}
 												}
 											}
-										}
-										root.note.selectFromLogbook( feature );
-									}).execute();
-				            }, this);
+											root.note.selectFromLogbook( feature );
+										}).execute();		
+									return true;						
+								}
+
+				            }, this); 
+	   // hack: I need to intercept this event when mouse clicks on a line between cells
+	   /* this.logbookPanel.on('rowclick', function(grid, rowIndex, e){
+			this.logbookPanel.fireEvent('cellclick', grid, rowIndex, 1, e);
+		}, this);*/
+		this.logbookPanel.on('show_on_map', function show(grid, rowIndex, e){
+			var record = grid.getStore().getAt( rowIndex );
+			var root = this;
+			this.logbook
+				.findById( record.id )
+				.success( function(data){ 
+					// convert KML blob to feature
+					var format = new OpenLayers.Format.KML({
+							    	extractStyles: true, 
+									extractAttributes: true,
+									maxDepth: 2 
+							    });
+					var features = format.read( data.blob );
+					var feature = features[0];
+					feature.attributes.logbookId = record.id;
+					feature.attributes.owner = data.owner;
+					var attributes = feature.attributes;
+					for (var attributeName in attributes ){
+						if (typeof attributes[attributeName] == "object") {
+							if (attributes[attributeName].value) {
+								attributes[attributeName] = attributes[attributeName].value;
+							}
+						}
+					}
+					var selectedRecord = grid.getSelectionModel().getSelected();
+					if ( selectedRecord && selectedRecord.id === record.id ){
+						root.layer.select( feature );
+					} else {
+						root.layer.addToMap( feature );
+					}
+					
+				}).execute();		
+			return true;		
+		}, this);
+		this.logbookPanel.on('hide_from_map', function show(grid, rowIndex, e){
+			var record = grid.getStore().getAt( rowIndex );
+			this.layer.removeByLogbookId( record.id);
+		}, this);
+	
 	},
 
     /** private: method[addOutput]
@@ -1179,10 +1524,6 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 				
 				self.notePanel.refresh();
 				
-				/*if ( self.feature && (self.feature.attributes.logbookId===-1 || (Application.user.username === self.feature.attributes.owner))){
-					self.notePanel.addToLogbookBtn.enable();
-					self.notePanel.operator.setValue( Application.user.username);
-				}				*/
 			} else {
 				Ext.Msg.show({
 						title: 'Login failed',
@@ -1218,6 +1559,37 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		return this.buildUI();
 	},
 
+	handleRemoveFromLogbook: function( feature ){
+		
+		
+		if ( feature.attributes.logbookId ){
+			var self = this;
+			this.logbook
+				.deleteByPk( feature.attributes.logbookId )
+				.failure( function(response){
+					Ext.Msg.show({
+						title: 'Cannot delete this note from logbook',
+						msg: response,
+						buttons: Ext.Msg.OK,
+						icon: Ext.MessageBox.ERROR
+					});				
+				})
+				.success( function(logbookId){
+					Ext.Msg.show({
+						title: 'Note deleted',
+						msg: 'Note  deleted from logbook successfully',
+						buttons: Ext.Msg.OK,
+						icon: Ext.MessageBox.INFO
+					});		
+					
+							
+				}).execute();			
+		} else {
+			// this code should never be reached
+			console.error('feature does not have a logbook id');
+		}
+	},
+	
 	
 	handleAddToLogbook: function( feature ){
 		

@@ -74,7 +74,7 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
      */
     addPolygonTooltip: "Add Polygon",
 
-    clearAllMenuText: "Delete all",
+    clearAllMenuText: "Delete all from map",
 
 	customLayerDefaultName: "Custom layer",
   
@@ -207,7 +207,7 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 			 this.deleteButton = new Ext.SplitButton({
 		            iconCls: "gxp-icon-removeall",
 					disabled: true,
-		            tooltip: 'Remove features',
+		            tooltip: 'Remove features from map',
 		            // enableToggle: true,
 		            // toggleGroup: this.toggleGroup,
 		            // allowDepress: true,
@@ -245,7 +245,7 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 									scope:this
 		                  },
 		                  {
-		                            text: 'Delete all selected',
+		                            text: 'Delete all selected from map',
 		                            iconCls: "gxp-icon-delete-feature",
 		                            toggleGroup: this.toggleGroup,
 		                            group: this.toggleGroup,
