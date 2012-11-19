@@ -31,6 +31,7 @@ gxp.KMLFileDownloadPanel = Ext.extend(Ext.FormPanel, {
     failedUploadingTitle: "Cannot generate KML file",
     /** end i18n */
 
+	fileUpload: true,
 
 	width: 500,
 	frame: true,
@@ -79,7 +80,7 @@ gxp.KMLFileDownloadPanel = Ext.extend(Ext.FormPanel, {
                 var form = this.getForm();
                 if (form.isValid()) {
 					// application/x-www-form-urlencoded
-                   /*form.submit({
+                   form.submit({
                         url: this.xmlJsonTranslateService + 'FileDownloader', 
                         submitEmptyText: false,
                         waitMsg: this.waitMsgText,
@@ -96,8 +97,8 @@ gxp.KMLFileDownloadPanel = Ext.extend(Ext.FormPanel, {
                             });
 						},
 						success:this.handleUploadSuccess
-                    }); */
-					var Request = Ext.Ajax.request({
+                    }); 
+					/*var Request = Ext.Ajax.request({
 							       url: this.xmlJsonTranslateService + 'FileDownloader',
 							       method: 'POST',
 							       headers:{
@@ -118,7 +119,7 @@ gxp.KMLFileDownloadPanel = Ext.extend(Ext.FormPanel, {
 			                               icon: Ext.MessageBox.ERROR
 			                            });
 							       }
-							    });		
+							    });		*/
 
                 }
             },
@@ -153,8 +154,9 @@ gxp.KMLFileDownloadPanel = Ext.extend(Ext.FormPanel, {
 
     /** private: method[handleUploadSuccess]
      */
-    handleUploadSuccess: function(result) {
-        var obj = Ext.decode( result.responseText );
+    handleUploadSuccess: function(form, action) {
+        // var obj = Ext.decode( result.responseText );
+		var obj = Ext.decode( action.response.responseText );
 		var filename = this.filename;
 		var response = new Object;
 		response.filename = filename;

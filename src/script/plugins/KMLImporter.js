@@ -92,9 +92,11 @@ gxp.plugins.KMLImporter = Ext.extend(gxp.plugins.Tool, {
 					form.on("uploadcomplete", function addKMLToLayer(caller, response){
 							// the code to access the uploaded file
 							var code = response.code;
+							var url = response.url;
 
 							var Request = Ext.Ajax.request({
-						       url: xmlJsonTranslateService+'/FileUploader?code='+code,
+						       // url: xmlJsonTranslateService+'/FileUploader?code='+code,
+							   url: url + '?code=' + code,
 						       method: 'GET',
 						       headers:{
 						          'Content-Type' : 'application/xml'

@@ -22,7 +22,7 @@ gxp.KMLFileUploadPanel = Ext.extend(Ext.FormPanel, {
     
     /** i18n */
     fileLabel: "KML file",
-    fieldEmptyText: "Browse for KML files...",
+    fieldEmptyText: "Browse for KML or KMZ files...",
     uploadText: "Upload",
     waitMsgText: "Uploading your data...",
     invalidFileExtensionText: "File extension must be one of: ",
@@ -53,7 +53,7 @@ gxp.KMLFileUploadPanel = Ext.extend(Ext.FormPanel, {
      *  List of valid file extensions.  These will be used in validating the 
      *  file input value.  Default is ``[".kml"]``.
      */
-    validFileExtensions: [".kml"],
+    validFileExtensions: [".kml", ".kmz"],
     
     /** api: config[url]
      *  ``String``
@@ -99,11 +99,28 @@ gxp.KMLFileUploadPanel = Ext.extend(Ext.FormPanel, {
         this.buttons = [{
             text: this.uploadText,
             handler: function() {
+	
+				this.url = this.xmlJsonTranslateService;
+				
+				var ext = this.filename.slice(-4).toLowerCase();
+				switch( ext ){
+				case '.kml':
+				  this.url += 'FileUploader';
+				  break;
+				case '.kmz':
+				  this.url += 'KMZUploader';
+				  break;
+				default:
+				  // this code should not be executed
+				  console.log('unknown extention: cannot upload file.');
+				  return;
+				}
+			
 				var map = this.map;
                 var form = this.getForm();
                 if (form.isValid()) {
                     form.submit({
-                        url: this.xmlJsonTranslateService + '/FileUploader', 
+                        url: this.url, 
                         submitEmptyText: false,
                         waitMsg: this.waitMsgText,
                         waitMsgTarget: true,
@@ -181,6 +198,7 @@ gxp.KMLFileUploadPanel = Ext.extend(Ext.FormPanel, {
 		var response = new Object;
 		response.filename = filename;
 		response.code = obj.result.code;
+		response.url = this.url;
         this.fireEvent("uploadcomplete", this, response);
     }
 

@@ -80,13 +80,16 @@ AccessControlManager = Ext.extend(Ext.util.Observable, {
 	change: function(feature){
 		for (var i=0; i<this.permissions.length; i++){
 			var permission = this.permissions[i];
-			if ( permission.condition( feature, this.note.isChanged ) ){
-				// console.log('grant ' + permission.name);
-				permission.action( this );
-			} else {
-				// console.log('revoke ' + permission.name);
-				permission.otherwise( this );
+			if ( feature ){
+					if ( permission.condition( feature, this.note.isChanged ) ){
+						// console.log('grant ' + permission.name);
+						permission.action( this );
+					} else {
+						// console.log('revoke ' + permission.name);
+						permission.otherwise( this );
+					}	
 			}
+		
 		}
 	}
 
@@ -265,6 +268,10 @@ Note = Ext.extend(Ext.util.Observable, {
 		this.fireEvent('persist', feature);
 	},
 	refresh: function(feature){
+		if ( ! Application.user.isGuest() && feature){	
+			feature.attributes.owner = Application.user.username;
+		}
+		
 		this.fireEvent('change', feature);
 	},
 	change: function( feature, silent ){
@@ -325,6 +332,17 @@ Note = Ext.extend(Ext.util.Observable, {
 		// }
 		
 	},
+	update: function( feature ){
+		this.isChanged = true;
+		this.feature.attributes = feature.attributes;
+		if ( this.feature.geometry instanceof OpenLayers.Geometry.Point ){
+			this.feature.geometry.x = feature.geometry.x;
+			this.feature.geometry.y = feature.geometry.y;
+		}		
+		// if (! silent ){
+			this.fireEvent('update', feature);
+		// }
+	},
 	deactivate: function(){
 
 		if ( this.isChanged ){
@@ -366,11 +384,13 @@ Note = Ext.extend(Ext.util.Observable, {
 });
 
 NotePanel = Ext.extend( Ext.FormPanel, {
-		region:'center',
+		region:'north',
 		frame:false,  
 		border:false, 
 		autoScroll:true,
-		height:300,
+		height:250,
+		// autoHeight:true,
+		width:'350',
 		labelAlign:'top', 
 	    title: "Pilot Notes",
 		tbar:[],
@@ -458,7 +478,8 @@ NotePanel = Ext.extend( Ext.FormPanel, {
 					            },{   
 									xtype: 'numberfield',
 								    fieldLabel: 'Latitude',
-									allowBlank: false,
+									readOnly:true,
+									// allowBlank: false,
 									width: 200,
 									decimalPrecision: 5,
 									maxValue:90,
@@ -470,7 +491,8 @@ NotePanel = Ext.extend( Ext.FormPanel, {
 								},{   
 									xtype: 'numberfield',
 									fieldLabel: 'Longitude',
-									allowBlank: false,
+									readOnly:true,
+									// allowBlank: false,
 									width: 200,
 									decimalPrecision: 5,
 									maxValue:180,
@@ -591,6 +613,9 @@ NotePanel = Ext.extend( Ext.FormPanel, {
 				this.getForm().clearInvalid();
 			
 				this.note.change(feature, true);
+		   },
+		   update: function( feature ){
+			
 		   },
 		   refresh: function(){
 				this.note.refresh(this.feature);
@@ -814,8 +839,12 @@ LogbookPanel = Ext.extend(
 	 	{
 			renderTo:'logbook-panel',
 			autoScroll:true,
-			region:'south',
-			height:300,
+			region:'center',
+			frame:false,  
+			autoHeight: true,
+			
+			// height:300,
+			width:'350',
 			title:'Log Book',
 			
 			hideTooltip: 'Hide from map',
@@ -828,9 +857,29 @@ LogbookPanel = Ext.extend(
 		    }),
 			
 				viewConfig: {
-		            forceFit: true
+		            forceFit: true,
+					autoFill:true
 		        },
 				initComponent: function( ){
+					
+					var visibility = new Object;
+					this.visibility = visibility;
+					
+					this.store.on('load',
+						function(grid){
+							var records = this.getStore().getRange();
+							for (var i=0; i<records.length; i++){
+								var record = records[i];
+								if ( visibility[ record.id ] === undefined ){
+									visibility[ record.id ] = false; 
+								}
+								
+							}
+							// console.log( visibility );
+						},
+						this);
+						
+					
 					
 					this.colModel = new Ext.grid.ColumnModel({
 				            defaults: {
@@ -846,29 +895,31 @@ LogbookPanel = Ext.extend(
 	
 									getClass: function (value, metadata, record) {
 										
-										
-										if ( this.view === undefined ){
-											this.view = true;
-										}
-										
-								        if ( this.view === true ) {
+										// console.log( 'get class');
+									
+								        if ( visibility[ record.id ] ) {
 								           	this.items[0].tooltip = 'Show on map';
-											this.view = ! this.view ;
-							                return 'hide';
+							                return 'view';
 								        } else {
 								           	this.items[0].tooltip = 'Hide from map';
-											this.view = ! this.view ;
-							                return 'view';
+							                return 'hide';
 								        }
 										
 								    },
-								  handler: function(grid, rowIndex, colIndex, record, event){
-							 		 grid.store.reload();
-									 if ( this.view === false ){
+								  handler: function(grid, rowIndex, colIndex, column, event){
+									
+									var record = grid.getStore().getAt( rowIndex );
+									 
+									 visibility[ record.id ] = !  visibility[ record.id ];
+							 		 
+									 if ( visibility[ record.id ] ){
 										grid.fireEvent('show_on_map', grid, rowIndex, event);
 									 } else {
 										grid.fireEvent('hide_from_map', grid, rowIndex, event);
 									 }
+									
+								     grid.store.reload();
+									
 						             return false;
 								  }								
 								
@@ -921,7 +972,7 @@ LogbookPanel = Ext.extend(
 				        });
 					
 					this.bbar = new Ext.PagingToolbar({
-			            pageSize : 10,
+			            pageSize : 20,
 			            store : this.store,
 			            displayInfo: true
 			        });
@@ -929,7 +980,7 @@ LogbookPanel = Ext.extend(
 					LogbookPanel.superclass.initComponent.call(this, arguments);
 				},
 				select: function(feature){
-					if ( feature.attributes.logbookId ){
+					if ( feature.attributes.logbookId !== -1 ){
 						var store = this.getStore();
 						var record = store.getById( feature.attributes.logbookId );
 						var pos = store.indexOf(record);
@@ -940,8 +991,16 @@ LogbookPanel = Ext.extend(
 				},
 				unselect: function(feature){
 					this.getSelectionModel().clearSelections();
+					this.getStore().reload();
 				},
 				reload: function(feature){
+					
+					
+					if ( feature &&  feature.attributes.logbookId ){
+						this.visibility[ feature.attributes.logbookId ] = true;
+					}
+					
+					
 					var handler = function(){
 						this.select(feature);
 						this.getStore().un( 'load', handler);
@@ -951,6 +1010,12 @@ LogbookPanel = Ext.extend(
 				},
 				isReady: function(){
 					return ( this.getStore() != null && this.getStore() != undefined );
+				},
+				setShowOnMap: function( logbookId ){
+					var record = this.getStore().getById( logbookId );
+					this.visibility[ record.id ] = true;
+					grid.store.reload();
+					
 				}
 
 	});
@@ -978,6 +1043,17 @@ FeatureLayer = Ext.extend(Ext.util.Observable, {
 			}
 		}
 		return null;
+	},
+	
+	hasFeature: function( logbookId ){
+		var layer = this.getLayer();
+		for (var i=0; i<layer.features.length; i++){
+			var feature = layer.features[i];
+			if ( feature.attributes.logbookId && feature.attributes.logbookId == logbookId){
+				return true;
+			}
+		}
+		return false;
 	},
 	
 	addToMap: function( feature ){
@@ -1029,6 +1105,14 @@ FeatureLayer = Ext.extend(Ext.util.Observable, {
 		var modifier = this.getModifier();
 		selector.unselectAll();
 		modifier.deactivate();
+	},
+	unselectAll: function(){
+		this.bus.suspendEvents(false);
+		var selector = this.getSelector();
+		var modifier = this.getModifier();
+		selector.unselectAll();
+		modifier.deactivate();		
+		this.bus.resumeEvents();
 	},
 	update: function(feature){
 		var modifier = this.getModifier();
@@ -1090,11 +1174,12 @@ FeatureLayer = Ext.extend(Ext.util.Observable, {
 		var layer = this.getLayer();
 		var features = layer.selectedFeatures;
 		if (features.length == 0){
-			console.error('Cannot remove feature: no feature found.');
+			this.bus.resumeEvents();
+			// console.error('Cannot remove feature: no feature found.');
 			return;
 		} else if ( features.length > 1){
-			console.error('Cannot remove feature: too many features selected.');
-			return;
+			// console.error('Cannot remove feature: too many features selected.');
+			// return;
 		}		
 		layer.removeFeatures( layer.selectedFeatures );
 		this.bus.resumeEvents();
@@ -1105,7 +1190,7 @@ FeatureLayer = Ext.extend(Ext.util.Observable, {
 		var features = layer.features;
 		for (var i=0; i<features.length; i++){
 			var feature = features[i];
-			if ( feature.attributes.logbookId && feature.attributes.logbookId === logbookId ){
+			if ( feature.attributes.logbookId && feature.attributes.logbookId == logbookId ){
 				layer.removeFeatures( [ feature ] );
 				this.bus.resumeEvents();
 				return;
@@ -1273,7 +1358,8 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		});
 		this.note.addListener('logbook_select', this.notePanel.load, this.notePanel);
 		this.note.addListener('map_select', this.notePanel.load, this.notePanel);
-		// this.note.addListener('change', this.notePanel.load, this.notePanel);
+		// this.note.addListener('change', this.notePanel.load, this.notePanel); //
+		this.note.addListener('update', this.notePanel.load, this.notePanel); 
 		this.note.addListener('rewind', this.notePanel.load, this.notePanel);
 		this.note.addListener('unselect', this.notePanel.unload, this.notePanel);
 		this.note.addListener('remove', this.notePanel.unload, this.notePanel);
@@ -1309,20 +1395,29 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		});
 			
 		var pn = new Ext.Panel({
-			margins: '0 0 0 0 ',
-			// layout: "border",
+			// margins: '0 0 0 0 ',
+			layout: "fit",
+			flex:1,
+			width:'350',
+			viewConfig: {
+	            forceFit: true
+	        },
+			// layout: { type: 'vbox', pack: 'start', align: 'stretch' },
 			items:[
 				this.notePanel,
 				{
 					id:'logbook-panel',
-					xtype:'panel',
-					region:'south'
+					xtype:'panel'
 				}
 			]
 		});
+		
+		
+						
 					
 		this.panel = gxp.plugins.PilotNotes.superclass.addOutput.call(this, pn );
-
+		
+		
 		this.target.on("notefeatureselected", 
 			function selectFeature(container, feature){
 					if ( !feature.attributes.owner && ! Application.user.isGuest() ){
@@ -1344,7 +1439,8 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		this.target.on("notefeaturechanged", 
 			function changeFeature(container, feature){
 				// self.note.change( feature );
-				self.note.selectFromMap( feature );
+				// self.note.selectFromMap( feature );
+				self.note.update( feature );
 		});
 
 		this.target.on("notefeaturesaved", function saveFeature(container, feature){
@@ -1397,6 +1493,18 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 												}
 											}
 											root.note.selectFromLogbook( feature );
+											
+											root.layer.unselectAll();
+											
+											if ( root.logbookPanel.visibility[ record.id] ){
+												if ( root.layer.hasFeature( record.id )  ){
+													root.layer.select( feature );
+												} else {
+													root.layer.addToMap( feature );
+												}
+											}
+											
+											
 										}).execute();		
 									return true;						
 								}
@@ -1430,19 +1538,24 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 							}
 						}
 					}
-					var selectedRecord = grid.getSelectionModel().getSelected();
-					if ( selectedRecord && selectedRecord.id === record.id ){
-						root.layer.select( feature );
-					} else {
+					if ( ! root.layer.hasFeature( record.id )  ){
 						root.layer.addToMap( feature );
 					}
+					var selected = grid.getSelectionModel().getSelected();
+					if ( selected.id == record.id ){
+						root.layer.select( feature );			
+					}
+				
 					
 				}).execute();		
 			return true;		
 		}, this);
 		this.logbookPanel.on('hide_from_map', function show(grid, rowIndex, e){
 			var record = grid.getStore().getAt( rowIndex );
-			this.layer.removeByLogbookId( record.id);
+			if ( this.layer.hasFeature( record.id )  ){
+				this.layer.removeByLogbookId( record.id);
+			}
+			
 		}, this);
 	
 	},
@@ -1468,7 +1581,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 			self.store.load({
 		            params:{
 		                start: 0,
-		                limit: 5
+		                limit: 20
 		            }
 		        });
 			self.buildLogbookUI();
@@ -1505,7 +1618,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 						self.store.load({
 					            params:{
 					                start: 0,
-					                limit: 5
+					                limit: 20
 					            }
 					        });
 						self.buildLogbookUI();
@@ -1523,6 +1636,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 				}
 				
 				self.notePanel.refresh();
+				self.notePanel.operator.setValue( Application.user.username );
 				
 			} else {
 				Ext.Msg.show({
@@ -1561,12 +1675,16 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 
 	handleRemoveFromLogbook: function( feature ){
 		
+		var appMask = new Ext.LoadMask(Ext.getBody(), {msg:"Please wait, deleting..."});
+		appMask.show();
+		
 		
 		if ( feature.attributes.logbookId ){
 			var self = this;
 			this.logbook
 				.deleteByPk( feature.attributes.logbookId )
 				.failure( function(response){
+					appMask.hide();
 					Ext.Msg.show({
 						title: 'Cannot delete this note from logbook',
 						msg: response,
@@ -1575,14 +1693,16 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 					});				
 				})
 				.success( function(logbookId){
-					Ext.Msg.show({
+					appMask.hide();
+					/*Ext.Msg.show({
 						title: 'Note deleted',
 						msg: 'Note  deleted from logbook successfully',
 						buttons: Ext.Msg.OK,
 						icon: Ext.MessageBox.INFO
-					});		
+					});	*/	
 					
-							
+				   // update and disable		
+				   self.note.unselect();
 				}).execute();			
 		} else {
 			// this code should never be reached
@@ -1609,10 +1729,14 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		var self = this;
 		data.blob = kmlContent;
 		
+		var appMask = new Ext.LoadMask(Ext.getBody(), {msg:"Please wait, saving..."});
+		appMask.show();
+		
 		if ( !feature.attributes.logbookId || feature.attributes.logbookId === -1 ){
 			this.logbook
 				.create( data )
 				.failure( function(response){
+					appMask.hide();
 					Ext.Msg.show({
 						title: 'Cannot save this note on logbook',
 						msg: response,
@@ -1621,20 +1745,26 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 					});				
 				})
 				.success( function(logbookId){
-					Ext.Msg.show({
+					/* Ext.Msg.show({
 						title: 'Note saved',
 						msg: 'Note saved on logbook successfully',
 						buttons: Ext.Msg.OK,
 						icon: Ext.MessageBox.INFO
-					});		
+					});	*/	
 					
 					self.reload( feature, logbookId );
+					
+					appMask.hide();
+					
+					// set show on map = true
+					// self.logbookPanel.setShowOnMap( logbookId );
 							
 				}).execute();			
 		} else {
 			this.logbook
 				.update( feature.attributes.logbookId, data)
 				.failure( function(response){
+					appMask.hide();
 					Ext.Msg.show({
 						title: 'Cannot update this note on logbook',
 						msg: response,
@@ -1643,15 +1773,15 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 					});				
 				})
 				.success( function(logbookId){
-					Ext.Msg.show({
+					/*Ext.Msg.show({
 						title: 'Note updated',
 						msg: 'Note updated on logbook successfully',
 						buttons: Ext.Msg.OK,
 						icon: Ext.MessageBox.INFO
-					});		
+					});		*/
 					
 					self.reload( feature, feature.attributes.logbookId );
-					
+					appMask.hide();
 					
 				}).execute();
 		}
