@@ -42,6 +42,8 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 	
 	glidersFeatureType: null,
 	
+	creationPropertyName: null,
+	
 	glidersPrefix: null,
 	
 	wfsVersion: '1.1.0',
@@ -79,6 +81,8 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 			this.cruisePropertyName = this.target.vehicleSelector.cruisePropertyName;
 		if(!this.glidersFeatureType)
 			this.glidersFeatureType = this.target.vehicleSelector.glidersFeatureType;
+		if(!this.creationPropertyName)
+			this.creationPropertyName = this.target.vehicleSelector.creationPropertyName;
 		if(!this.glidersPrefix)
 			this.glidersPrefix = this.target.vehicleSelector.glidersPrefix;
 		if(!this.wfsVersion)
