@@ -41,10 +41,10 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 	applyText: 'Apply',
 	resetText: 'Reset',
 	settingColorTitle: 'Color',
-	settingColorTitle: 'Color',
 	//end i18n
 	
-	
+	wpsManager: null,
+        
 	spatialFilterOptions: {
             lonMax: 180,
             lonMin: -180,
@@ -52,11 +52,11 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
             latMin: -90
     },
 	securityLevels: [
-		'NATO UNCLASSIFIED',
-		'NATO RESTRICTED',
-		'NATO CONFIDENTIAL',
-		'NATO SECRET',
-		'NATO TOP SECRET'
+		'NATO_UNCLASSIFIED',
+		'NATO_RESTRICTED',
+		'NATO_CONFIDENTIAL',
+		'NATO_SECRET',
+		'NATO_TOP_SECRET'
 	],
 	
 	settingColor: 'FF0000',
@@ -125,15 +125,15 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 			layout: 'table',
 			autoWidth:true,
 			layoutConfig: {
-                columns: 3,
-				tableAttrs: {
-					style: {
-						width: '100%',
-						margin: '0 auto'
+                        columns: 3,
+			tableAttrs: {
+				style: {
+					width: '100%',
+					margin: '0 auto'
 						
-					}
 				}
-            },
+			}
+                },
 			bodyStyle: 'text-align:center;margin:0 auto;table-layout:auto',
 			bodyCssClass: 'spm-center',			
 			items: [
@@ -246,14 +246,102 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 						iconCls:'icon-attribute-apply',
 						text: this.applyText,
 						handler: function(){
-							//TODO
-							Ext.Msg.show({
-								title: "SPM Creation",
-								msg: "Not implemented yet!",
-								buttons: Ext.Msg.OK,
-								icon: Ext.Msg.INFO
-							});
-						}
+                                                    if(this.spmCreateForm.getForm().isValid()){
+                                                        var today = new Date();
+                                                    var currentDate= today.getFullYear() + "-" + (today.getMonth()+1) + "-" +today.getDate();
+
+                                                    var wps = this.target.tools[this.wpsManager];
+                                                    var formValues=this.spmCreateForm.getForm().getFieldValues(true);
+                                                    
+                                                    var lat=this.latitudeField.getValue();
+                                                    var lon=this.longitudeField.getValue();
+                                        
+                                                    var requestObj={
+                                                            /* storeExecuteResponse: false,
+                                                                lineage:  false,
+                                                                status: false,*/
+                                                                type: "raw",
+                                                                inputs:{
+                                                                    octaveExecutablePath: new OpenLayers.WPSProcess.LiteralData({
+                                                                                        value:spm.octaveExecutablePath
+                                                                    }),
+                                                                    octaveConfigFilePath: new OpenLayers.WPSProcess.LiteralData({
+                                                                                        value:spm.octaveConfigFilePath
+                                                                    }),
+                                                                    userId: new OpenLayers.WPSProcess.LiteralData({
+                                                                                        value:spm.userId
+                                                                    }),
+                                                                    
+                                                                    outputUrl: new OpenLayers.WPSProcess.LiteralData({
+                                                                                        value:spm.outputUrl
+                                                                    }),
+                                                                    runBegin: new OpenLayers.WPSProcess.LiteralData({
+                                                                                        value:currentDate
+                                                                    }),
+                                                                    runEnd: new OpenLayers.WPSProcess.LiteralData({
+                                                                                        value:currentDate
+                                                                    }),
+                                                                    itemStatus: new OpenLayers.WPSProcess.LiteralData({
+                                                                                        value:spm.itemStatus
+                                                                    }),
+                                                                    itemStatusMessage: new OpenLayers.WPSProcess.LiteralData({
+                                                                                        value:spm.itemStatusMessage
+                                                                    }),
+                                                                    wsName: new OpenLayers.WPSProcess.LiteralData({
+                                                                                        value:spm.wsName
+                                                                    }),
+                                                                    storeName: new OpenLayers.WPSProcess.LiteralData({
+                                                                                        value:spm.storeName
+                                                                    }),
+                                                                    layerName: new OpenLayers.WPSProcess.LiteralData({
+                                                                                        value:spm.layerName
+                                                                    }),
+                                                                    securityLevel: new OpenLayers.WPSProcess.LiteralData({
+                                                                                        value:this.securityLevelCombo.getValue()
+                                                                    }),
+                                                                    srcPath: new OpenLayers.WPSProcess.LiteralData({
+                                                                                        value:spm.srcPath
+                                                                    }),
+                                                                    season: new OpenLayers.WPSProcess.LiteralData({
+                                                                         value:this.seasonCombo.getValue().toLowerCase()
+                                                                    })
+                                                                },
+                                                                outputs: [{
+                                                                    identifier: "result",
+                                                                    mimeType: "text/xml; subtype=wfs-collection/1.0"
+                                                                    //asReference: true,
+                                                                    //type: "raw"
+                                                                }]
+                                                            };
+                                                    
+                                                    if(formValues["sourcepressurelevel"])
+                                                        requestObj.inputs.srcPressureLevel= new OpenLayers.WPSProcess.LiteralData({
+                                                                    value:formValues["sourcepressurelevel"]
+                                                        });
+                                                    
+                                                    if(formValues["sourcefrequency"])
+                                                        requestObj.inputs.srcFrequency= new OpenLayers.WPSProcess.LiteralData({
+                                                                    value:formValues["sourcefrequency"]
+                                                        });
+                                                    
+                                                   
+                                                    if(formValues["modelname"])
+                                                        requestObj.inputs.name= new OpenLayers.WPSProcess.LiteralData({
+                                                                    value:formValues["modelname"]
+                                                        });
+                                                    
+                                                    
+                                                    if(lat!="" && lon!="")
+                                                         requestObj.inputs.footprint=new OpenLayers.WPSProcess.ComplexData({
+                                                             value: "POINT("+lon+" "+lat+")",
+                                                             mimeType: "text/xml; subtype=gml/3.1.1"
+                                                    });
+                                                
+                                                    var executeInstance=wps.execute("gs:IDASoundPropagationModel",requestObj); 
+                                                    }
+                                                           
+						},
+                                                scope: this
 					},
 					{
 						xtype: 'button',
