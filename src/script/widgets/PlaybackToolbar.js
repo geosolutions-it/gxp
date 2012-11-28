@@ -75,6 +75,8 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
     stopTooltip:'Stop',
     fastforwardLabel:'FFWD',
     fastforwardTooltip:'Double Speed Playback',
+    backLabel:'Back',
+    backTooltip:'Draw back One Frame',    
     nextLabel:'Next',
     nextTooltip:'Advance One Frame',
     resetLabel:'Reset',
@@ -91,7 +93,7 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
      */
     initComponent: function() {
         if(!this.playbackActions){
-            this.playbackActions = ["settings","slider","reset","play","fastforward","next","loop"]; 
+            this.playbackActions = ["settings","slider","back","next","play","fastforward","loop"]; 
         }
         if(!this.control){
             this.control = this.buildTimeManager();
@@ -213,7 +215,34 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
         return items;
     },
 
+	disable: function(){
+		//this.btnPlay.disable();
+		this.btnNext.disable();
+		/*this.btnLoop.disable();
+		this.btnFastforward.disable();
+		this.slider.disable();
+        this.slider.sliderTip.hide();
+        this.btnSettings.disable();
+        this.btnCurrentTime.disable();
+        this.btnBack.disable();*/
+	},
+	
+	enable: function(){
+		//this.btnPlay.enable();
+		this.btnNext.enable();
+		/*this.btnLoop.enable();
+        if(this.btnFastforward.active){
+            this.btnFastforward.enable();
+        }
+		this.slider.enable();
+        this.slider.sliderTip.show();
+        this.btnSettings.enable();
+        this.btnCurrentTime.enable();
+        this.btnBack.enable();*/
+	},
+    
     getAvailableTools: function(){         
+	var ctl = this.control;
         var tools = {
             'slider': {
                 xtype: 'gxp_timeslider',
@@ -258,10 +287,24 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
                 menuText: this.playLabel,
                 text: (this.labelButtons) ? this.playLabel : false
             },
+            'back': {
+                iconCls: 'gxp-icon-back',
+                ref:'btnBack',
+                handler: function(){
+                    ctl.stepType = "back";                     
+                    this.stop();
+                    this.tick();
+                },
+                scope: this.control,
+                tooltip: this.backTooltip,
+                menuText: this.backLabel,
+                text: (this.labelButtons) ? this.backLabel : false
+            },
             'next': {
                 iconCls: 'gxp-icon-next',
                 ref:'btnNext',
                 handler: function(){
+                    ctl.stepType = "next";                    
                     this.stop();
                     this.tick();
                 },
@@ -393,6 +436,10 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
         //DON'T DROP FRAMES
         //this.controlConfig.maxFrameDelay = NaN;
         var ctl = this.control = new OpenLayers.Control.TimeManager(this.controlConfig);
+		if (!ctl.toolbar){
+			ctl.toolbar = this;
+		}
+	
         ctl.loop = this.looped;
         this.mapPanel.map.addControl(ctl);
         if(ctl.layers) {
@@ -424,11 +471,12 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
                 }
             });
             btn.bound=true;
-        }
+        }       
         
         if(pressed){
             if(!this.control.timer){
                 //don't start playing again if it is already playing
+                this.control.stepType = "play";
                 this.control.play();
             }
             btn.btnEl.removeClass('gxp-icon-play');
@@ -458,7 +506,7 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
         }
     },
     toggleDoubleSpeed:function(btn,pressed){
-        var framerate = this.control.frameRate * ((pressed) ? 2 : 0.5);
+        var framerate = this.control.frameRate / ((pressed) ? 2 : 0.5);
         this.control.setFrameRate(framerate);
         btn.setTooltip((pressed) ? this.normalTooltip : this.fastforwardTooltip);
     },

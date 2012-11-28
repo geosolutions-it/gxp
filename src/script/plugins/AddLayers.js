@@ -272,6 +272,25 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
                         layerStore.insert(0, [record]);
                     } else {
                         layerStore.add([record]);
+
+                        if(records.length == 1){
+				var layer = record.get('layer');
+				var extent = layer.restrictedExtent || layer.maxExtent || app.mapPanel.map.maxExtent;
+				var map = app.mapPanel.map;
+
+				// respect map properties
+				var restricted = map.restrictedExtent || map.maxExtent;
+				if (restricted) {
+				    extent = new OpenLayers.Bounds(
+				        Math.max(extent.left, restricted.left),
+				        Math.max(extent.bottom, restricted.bottom),
+				        Math.min(extent.right, restricted.right),
+				        Math.min(extent.top, restricted.top)
+				    );
+				}
+
+				map.zoomToExtent(extent, true);
+			}
                     }
                 }
             }

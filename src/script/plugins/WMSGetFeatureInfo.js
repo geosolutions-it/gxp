@@ -147,11 +147,12 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
                     layers: [layer],
                     infoFormat: infoFormat,
                     vendorParams: vendorParams,
+                    maxFeatures: 100,
                     eventListeners: {
                         getfeatureinfo: function(evt) {
                             var title = x.get("title") || x.get("name");
                             if (infoFormat == "text/html") {
-                                var match = evt.text.match(/<body[^>]*>([\s\S]*)<\/body>/);
+                                var match = evt.text.match(/<html[^>]*>([\s\S]*)<\/html>/);
                                 if (match && !match[1].match(/^\s*$/)) {
                                     this.displayPopup(evt, title, match[1]);
                                 }
@@ -200,7 +201,7 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
                 autoScroll: true,
                 location: evt.xy,
                 map: this.target.mapPanel,
-                width: 250,
+                width: 400,
                 height: 300,
                 defaults: {
                     layout: "fit",

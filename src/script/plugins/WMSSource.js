@@ -168,6 +168,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
      *  ``Array(String)`` List of config properties that are required for a
      *  complete layer configuration, in addition to ``name``.
      */
+    //requiredProperties: ["title", "bbox"],
     requiredProperties: ["title", "bbox"],
     
     /** private: method[constructor]
@@ -272,8 +273,8 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
             baseParams.VERSION = this.version;
         }
 
-        var lazy = this.isLazy();
-        
+        var lazy = false;  //this.isLazy();
+
         this.store = new GeoExt.data.WMSCapabilitiesStore({
             // Since we want our parameters (e.g. VERSION) to override any in the 
             // given URL, we need to remove corresponding paramters from the 
@@ -409,7 +410,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
         config.srs = {};
         config.srs[srs] = true;
         
-        var bbox = config.bbox || this.target.map.maxExtent;
+        var bbox = config.bbox || this.target.map.maxExtent || OpenLayers.Projection.defaults[srs].maxExtent;
         config.bbox = {};
         config.bbox[srs] = {bbox: bbox};
         
@@ -424,6 +425,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
             config.url || this.url, {
                 layers: config.name,
                 transparent: "transparent" in config ? config.transparent : true,
+                cql_filter: config.cql_filter,
                 format: config.format
             }, {
                 projection: srs
@@ -490,15 +492,29 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
                     }
                 }
             }
+
+				var params = Ext.applyIf({
+	                STYLES: config.styles,
+	                FORMAT: config.format,
+	                TRANSPARENT: config.transparent,
+	                CQL_FILTER: config.cql_filter,
+					ELEVATION: config.elevation
+	            }, this.layerBaseParams);
+			
+			
             
+			
+
+			
             // update params from config
-            layer.mergeNewParams({
+			layer.mergeNewParams(params);
+			
+            /*layer.mergeNewParams({
                 STYLES: config.styles,
                 FORMAT: config.format,
                 TRANSPARENT: config.transparent,
-                ELEVATION: config.elevation,
-                TIME: config.time
-            });
+                CQL_FILTER: config.cql_filter
+            });*/
             
             var singleTile = false;
             if ("tiled" in config) {
@@ -521,7 +537,11 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
                 opacity: ("opacity" in config) ? config.opacity : 1,
                 buffer: ("buffer" in config) ? config.buffer : 1,
                 dimensions: original.data.dimensions,
-                transitionEffect: singleTile ? 'resize' : null
+                transitionEffect: singleTile ? 'resize' : null,
+		//transitionEffect: null, //singleTile ? 'resize' : null,
+                minScale: config.minscale,
+                maxScale: config.maxscale,
+				displayInLayerSwitcher: ("displayInLayerSwitcher" in config) ? config.displayInLayerSwitcher : true
             });
             
             // data for the new record
@@ -562,7 +582,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
             record.json = config;
 
         } else {
-            if (window.console) {
+            if (window.console && this.store.getCount() > 0) {
                 console.warn("Could not create layer record for layer '" + config.name + "'. Check if the layer is found in the WMS GetCapabilities response.");
             }
         }
@@ -823,7 +843,8 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
                 record.json
             ),
             layer = record.getLayer(),
-            params = layer.params;
+            params = layer.params,
+            options = layer.options;
         var name = config.name,
             raw = this.store.reader.raw;
         if (raw) {
@@ -848,7 +869,11 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
         return Ext.apply(config, {
             format: params.FORMAT,
             styles: params.STYLES,
-            transparent: params.TRANSPARENT
+            transparent: params.TRANSPARENT,
+            cql_filter: params.CQL_FILTER,
+            minscale: options.minScale,
+            maxscale: options.maxScale,
+            infoFormat: record.get("infoFormat")
         });
     },
     

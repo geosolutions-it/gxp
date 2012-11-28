@@ -194,6 +194,8 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
              *  Fires when application is ready for user interaction.
              */
             "ready",
+
+			"timemanager",
             
             /** api: event[portalready]
              *  Fires after the portal is initialized.
@@ -402,11 +404,11 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
         var source;
         var config = options.config;
         config.id = id;
+         
         try {
             source = Ext.ComponentMgr.createPlugin(
                 config, this.defaultSourceType
             );
-            
             //
             // Setting the id of the source in order to add a new source and a new layer dinamically (no AddLayer plugin).
             // (by default this id is only for the conresponding element inside the ext sources combobox).
@@ -420,6 +422,7 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
                 fn: function() {
                     var callback = options.callback || Ext.emptyFn;
                     callback.call(options.scope || this, id);
+                                                    
                 },
                 scope: this,
                 single: true
@@ -435,8 +438,9 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
             }
         });
         this.layerSources[id] = source;
+
         source.init(this);
-        
+
         return source;
     },
     
@@ -466,7 +470,8 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
                     new OpenLayers.Control.Navigation({zoomWheelOptions: {interval: 250}}),
                     new OpenLayers.Control.PanPanel(),
                     new OpenLayers.Control.ZoomPanel(),
-                    new OpenLayers.Control.Attribution()
+                    new OpenLayers.Control.Attribution(),
+                    new OpenLayers.Control.LoadingPanel()
                 ],
                 maxExtent: mapConfig.maxExtent && OpenLayers.Bounds.fromArray(mapConfig.maxExtent),
                 restrictedExtent: mapConfig.restrictedExtent && OpenLayers.Bounds.fromArray(mapConfig.restrictedExtent),
@@ -561,7 +566,7 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
     initPortal: function() {
         
         var config = this.portalConfig || {};
-        var Constructor = ( config.renderTo || this.renderToTab ) ? Ext.Panel : Ext.Viewport;        
+        var Constructor = ( config.renderTo || this.renderToTab) ? Ext.Panel : Ext.Viewport;        
         
         if (this.portalItems.length === 0) {
             this.mapPanel.region = "center";
@@ -578,8 +583,60 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
                 items: this.portalItems
             }
         }));
+
+         if(this.appType == "default"){
+            var portalContainer = Ext.getCmp(this.renderToTab);
+            portalContainer.add(this.portal);
+            portalContainer.doLayout();
+            portalContainer.setActiveTab(1);
+                        
+            //Ext.getCmp('west').collapse();
+            
+            var map = this.mapPanel.map;
+            var activeTab = portalContainer.getActiveTab();
+            app.on({
+              'portalready' : function(){
+                activeTab.addListener("activate", function(){
+                    Ext.getCmp('west').expand();
+
+                    map.size.w += 1;
+                    map.updateSize();
+                    map.size.w -= 1;
+                    map.updateSize();
+                });
+                
+                portalContainer.setActiveTab(1);
+              }
+            });
+        }
         
-        if(this.renderToTab){
+        if(this.appType == "public"){
+            var portalContainer = Ext.getCmp(this.renderToTab);
+            portalContainer.add(this.portal);
+            portalContainer.doLayout();
+            portalContainer.setActiveTab(1);
+                        
+            Ext.getCmp('west').collapse();
+            
+            var map = this.mapPanel.map;
+            var activeTab = portalContainer.getActiveTab();
+            app.on({
+              'portalready' : function(){
+                activeTab.addListener("activate", function(){
+                    Ext.getCmp('west').expand();
+
+                    map.size.w += 1;
+                    map.updateSize();
+                    map.size.w -= 1;
+                    map.updateSize();
+                });
+                
+                portalContainer.setActiveTab(0);
+              }
+            });
+        }
+        
+        if(this.appType == "private"){
             var portalContainer = Ext.getCmp(this.renderToTab);
             portalContainer.add(this.portal);
             portalContainer.doLayout();
