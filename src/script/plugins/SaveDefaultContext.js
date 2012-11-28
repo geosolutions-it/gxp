@@ -74,7 +74,7 @@ gxp.plugins.SaveDefaultContext = Ext.extend(gxp.plugins.Tool, {
 					//var auth='Basic ' + Base64.encode(this.user+":"+this.pass);					
 					Ext.Ajax.request({
 						//** REMOVE USER AND PASS IN URL WHEN PROXY WILL SUPPORT BASIC AUTH **//
-						url: proxy + server + "exist/rest/mapadmin/context.xml",
+						url:  server + "exist/rest/mapadmin/context.xml",
 						headers: {
 							'Authorization' : this.target.auth
 						},
