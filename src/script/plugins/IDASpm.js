@@ -338,6 +338,9 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                                                     });
                                                 
                                                     var executeInstance=wps.execute("gs:IDASoundPropagationModel",requestObj); 
+                                                    
+                                                    Ext.getCmp('south').expand();
+                                                    Ext.getCmp(this.outputTarget).setActiveTab(wfsGrid);
                                                     }
                                                            
 						},
