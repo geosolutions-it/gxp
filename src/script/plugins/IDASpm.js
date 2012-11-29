@@ -92,6 +92,10 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 					  this.selectLonLat.activate();
 				  }else{					
 					  this.selectLonLat.deactivate();
+					    var layer = map.getLayersByName("spm_source")[0];	
+						if(layer){
+							map.removeLayer(layer);
+						}
 				  }
 			  }
 			}
@@ -434,8 +438,8 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 			map.removeLayer(layer);
 		}
 		
-		var cp = Ext.getCmp("SPMCreateColorPicker");
-		var color = "#"+ cp.getValue();
+		//var cp = Ext.getCmp("SPMCreateColorPicker");
+		var color = "#E8C31C"; //cp.getValue();
 		var style = new OpenLayers.Style({
 			pointRadius: 4, // sized according to type attribute
 			graphicName: "circle",
