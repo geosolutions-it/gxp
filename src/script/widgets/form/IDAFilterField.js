@@ -45,11 +45,11 @@ gxp.form.IDAFilterField = Ext.extend(Ext.form.CompositeField, {
      */
     coveragesComboConfig: null,
 	
-	baseURL: "http://localhost:8080/geoserver",
+	baseURL: null,
 	
 	version: "1.1.1",
 	
-	proxy: "/proxy/?url=",
+	proxy: null,
 	
 	coveragesSettings: [],
 	
@@ -65,14 +65,33 @@ gxp.form.IDAFilterField = Ext.extend(Ext.form.CompositeField, {
         // TODO Assume that the AttributeStore is already loaded and always
         // create a new one without geometry fields.
         var mode = "remote";
+		
+		//
+		// Check domain for proxy
+		//
+		if(!this.baseURL || !this.proxy){
+			Ext.Msg.show({
+				title: "Layer Attribute Exception",
+				msg: "The geoserver base URL  or proxy are undefined! Check your 'risk_data' property configuration.",
+				buttons: Ext.Msg.OK,
+				icon: Ext.Msg.ERROR
+			});
+		}
+		
+		var pattern = /(.+:\/\/)?([^\/]+)(\/.*)*/i;
+        var mHost = pattern.exec(this.baseURL);
+
+        var mUrl = this.baseURL + "/ows?service=wcs&" + this.version + "&request=GetCapabilities";
+		
 		var coverages = new Ext.data.Store({
 			reader : new WCSCapabilitiesReader({
 				fields: ['name']
 			}),
 			autoLoad : true,
 			proxy: new Ext.data.HttpProxy({
-                url: (this.proxy ? this.proxy : "") + encodeURIComponent(this.baseURL + "/ows?service=wcs&" + this.version + "&request=GetCapabilities"),
-                timeout: 60,
+                //url: (this.proxy ? this.proxy : "") + encodeURIComponent(this.baseURL + "/ows?service=wcs&" + this.version + "&request=GetCapabilities"),
+                url: mHost[2] == location.host ? mUrl : (this.proxy ? this.proxy : "") + encodeURIComponent(mUrl),
+				timeout: 60,
                 method: 'GET'
             })
 		});

@@ -33,10 +33,10 @@ gxp.plugins.IDASearch = Ext.extend(gxp.plugins.Tool, {
     // End i18n.
     
     spatialFilterOptions: {
-            lonMax: 20037508.34,   //90,
-            lonMin: -20037508.34,  //-90,
-            latMax: 20037508.34,   //180,
-            latMin: -20037508.34  //-180
+		lonMax: 20037508.34,   //90,
+		lonMin: -20037508.34,  //-90,
+		latMax: 20037508.34,   //180,
+		latMin: -20037508.34  //-180
     },
     
     toggleGroup: null,
