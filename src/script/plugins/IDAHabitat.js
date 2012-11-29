@@ -24,7 +24,7 @@ gxp.plugins.IDAHabitat = Ext.extend(gxp.plugins.Tool, {
 
     title: "Habitat",
     
-    buttonLinkIconPath: '../theme/app/img/silk/world_link.png',  
+    buttonLinkIconPath: 'theme/app/img/silk/world_link.png',  
 	
     /** private: method[constructor]
      *  :arg config: ``Object``

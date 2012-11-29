@@ -24,7 +24,7 @@ gxp.plugins.IDAMmDatabase = Ext.extend(gxp.plugins.Tool, {
 
     title: "Marine mammal DB",
     
-    buttonLinkIconPath: '../theme/app/img/silk/world_link.png',  
+    buttonLinkIconPath: 'theme/app/img/silk/world_link.png',  
 	
     /** private: method[constructor]
      *  :arg config: ``Object``

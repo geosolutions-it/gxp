@@ -55,7 +55,7 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 		// The attributes conrespont to the IDA raste layers (SPM + Habitat)
 		// TODO - If/When  possible make it as remote (store/reader) 
 		baseURL: "http://localhost:8080/",
-		proxy: "/proxy/?url=",
+		//proxy: "/proxy/?url=",
 		allowBlank: true,
 		allowGroups: true
 	},
@@ -137,9 +137,11 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 		};
 		
 		var params = this.defaultBuilder;
-		params.proxy = this.target.riskData.urlParameters.proxy ? this.target.riskData.urlParameters.proxy : this.target.proxy;
-		if(this.target.riskData.urlParameters.capabilitiesURL)
-			params.baseURL = this.target.riskData.urlParameters.capabilitiesURL;
+		params.proxy = this.target.proxy;
+		
+		if(this.target.riskData.urlParameters.geoserverURL)
+			params.baseURL = this.target.riskData.urlParameters.geoserverURL;
+		
 		if(this.target.riskData.coveragesSettings)
 			params.coveragesSettings = this.target.riskData.coveragesSettings;
 		

@@ -1,4 +1,3 @@
-
 /**
  * @requires plugins/Tool.js
  */
@@ -37,10 +36,10 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 	modelnameLabel : 'Model Name',
 	pointSelectionButtionTip: 'Enable Point Selection',
 	seasonLabelText: 'Season',
-	securityLevelLabelText : 'Security Level',
+	//securityLevelLabelText : 'Security Level',
 	applyText: 'Apply',
 	resetText: 'Reset',
-	settingColorTitle: 'Color',
+	//settingColorTitle: 'Color',
 	//end i18n
 	
 	wpsManager: null,
@@ -51,13 +50,14 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
             latMax: 90,
             latMin: -90
     },
-	securityLevels: [
+	
+	/*securityLevels: [
 		'NATO_UNCLASSIFIED',
 		'NATO_RESTRICTED',
 		'NATO_CONFIDENTIAL',
 		'NATO_SECRET',
 		'NATO_TOP_SECRET'
-	],
+	],*/
 	
 	settingColor: 'FF0000',
     /** private: method[constructor]
@@ -125,15 +125,14 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 			layout: 'table',
 			autoWidth:true,
 			layoutConfig: {
-                        columns: 3,
-			tableAttrs: {
-				style: {
-					width: '100%',
-					margin: '0 auto'
-						
+                columns: 3,
+				tableAttrs: {
+					style: {
+						width: '100%',
+						margin: '0 auto'	
+					}
 				}
-			}
-                },
+            },
 			bodyStyle: 'text-align:center;margin:0 auto;table-layout:auto',
 			bodyCssClass: 'spm-center',			
 			items: [
@@ -151,9 +150,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 					items: [this.longitudeField]
 				}
 			]
-			
 		});
-	
 	
 		//create the click control
 		OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {                
@@ -184,11 +181,9 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 			map:map,
 			spmPanel:this
 		});
-		
-		
-		
-		 this.selectLonLat = new OpenLayers.Control.Click();
-		 map.addControl(this.selectLonLat);
+
+		this.selectLonLat = new OpenLayers.Control.Click();
+		map.addControl(this.selectLonLat);
 		
 		// season combo
 		this.seasonCombo = new Ext.form.ComboBox({
@@ -206,7 +201,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 			value:  this.springText
 		});
 
-		this.securityLevelCombo=  new Ext.form.ComboBox({
+		/*this.securityLevelCombo=  new Ext.form.ComboBox({
 			width: 150,
 			allowBlank: false,
 			forceSelection: true,
@@ -218,9 +213,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 			store:  this.securityLevels,
 			
 			value: this.securityLevels[0]
-		});
-		
-		
+		});*/
 		
 		//
 		// whole form
@@ -228,117 +221,111 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 		this.spmCreateForm = new Ext.form.FormPanel({
 			region:'center',
 			layout: "form",
-
-			
 			frame: false,
 			autoScroll:true,
-			
 			bodyStyle: "padding: 5px",
 			defaults:{
 				labelStyle: 'width:170px;',
-				width: 150
-				
-			 },
-			 bbar: new Ext.Toolbar({
+				width: 150	
+			},
+			bbar: new Ext.Toolbar({
 				items:['->',
 					{
 						xtype: 'button',
 						iconCls:'icon-attribute-apply',
 						text: this.applyText,
 						handler: function(){
-                                                    if(this.spmCreateForm.getForm().isValid()){
-                                                        var today = new Date();
-                                                    var currentDate= today.getFullYear() + "-" + (today.getMonth()+1) + "-" +today.getDate();
+							if(this.spmCreateForm.getForm().isValid()){
+								var today = new Date();
+								var currentDate= today.getFullYear() + "-" + (today.getMonth()+1) + "-" +today.getDate();
 
-                                                    var wps = this.target.tools[this.wpsManager];
-                                                    var formValues=this.spmCreateForm.getForm().getFieldValues(true);
-                                                    
-                                                    var lat=this.latitudeField.getValue();
-                                                    var lon=this.longitudeField.getValue();
-                                        
-                                                    var requestObj={
-                                                            /* storeExecuteResponse: false,
-                                                                lineage:  false,
-                                                                status: false,*/
-                                                                type: "raw",
-                                                                inputs:{
-                                                                    octaveExecutablePath: new OpenLayers.WPSProcess.LiteralData({
-                                                                                        value:spm.octaveExecutablePath
-                                                                    }),
-                                                                    octaveConfigFilePath: new OpenLayers.WPSProcess.LiteralData({
-                                                                                        value:spm.octaveConfigFilePath
-                                                                    }),
-                                                                    userId: new OpenLayers.WPSProcess.LiteralData({
-                                                                                        value:spm.userId
-                                                                    }),
-                                                                    
-                                                                    outputUrl: new OpenLayers.WPSProcess.LiteralData({
-                                                                                        value:spm.outputUrl
-                                                                    }),
-                                                                    runBegin: new OpenLayers.WPSProcess.LiteralData({
-                                                                                        value:currentDate
-                                                                    }),
-                                                                    runEnd: new OpenLayers.WPSProcess.LiteralData({
-                                                                                        value:currentDate
-                                                                    }),
-                                                                    itemStatus: new OpenLayers.WPSProcess.LiteralData({
-                                                                                        value:spm.itemStatus
-                                                                    }),
-                                                                    itemStatusMessage: new OpenLayers.WPSProcess.LiteralData({
-                                                                                        value:spm.itemStatusMessage
-                                                                    }),
-                                                                    wsName: new OpenLayers.WPSProcess.LiteralData({
-                                                                                        value:spm.wsName
-                                                                    }),
-                                                                    storeName: new OpenLayers.WPSProcess.LiteralData({
-                                                                                        value:spm.storeName
-                                                                    }),
-                                                                    layerName: new OpenLayers.WPSProcess.LiteralData({
-                                                                                        value:spm.layerName
-                                                                    }),
-                                                                    securityLevel: new OpenLayers.WPSProcess.LiteralData({
-                                                                                        value:this.securityLevelCombo.getValue()
-                                                                    }),
-                                                                    srcPath: new OpenLayers.WPSProcess.LiteralData({
-                                                                                        value:spm.srcPath
-                                                                    }),
-                                                                    season: new OpenLayers.WPSProcess.LiteralData({
-                                                                         value:this.seasonCombo.getValue().toLowerCase()
-                                                                    })
-                                                                },
-                                                                outputs: [{
-                                                                    identifier: "result",
-                                                                    mimeType: "text/xml; subtype=wfs-collection/1.0"
-                                                                    //asReference: true,
-                                                                    //type: "raw"
-                                                                }]
-                                                            };
-                                                    
-                                                    if(formValues["sourcepressurelevel"])
-                                                        requestObj.inputs.srcPressureLevel= new OpenLayers.WPSProcess.LiteralData({
-                                                                    value:formValues["sourcepressurelevel"]
-                                                        });
-                                                    
-                                                    if(formValues["sourcefrequency"])
-                                                        requestObj.inputs.srcFrequency= new OpenLayers.WPSProcess.LiteralData({
-                                                                    value:formValues["sourcefrequency"]
-                                                        });
-                                                    
-                                                   
-                                                    if(formValues["modelname"])
-                                                        requestObj.inputs.name= new OpenLayers.WPSProcess.LiteralData({
-                                                                    value:formValues["modelname"]
-                                                        });
-                                                    
-                                                    
-                                                    if(lat!="" && lon!="")
-                                                         requestObj.inputs.footprint=new OpenLayers.WPSProcess.ComplexData({
-                                                             value: "POINT("+lon+" "+lat+")",
-                                                             mimeType: "text/xml; subtype=gml/3.1.1"
-                                                    });
-                                                
-                                                    var executeInstance=wps.execute("gs:IDASoundPropagationModel",requestObj); 
-                                                    }
+								var wps = this.target.tools[this.wpsManager];
+								var formValues=this.spmCreateForm.getForm().getFieldValues(true);
+								
+								var lat=this.latitudeField.getValue();
+								var lon=this.longitudeField.getValue();
+					
+								var requestObj = {
+									/*storeExecuteResponse: false,
+									lineage:  false,
+									status: false,*/
+									type: "raw",
+									inputs:{
+										octaveExecutablePath: new OpenLayers.WPSProcess.LiteralData({
+															value:spm.octaveExecutablePath
+										}),
+										octaveConfigFilePath: new OpenLayers.WPSProcess.LiteralData({
+															value:spm.octaveConfigFilePath
+										}),
+										userId: new OpenLayers.WPSProcess.LiteralData({
+															value:spm.userId
+										}),
+										
+										outputUrl: new OpenLayers.WPSProcess.LiteralData({
+															value:spm.outputUrl
+										}),
+										runBegin: new OpenLayers.WPSProcess.LiteralData({
+															value:currentDate
+										}),
+										runEnd: new OpenLayers.WPSProcess.LiteralData({
+															value:currentDate
+										}),
+										itemStatus: new OpenLayers.WPSProcess.LiteralData({
+															value:spm.itemStatus
+										}),
+										itemStatusMessage: new OpenLayers.WPSProcess.LiteralData({
+															value:spm.itemStatusMessage
+										}),
+										wsName: new OpenLayers.WPSProcess.LiteralData({
+															value:spm.wsName
+										}),
+										storeName: new OpenLayers.WPSProcess.LiteralData({
+															value:spm.storeName
+										}),
+										layerName: new OpenLayers.WPSProcess.LiteralData({
+															value:spm.layerName
+										}),
+										/*securityLevel: new OpenLayers.WPSProcess.LiteralData({
+															value:this.securityLevelCombo.getValue()
+										}),*/
+										srcPath: new OpenLayers.WPSProcess.LiteralData({
+															value:spm.srcPath
+										}),
+										season: new OpenLayers.WPSProcess.LiteralData({
+											 value:this.seasonCombo.getValue().toLowerCase()
+										})
+									},
+									outputs: [{
+										identifier: "result",
+										mimeType: "text/xml; subtype=wfs-collection/1.0"
+										//asReference: true,
+										//type: "raw"
+									}]
+								};
+								
+								if(formValues["sourcepressurelevel"])
+									requestObj.inputs.srcPressureLevel= new OpenLayers.WPSProcess.LiteralData({
+												value:formValues["sourcepressurelevel"]
+									});
+								
+								if(formValues["sourcefrequency"])
+									requestObj.inputs.srcFrequency= new OpenLayers.WPSProcess.LiteralData({
+												value:formValues["sourcefrequency"]
+									});
+
+								if(formValues["modelname"])
+									requestObj.inputs.name= new OpenLayers.WPSProcess.LiteralData({
+												value:formValues["modelname"]
+									});
+
+								if(lat!="" && lon!="")
+									 requestObj.inputs.footprint=new OpenLayers.WPSProcess.ComplexData({
+										 value: "POINT("+lon+" "+lat+")",
+										 mimeType: "text/xml; subtype=gml/3.1.1"
+								});
+							
+								var executeInstance=wps.execute("gs:IDASoundPropagationModel",requestObj); 
+							}
                                                            
 						},
                                                 scope: this
@@ -362,10 +349,10 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 			items: [
 				/*     
 				{	
-						region:'north',
-						xtype:'panel',
-						html:'<div>'+this.soundPropagationModelParamText+'</div>',
-						bodyStyle:'margin:5px;padding:5px'
+					region:'north',
+					xtype:'panel',
+					html:'<div>'+this.soundPropagationModelParamText+'</div>',
+					bodyStyle:'margin:5px;padding:5px'
 				},
 				*/
 				this.lonLatFieldSet,
@@ -381,7 +368,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 					 },
 					items:[
 						this.seasonCombo,
-						 {
+						/*{
 							name: 'color',
 							xtype: 'colorpickerfield',
 							id: 'SPMCreateColorPicker',
@@ -389,12 +376,11 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 							name: this.settingColorTitle,
 							editable: false,
 							value: this.settingColor
-						},
+						},*/
 						{
 							fieldLabel: this.sourcedepthLabel,
 							name: 'sourcedepth',
 							allowBlank:false
-
 						},{
 							fieldLabel: this.sourcefrequencyLabel,
 							name: 'sourcefrequency',
@@ -408,13 +394,13 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 							name: 'modelname',
 							xtype: 'textfield',
 							allowBlank:false
-						},
-						this.securityLevelCombo
+						}/*,
+						this.securityLevelCombo*/
 					]
 				}
 			]
-        
 		});
+		
         var cpanel = new Ext.Panel({
             border: false,
             layout: "border",
@@ -422,9 +408,8 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 			autoScroll:false,
             title: this.title,
 			items: [
-					
-					this.spmCreateForm
-				]
+				this.spmCreateForm
+			]
         });
         
         config = Ext.apply(cpanel, config || {});
@@ -448,23 +433,20 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 		if(layer){
 			map.removeLayer(layer);
 		}
-		var cp= Ext.getCmp("SPMCreateColorPicker");
+		
+		var cp = Ext.getCmp("SPMCreateColorPicker");
 		var color = "#"+ cp.getValue();
 		var style = new OpenLayers.Style({
 			pointRadius: 4, // sized according to type attribute
 			graphicName: "circle",
-			
-			
 			fillColor: color,
 			strokeColor: color,
 			fillOpacity:0.5,
 			strokeWidth:2
-			
 		});
 		
 		layer = new OpenLayers.Layer.Vector("spm_source",{
 			styleMap: style
-			
 		});
 		
 		var point = new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat);	
