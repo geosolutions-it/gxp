@@ -168,6 +168,18 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
 		this.checkLayerSource(this.wmsURL);
 
 		if(this.source){
+		
+			if(!this.source.loaded){
+				this.source.on('ready', function(){
+					mask.hide();
+					this.target.layerSources[this.source.id].loaded = true; 
+					this.addLayerRecord();
+					
+					if(this.useEvents)
+						this.fireEvents('ready');
+				}, this);
+			}
+			
 		    var index = this.source.store.findExact("name", this.msLayerName);
 			
 			if (index < 0) {
@@ -189,13 +201,14 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
 			};
 		  
 			this.source = this.target.addLayerSource(sourceOpt);
-		  
+			
 			//
 			// Waiting GetCapabilities response from the server.
 			//			
 			this.source.on('ready', function(){ 
 				mask.hide();
 				
+				this.target.layerSources[this.source.id].loaded = true;
 				this.addLayerRecord();
 				
 				if(this.useEvents)

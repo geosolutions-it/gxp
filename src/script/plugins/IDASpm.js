@@ -41,7 +41,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 	resetText: 'Reset',
 	spmList: "SPM List",
 	spmTooltip: "Show the SPM List",
-        spmExecuteMessage: "Request sended. Please refresh the SPM table in order to view the status changes",
+    spmExecuteMessage: "Request sent. Please refresh the SPM table in order to view the status changes",
 	//settingColorTitle: 'Color',
 	//end i18n
 	
