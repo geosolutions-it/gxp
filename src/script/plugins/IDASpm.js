@@ -41,6 +41,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 	resetText: 'Reset',
 	spmList: "SPM List",
 	spmTooltip: "Show the SPM List",
+        spmExecuteMessage: "Request sended. Please refresh the SPM table in order to view the status changes",
 	//settingColorTitle: 'Color',
 	//end i18n
 	
@@ -349,7 +350,17 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 								var executeInstance = wps.execute("gs:IDASoundPropagationModel",requestObj);                                 
 								this.activateSPMList();
 							
-                                                                Ext.bubble.msg('Sound Propagation Model', 'Request sended. Please refresh the SPM table in order to view the status changes');
+                                                                var title="Sound Propagation Model";
+
+                                                                if(Ext.isIE6 || Ext.isIE7) 
+                                                                  Ext.Msg.show({
+                                                                    title: title,
+                                                                    msg: this.spmExecuteMessage,
+                                                                    width: 300,
+                                                                    icon: Ext.MessageBox.INFO
+                                                                  }); 
+                                                                else
+                                                                  Ext.bubble.msg(title, this.spmExecuteMessage);
 							}      
 						},
                         scope: this
