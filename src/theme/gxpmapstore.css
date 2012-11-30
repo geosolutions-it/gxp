@@ -29,6 +29,10 @@
 	background-image: url(img/geosilk/cursor.png) !important;
 }
 
+.spm-list-show{
+	background-image: url(img/silk/application_view_columns.png) !important;
+}
+
 .spm-btn-bottom {
 	position: relative;
 	top:5px;

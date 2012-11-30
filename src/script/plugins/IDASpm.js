@@ -39,10 +39,14 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 	//securityLevelLabelText : 'Security Level',
 	applyText: 'Apply',
 	resetText: 'Reset',
+	spmList: "SPM List",
+	spmTooltip: "Show the SPM List",
 	//settingColorTitle: 'Color',
 	//end i18n
 	
 	wpsManager: null,
+	
+	wfsGrid: "wfsGridPanel",
         
 	spatialFilterOptions: {
             lonMax: 180,
@@ -60,6 +64,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 	],*/
 	
 	settingColor: 'FF0000',
+	
     /** private: method[constructor]
      *  :arg config: ``Object``
      */
@@ -71,6 +76,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
      *  :arg config: ``Object``
      */
     addOutput: function(config) {
+	
 		//map 
 		var map = this.target.mapPanel.map;
 		map.enebaleMapEvent = true;
@@ -100,6 +106,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 			  }
 			}
         });
+		
 		//latitude text field
 		this.latitudeField = new Ext.form.NumberField({
 				fieldLabel: 'Lat',
@@ -111,6 +118,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 				allowDecimals: true,
 				hideLabel : false
 		});
+		
 		//longitude text field
 		this.longitudeField = new Ext.form.NumberField({
 			fieldLabel: 'Lon',
@@ -122,6 +130,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 			allowDecimals: true,
 			hideLabel : false
 		});
+		
 		//Latitude and longitude fieldset: sound source point
 		this.lonLatFieldSet = new Ext.form.FieldSet({
 			title: this.soundSourcePointText,
@@ -200,8 +209,6 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 			fieldLabel:this.seasonLabelText,
 			mode: 'local',
 			store:  [ this.springText,this.summerText,this.fallText,this.winterText],
-			
-			
 			value:  this.springText
 		});
 
@@ -233,7 +240,16 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 				width: 150	
 			},
 			bbar: new Ext.Toolbar({
-				items:['->',
+				items:[{
+						xtype: 'button',
+						iconCls:'spm-list-show',
+						text: this.spmList,
+						tooltip: this.spmTooltip,
+						handler: function(){
+						    this.activateSPMList();
+						},
+						scope:this
+					}, '->',
 					{
 						xtype: 'button',
 						iconCls:'icon-attribute-apply',
@@ -289,9 +305,9 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 										layerName: new OpenLayers.WPSProcess.LiteralData({
 															value:spm.layerName
 										}),
-										/*securityLevel: new OpenLayers.WPSProcess.LiteralData({
-															value:this.securityLevelCombo.getValue()
-										}),*/
+										securityLevel: new OpenLayers.WPSProcess.LiteralData({
+															value: 'NATO_UNCLASSIFIED' //this.securityLevelCombo.getValue()
+										}),
 										srcPath: new OpenLayers.WPSProcess.LiteralData({
 															value:spm.srcPath
 										}),
@@ -317,7 +333,6 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 												value:formValues["sourcefrequency"]
 									});
 
-
 								if(formValues["modelname"])
 									requestObj.inputs.name= new OpenLayers.WPSProcess.LiteralData({
 												value:formValues["modelname"]
@@ -329,14 +344,13 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 										 mimeType: "text/xml; subtype=gml/3.1.1"
 								});
 							
-								var executeInstance=wps.execute("gs:IDASoundPropagationModel",requestObj); 
-                                                                Ext.getCmp('south').expand();
-                                                                Ext.getCmp(this.outputTarget).setActiveTab(wfsGrid);
+								var executeInstance = wps.execute("gs:IDASoundPropagationModel",requestObj);                                 
+								this.activateSPMList();
 							}
 
                                                            
 						},
-                                                scope: this
+                        scope: this
 					},
 					{
 						xtype: 'button',
@@ -423,11 +437,17 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
         config = Ext.apply(cpanel, config || {});
         
         var spmPanel = gxp.plugins.IDASpm.superclass.addOutput.call(this, config);
-
         //Ext.getCmp("idacontrol").setActiveTab(cpanel);
         
         return spmPanel;
     },
+	
+	activateSPMList: function(){
+		var wfsgrid = Ext.getCmp(this.wfsGrid);
+		var southPanel = Ext.getCmp('south').expand();
+		var idaLayList = Ext.getCmp('idalaylist').setActiveTab(wfsgrid);
+	},
+	
 	/**
 	 * Updates the fields Latitude and longitude.
 	 */
@@ -443,7 +463,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 		}
 		
 		//var cp = Ext.getCmp("SPMCreateColorPicker");
-		var color = "#E8C31C"; //cp.getValue();
+		var color = "#3BC45B"; //cp.getValue();
 		var style = new OpenLayers.Style({
 			pointRadius: 4, // sized according to type attribute
 			graphicName: "circle",
