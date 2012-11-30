@@ -289,9 +289,9 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 										layerName: new OpenLayers.WPSProcess.LiteralData({
 															value:spm.layerName
 										}),
-										/*securityLevel: new OpenLayers.WPSProcess.LiteralData({
-															value:this.securityLevelCombo.getValue()
-										}),*/
+										securityLevel: new OpenLayers.WPSProcess.LiteralData({
+															value:"NATO_UNCLASSIFIED"/*this.securityLevelCombo.getValue()*/
+										}),
 										srcPath: new OpenLayers.WPSProcess.LiteralData({
 															value:spm.srcPath
 										}),
@@ -330,11 +330,11 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 								});
 							
 								var executeInstance=wps.execute("gs:IDASoundPropagationModel",requestObj); 
-                                                                Ext.getCmp('south').expand();
-                                                                Ext.getCmp(this.outputTarget).setActiveTab(wfsGrid);
-							}
 
-                                                           
+                                                                Ext.bubble.msg('Sound Propagation Model', 'Request sended. Please refresh the SPM table in order to view the status changes');
+                                                                
+                                                                Ext.getCmp('south').expand();
+							}      
 						},
                                                 scope: this
 					},
