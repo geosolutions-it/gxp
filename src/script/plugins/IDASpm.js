@@ -352,7 +352,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 							
                                                                 var title="Sound Propagation Model";
 
-                                                                if(Ext.isIE6 || Ext.isIE7) 
+                                                                if(Ext.isChrome || Ext.isGecko3 || Ext.isIE8) 
                                                                   Ext.Msg.show({
                                                                     title: title,
                                                                     msg: this.spmExecuteMessage,
