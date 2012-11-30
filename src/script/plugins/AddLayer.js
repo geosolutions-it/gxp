@@ -77,21 +77,21 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
 	/**  
 	 * api: method[addLayerRecord]
      */
-	addLayerRecord: function(source, sourceId, msLayerName, gnUrl, enableViewTab, layerUUID, gnLangStr){
+	addLayerRecord: function(){
 		  
 		var props = {
-			name: msLayerName,
-			title: msLayerName,
-			source: sourceId
+			name: this.msLayerName,
+			title: this.msLayerTitle,
+			source: this.source.id
 		};
 		  
-		if(layerUUID)
-			props.uuid = layerUUID;
+		if(this.layerUUID)
+			props.uuid = this.layerUUID;
 		
-		if(gnUrl && gnLangStr)
-			props.gnURL = gnUrl + "srv/" + gnLangStr + "/";
+		if(this.gnUrl && this.gnLangStr)
+			props.gnURL = this.gnUrl + "srv/" + this.gnLangStr + "/";
 		  
-		var record = source.createLayerRecord(props);   
+		var record = this.source.createLayerRecord(props);   
 				  
 		if (record) {
 			var layerStore = this.target.mapPanel.layers;  
@@ -102,7 +102,7 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
 		    //
 			// If tabs are used the View tab is Activated
 			//
-			if(this.target.renderToTab && enableViewTab){
+			if(this.target.renderToTab && this.enableViewTab){
 				var portalContainer = Ext.getCmp(this.target.renderToTab);
 				portalContainer.setActiveTab(1);
 			}					
@@ -135,7 +135,6 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
 	 * api: method[checkLayerSource]
      */
 	checkLayerSource: function(wmsURL){
-		var source;
 		for (var id in this.target.layerSources) {
 			  var src = this.target.layerSources[id];    
 			  var url  = src.initialConfig.url; 
@@ -144,42 +143,60 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
 			  // Checking if source URL aldready exists
 			  // //////////////////////////////////////////
 			  if(url && url.indexOf(wmsURL) != -1){
-				  source = src;
+				  this.source = src;
 				  break;
 			  }
 		} 
 
-		return source;
+		return this.source;
 	},
 	
 	/**  
 	 * api: method[addLayer]
      */
-	addLayer: function(msLayerName, wmsURL, gnUrl, enableViewTab, msLayerUUID){		
+	addLayer: function(msLayerTitle, msLayerName, wmsURL, gnUrl, enableViewTab, msLayerUUID, gnLangStr){		
+		var mask = new Ext.LoadMask(Ext.getBody(), {msg: this.waitMsg});
+		
+		this.msLayerTitle = msLayerTitle;
+		this.msLayerName = msLayerName;
+		this.wmsURL = wmsURL;
+		this.gnUrl = gnUrl;
+		this.enableViewTab = enableViewTab;
+		this.msLayerUUID = msLayerUUID;
+		this.gnLangStr = gnLangStr;
+				
+		this.checkLayerSource(this.wmsURL);
 
-		var source = this.checkLayerSource(wmsURL);
-
-		if(source){
-			this.addLayerRecord(source, source.id, msLayerName, gnUrl, enableViewTab, msLayerUUID);
+		if(this.source){
+		    var index = this.source.store.findExact("name", this.msLayerName);
+			
+			if (index < 0) {
+				// ///////////////////////////////////////////////////////////////
+				// In this case is necessary reload the local store to refresh 
+				// the getCapabilities records 
+				// ///////////////////////////////////////////////////////////////
+				this.source.store.reload();
+			}else{
+				this.addLayerRecord();
+			}
 		}else{
-			var mask = new Ext.LoadMask(Ext.getBody(), {msg: this.waitMsg});
 			mask.show();
 
 			var sourceOpt = {
 				config: {
-				  url: wmsURL
+				  url: this.wmsURL
 				}
 			};
 		  
-			source = this.target.addLayerSource(sourceOpt);
+			this.source = this.target.addLayerSource(sourceOpt);
 		  
 			//
 			// Waiting GetCapabilities response from the server.
 			//			
-			source.on('ready', function(){ 
+			this.source.on('ready', function(){ 
 				mask.hide();
 				
-				this.addLayerRecord(source, source.id, msLayerName, gnUrl, enableViewTab, msLayerUUID);
+				this.addLayerRecord();
 				
 				if(this.useEvents)
 					this.fireEvents('ready');
@@ -189,7 +206,7 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
 			// To manage failure in GetCapabilities request (invalid request url in 
 			// GeoNetwork configuration or server error).
 			//
-			source.on('failure', function(src, msg){		          
+			this.source.on('failure', function(src, msg){		          
 				mask.hide();
 				
 				if(!this.useEvents){
@@ -209,25 +226,27 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
 	/**  
 	 * api: method[addSource]
      */
-	addSource: function(wmsURL){		  
-		var source = this.checkLayerSource(wmsURL);
+	addSource: function(wmsURL){			
+		this.wmsURL = wmsURL;
+		
+		this.checkLayerSource(this.wmsURL);
 
-		if(!source){
+		if(!this.source){
 			  var mask = new Ext.LoadMask(Ext.getBody(), {msg: this.waitMsg});
 			  mask.show();
 
 			  var sourceOpt = {
 				  config: {
-					  url: wmsURL
+					  url: this.wmsURL
 				  }
 			  };
 			  
-			  source = this.target.addLayerSource(sourceOpt);
+			  this.source = this.target.addLayerSource(sourceOpt);
 			  
 			  //
 			  // Waiting GetCapabilities response from the server.
 			  //
-			  source.on('ready', function(){ 
+			  this.source.on('ready', function(){ 
 				mask.hide();
 				
 				if(this.useEvents)
@@ -238,7 +257,7 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
 			  // To manage failure in GetCapabilities request (invalid request url in 
 			  // GeoNetwork configuration or server error).
 			  //
-			  source.on('failure', function(src, msg){		          
+			  this.source.on('failure', function(src, msg){		          
 				mask.hide();
 				  
 				if(!this.useEvents){

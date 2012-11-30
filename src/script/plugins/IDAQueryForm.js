@@ -627,9 +627,7 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                 this.northField.setValue(extentArray[3]); 
             }
         });
-		
-		
-        
+
         featureManager.on({
             "beforequery": function() {
                 new Ext.LoadMask(queryForm.getEl(), {
