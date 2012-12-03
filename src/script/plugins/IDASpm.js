@@ -258,8 +258,9 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 						handler: function(){
 							if(this.spmCreateForm.getForm().isValid()){
 								var today = new Date();
-								var currentDate= today.getFullYear() + "-" + (today.getMonth()+1) + "-" +today.getDate();
-
+								//var currentDate= today.getFullYear() + "-" + (today.getMonth()+1) + "-" +today.getDate();
+								var currentDate = today.format("Y-m-d");
+								
 								var wps = this.target.tools[this.wpsManager];
 								var formValues=this.spmCreateForm.getForm().getFieldValues(true);
 								
@@ -350,17 +351,17 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 								var executeInstance = wps.execute("gs:IDASoundPropagationModel",requestObj);                                 
 								this.activateSPMList();
 							
-                                                                var title="Sound Propagation Model";
+								var title="Sound Propagation Model";
 
-                                                                if(Ext.isChrome || Ext.isGecko3 || Ext.isIE8) 
-                                                                  Ext.Msg.show({
-                                                                    title: title,
-                                                                    msg: this.spmExecuteMessage,
-                                                                    width: 300,
-                                                                    icon: Ext.MessageBox.INFO
-                                                                  }); 
-                                                                else
-                                                                  Ext.bubble.msg(title, this.spmExecuteMessage);
+								if(Ext.isChrome || Ext.isGecko3 || Ext.isIE8) 
+								  Ext.Msg.show({
+									title: title,
+									msg: this.spmExecuteMessage,
+									width: 300,
+									icon: Ext.MessageBox.INFO
+								  }); 
+								else
+								  Ext.bubble.msg(title, this.spmExecuteMessage);
 							}      
 						},
                         scope: this
