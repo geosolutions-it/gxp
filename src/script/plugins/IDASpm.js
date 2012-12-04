@@ -41,7 +41,9 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 	resetText: 'Reset',
 	spmList: "SPM List",
 	spmTooltip: "Show the SPM List",
-    spmExecuteMessage: "Request sent. Please refresh the SPM table in order to view the status changes",
+        spmExecuteTooltip: "Execute SPM",
+        spmResetTooltip: "Reset SPM Inputs",
+        spmExecuteMessage: "Request sent. Please refresh the SPM table in order to view the status changes",
 	//settingColorTitle: 'Color',
 	//end i18n
 	
@@ -255,6 +257,8 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 						xtype: 'button',
 						iconCls:'icon-attribute-apply',
 						text: this.applyText,
+                                                id: "executeSPM",
+                                                tooltip: this.spmExecuteTooltip,
 						handler: function(){
 							if(this.spmCreateForm.getForm().isValid()){
 								var today = new Date();
@@ -353,15 +357,32 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 							
 								var title="Sound Propagation Model";
 
-								if(Ext.isChrome || Ext.isGecko3 || Ext.isIE8) 
+								/*if(Ext.isChrome || Ext.isGecko || Ext.isIE8) 
+                                                                    Ext.bubble.msg(title, this.spmExecuteMessage);
+								else
 								  Ext.Msg.show({
 									title: title,
 									msg: this.spmExecuteMessage,
 									width: 300,
 									icon: Ext.MessageBox.INFO
-								  }); 
-								else
-								  Ext.bubble.msg(title, this.spmExecuteMessage);
+								  });*/
+                                                              
+                                                                var t = new Ext.ToolTip({
+                                                                    floating: {
+                                                                        shadow: false
+                                                                    },
+                                                                    autoWidth: true,
+                                                                    
+                                                                    title: title,
+                                                                    html: this.spmExecuteMessage,
+                                                                    hideDelay: 190000,
+                                                                    closable: true
+                                                                });
+                                                                var elTooltop= Ext.getCmp("mapContainer").getEl();
+                                                                t.showAt([elTooltop.getX()+100, elTooltop.getY()+100]);
+                                                              //  t.showAt(t.el.getAlignToXY(Ext.get("center"), 'bl-bl', [10, -10]));
+                                                                t.el.slideIn('b');
+                                                              
 							}      
 						},
                         scope: this
@@ -370,6 +391,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 						xtype: 'button',
 						iconCls:'icon-attribute-reset',
 						text: this.resetText,
+                                                tooltip: this.spmResetTooltip,
 						handler: function(){
 							this.spmCreateForm.getForm().reset();
 							var layer = map.getLayersByName("spm_source")[0];	
