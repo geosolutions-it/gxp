@@ -116,6 +116,14 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
      */
     outputAction: 0,
     
+    /** api: config[disableAdvSearch]
+     *  ``Boolean`` default true. Disable the fields for advanced search.
+     */
+    disableAdvSearch: true,
+    
+    
+    wfsGrid: "wfsGridPanel",
+    
     // Begin i18n.
     northLabel:"North",
     westLabel:"West",
@@ -182,7 +190,7 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
             border: false,
             bodyStyle: "padding: 5px",
             layout: "form",
-			xtype: "form",
+	    xtype: "form",
             autoScroll: true,
             items: [{
                 xtype: "fieldset",
@@ -214,10 +222,10 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                                 queryForm.attributeFieldset.setDisabled(true);
                                 queryForm.attributeFieldset.collapse(true);
                             }
-							// panel visiblity
-							var featureSelected=(combo.getValue() == 'Feature');
-							queryForm.attributeFieldset.setVisible(featureSelected);
-							queryForm.spmFieldSet.setVisible(!featureSelected);
+			     // panel visiblity
+			     var featureSelected=(combo.getValue() == 'Feature');
+			     queryForm.attributeFieldset.setVisible(featureSelected);
+			     queryForm.spmFieldSet.setVisible(!featureSelected);
                         }
                     }
                 }, {
@@ -293,6 +301,7 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
 						allowBlank: false,
 						forceSelection: true,
 						editable: false,
+                                                name:"season",
 						triggerAction: 'all',
 						lazyRender:true,
 						fieldLabel:this.seasonLabelText,
@@ -313,8 +322,10 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
 						allowBlank: false,
 						forceSelection: true,
 						editable: false,
+                                                id:"securityLevel",
 						triggerAction: 'all',
 						lazyRender:true,
+                                                disabled: this.disableAdvSearch,
 						fieldLabel: this.securityLevelLabelText,
 						mode: 'local',
 						store:  this.securityLevels,
@@ -325,6 +336,7 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
 					{
 						fieldLabel: this.sourcedepthLabel,
 						name: 'sourcedepth',
+                                                disabled: this.disableAdvSearch,
 						xtype: 'numberfield',
 						width:210
 
@@ -358,6 +370,7 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
 							{
 								name: 'modelrundate',
 								xtype: 'datefield',
+                                                                id:'runDate',
 								width:110
 							},{
 								name:'modelrunhour',
@@ -372,15 +385,20 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
 
 							},{xtype: 'displayfield', value: ':'},{
 								name:'modelrunmin',
-								xtype: 'combo',
+								//xtype: 'combo',
+                                                                xtype: "timefield",
 								editable:false,
 								forceSelection:true,
 								triggerAction: "all",
-								width:40,
+                                                                minValue: '00',  
+                                                                maxValue: '59',  
+                                                                increment: 1,  
+                                                                format:'i',
+								width:40
 								
-								value:00,
+								/*value:00,
 								store: [00,01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,
-										30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59]
+									30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59]*/
 
 							},{
 								xtype:'button',
@@ -486,12 +504,19 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                         queryForm.attributeFieldset.setDisabled(true);
                         queryForm.attributeFieldset.collapse(true);
                     }
-					queryForm.getForm().reset();
+		    queryForm.getForm().reset();
 					// panel visiblity
 					
-					var featureSelected=(queryForm.type.getValue() == 'Feature');
-					queryForm.attributeFieldset.setVisible(featureSelected);
-					queryForm.spmFieldSet.setVisible(!featureSelected);
+		    var featureSelected=(queryForm.type.getValue() == 'Feature');
+		    queryForm.attributeFieldset.setVisible(featureSelected);
+		    queryForm.spmFieldSet.setVisible(!featureSelected);
+                    
+                    if(queryForm.type.getValue() != 'Feature'){
+                       var wfsGrid=this.target.tools[this.wfsGrid];
+                       wfsGrid.resetFilter();
+                    }
+                        
+                    
                 }
             }, {
                 text: this.queryActionText,
@@ -552,12 +577,12 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
 									filters[0]
 								);
                             }else
-								Ext.Msg.show({
-									title: "Max Features",
-									msg: "MaxFeature value is null or incorrect !",
-									buttons: Ext.Msg.OK,
-									icon: Ext.Msg.INFO
-								});
+				Ext.Msg.show({
+					title: "Max Features",
+					msg: "MaxFeature value is null or incorrect !",
+					buttons: Ext.Msg.OK,
+					icon: Ext.Msg.INFO
+				});
                         }else{
                             Ext.Msg.show({
                                 title: "Features Search",
@@ -567,15 +592,126 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                             });
                         }
                     }else{
-                        Ext.Msg.show({
-                            title: "SPM Search",
-                            msg: "Not implemented yet!",
-                            buttons: Ext.Msg.OK,
-                            icon: Ext.Msg.INFO
+                        var formValues=queryForm.getForm().getFieldValues(true);
+
+                        var SPMFilter = new OpenLayers.Filter.Logical({
+                            type: OpenLayers.Filter.Logical.AND,
+                            filters: []
                         });
+                        
+                        
+                        if(formValues.NorthBBOX && formValues.WestBBOX
+                           && formValues.EastBBOX && formValues.SouthBBOX)
+                            SPMFilter.filters.push(new OpenLayers.Filter.Spatial({
+                                type: OpenLayers.Filter.Spatial.BBOX,
+                                value: new OpenLayers.Bounds(formValues.WestBBOX, 
+                                formValues.SouthBBOX,
+                                formValues.EastBBOX, 
+                                formValues.NorthBBOX),
+                                projection: "EPSG:4326"
+                            }));
+                        
+                        if(formValues.modelname){
+                            SPMFilter.filters.push(
+                                new OpenLayers.Filter.Comparison({
+                                    type: OpenLayers.Filter.Comparison.LIKE,
+                                    property: "name",
+                                    value: "*"+formValues.modelname+"*"
+                                })
+                            );
+                        }
+                        
+                        if(formValues.sourcefrequency){
+                            SPMFilter.filters.push(
+                                new OpenLayers.Filter.Comparison({
+                                    type: OpenLayers.Filter.Comparison.EQUAL_TO,
+                                    property: "srcFrequency",
+                                    value: formValues.sourcefrequency
+                                })
+                            );
+                        }
+                        
+                        
+                        if(formValues.sourcepressurelevel){
+                            SPMFilter.filters.push(
+                                new OpenLayers.Filter.Comparison({
+                                    type: OpenLayers.Filter.Comparison.EQUAL_TO,
+                                    property: "srcPressureLevel",
+                                    value: formValues.sourcepressurelevel
+                                })
+                            );
+                        }
+                        
+                        
+                        if(formValues.season){
+                            SPMFilter.filters.push(
+                                new OpenLayers.Filter.Comparison({
+                                    type: OpenLayers.Filter.Comparison.EQUAL_TO,
+                                    property: "season",
+                                    value: formValues.season.toLowerCase()
+                                })
+                            );
+                        }
+                        
+                        if(formValues.securityLevel){
+                            SPMFilter.filters.push(
+                                new OpenLayers.Filter.Comparison({
+                                    type: OpenLayers.Filter.Comparison.EQUAL_TO,
+                                    property: "securityLevel",
+                                    value: formValues.securityLevel
+                                })
+                            );
+                        }
+                        
+                        
+                        var endDate=queryForm.getForm().findField("modelenddate").getValue();
+                        var endDateHour=queryForm.getForm().findField("modelendhour").getValue();
+                        var endDateMin=queryForm.getForm().findField("modelendmin").getValue();
+									
+                        if(endDate){
+                            if(endDateHour)
+                                endDate.setHours(endDateHour); 
+                            if(endDateMin){
+                                endDate.setMinutes(endDateMin); 
+                            }
+                                
+                       
+                            SPMFilter.filters.push(
+                                new OpenLayers.Filter.Comparison({
+                                    type: OpenLayers.Filter.Comparison.LESS_THAN_OR_EQUAL_TO,
+                                    property: "runEnd",
+                                    value: endDate.format("Y-m-d H:i")+":00"
+                                })
+                            );
+                        }
+                        
+                        
+                        var runDate=queryForm.getForm().findField("modelrundate").getValue();
+                        var runDateHour=queryForm.getForm().findField("modelrunhour").getValue();
+                        var runDateMin=queryForm.getForm().findField("modelrunmin").getValue();
+									
+                        if(runDate){
+                            if(runDateHour)
+                                runDate.setHours(runDateHour); 
+                            if(runDateMin)
+                                runDate.setMinutes(runDateMin); 
+                            
+                            SPMFilter.filters.push(
+                                new OpenLayers.Filter.Comparison({
+                                    type: OpenLayers.Filter.Comparison.GREATER_THAN_OR_EQUAL_TO,
+                                    property: "runBegin",
+                                    value: runDate.format("Y-m-d H:i")+":00"
+                                })
+                            );
+                        }
+                       var wfsGrid=this.target.tools[this.wfsGrid];
+                       var wfsgridComp = Ext.getCmp(wfsGrid.id);
+                       Ext.getCmp('south').expand(false);
+                       Ext.getCmp('idalaylist').setActiveTab(wfsgridComp);
+                       wfsGrid.setFilter(SPMFilter);
+                      
                     }
-                },
-                scope: this
+                }
             }]
         }, config || {});
         
