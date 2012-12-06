@@ -264,7 +264,6 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 								var today = new Date();
 								//var currentDate= today.getFullYear() + "-" + (today.getMonth()+1) + "-" +today.getDate();
 								var currentDate = today.format("Y-m-d");
-								
 								var wps = this.target.tools[this.wpsManager];
 								var formValues=this.spmCreateForm.getForm().getFieldValues(true);
 								
@@ -277,9 +276,11 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 									status: false,*/
 									type: "raw",
 									inputs:{
-										octaveExecutablePath: new OpenLayers.WPSProcess.LiteralData({
+										octaveExecutablePath: [new OpenLayers.WPSProcess.LiteralData({
 															value:spm.octaveExecutablePath
-										}),
+										})/*,new OpenLayers.WPSProcess.LiteralData({
+															value:spm.octaveExecutablePath
+										})*/],
 										octaveConfigFilePath: new OpenLayers.WPSProcess.LiteralData({
 															value:spm.octaveConfigFilePath
 										}),
@@ -350,39 +351,12 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 										 mimeType: "text/xml; subtype=gml/3.1.1"
 								});
 							
-
-
-								var executeInstance = wps.execute("gs:IDASoundPropagationModel",requestObj);                                 
-								this.activateSPMList();
-							
-								var title="Sound Propagation Model";
-
-								/*if(Ext.isChrome || Ext.isGecko || Ext.isIE8) 
-                                                                    Ext.bubble.msg(title, this.spmExecuteMessage);
-								else
-								  Ext.Msg.show({
-									title: title,
-									msg: this.spmExecuteMessage,
-									width: 300,
-									icon: Ext.MessageBox.INFO
-								  });*/
-                                                              
-                                                                var t = new Ext.ToolTip({
-                                                                    floating: {
-                                                                        shadow: false
-                                                                    },
-                                                                    autoWidth: true,
-                                                                    
-                                                                    title: title,
-                                                                    html: this.spmExecuteMessage,
-                                                                    hideDelay: 190000,
-                                                                    closable: true
-                                                                });
-                                                                var elTooltop= Ext.getCmp("mapContainer").getEl();
-                                                                t.showAt([elTooltop.getX()+100, elTooltop.getY()+100]);
-                                                              //  t.showAt(t.el.getAlignToXY(Ext.get("center"), 'bl-bl', [10, -10]));
-                                                                t.el.slideIn('b');
-                                                              
+								var executeInstance = wps.execute("gs:IDASoundPropagationModel",requestObj,
+                                                                    function(response){
+                                                                       // alert("response: " + response);
+                                                                    });                                 
+								this.activateSPMList(true);
+ 
 							}      
 						},
                         scope: this
@@ -478,11 +452,31 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
         return spmPanel;
     },
 	
-	activateSPMList: function(){
-		var wfsgrid = Ext.getCmp(this.wfsGrid);
-		var southPanel = Ext.getCmp('south').expand();
-		var idaLayList = Ext.getCmp('idalaylist').setActiveTab(wfsgrid);
-	},
+    activateSPMList: function(tooltip){
+	var wfsgrid = Ext.getCmp(this.wfsGrid);
+	var southPanel = Ext.getCmp('south').expand(false);
+	var idaLayList = Ext.getCmp('idalaylist').setActiveTab(wfsgrid);
+                
+       if(tooltip)         
+         this.showExecuteTooltip();
+    },
+        
+        showExecuteTooltip: function(){
+          var title="Sound Propagation Model";
+          var elTooltop= Ext.getCmp("east").getEl();  
+          var t = new Ext.ToolTip({
+               floating: {
+                          shadow: false
+               },
+               width: elTooltop.getWidth()-10,
+               title: title,
+               html: this.spmExecuteMessage,
+               hideDelay: 190000,
+               closable: true
+         });
+         t.showAt([elTooltop.getX()+5, elTooltop.getBottom()-100]);
+         t.el.slideIn('b');  
+        },
 	
 	/**
 	 * Updates the fields Latitude and longitude.
@@ -499,7 +493,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 		}
 		
 		//var cp = Ext.getCmp("SPMCreateColorPicker");
-		var color = "#3BC45B"; //cp.getValue();
+		var color = this.settingColor; //cp.getValue();
 		var style = new OpenLayers.Style({
 			pointRadius: 4, // sized according to type attribute
 			graphicName: "circle",
