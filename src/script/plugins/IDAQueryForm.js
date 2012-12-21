@@ -373,19 +373,19 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                                                                 id:'runDate',
 								width:110
 							},{
-								name:'modelrunhour',
-								xtype: 'combo',
+                                                                name:'modelrunhour',
+                                                                xtype: "timefield",
 								editable:false,
 								forceSelection:true,
 								triggerAction: "all",
+                                                                minValue: '00',  
+                                                                maxValue: '23',  
+                                                                increment: 1,  
+                                                                format:'i',
 								width:40,
-								
-								value:00,
-								store: [00,01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
-
+								value: '00'
 							},{xtype: 'displayfield', value: ':'},{
 								name:'modelrunmin',
-								//xtype: 'combo',
                                                                 xtype: "timefield",
 								editable:false,
 								forceSelection:true,
@@ -394,12 +394,8 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                                                                 maxValue: '59',  
                                                                 increment: 1,  
                                                                 format:'i',
-								width:40
-								
-								/*value:00,
-								store: [00,01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,
-									30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59]*/
-
+								width:40,
+								value: '00'
 							},{
 								xtype:'button',
 								iconCls:'icon-attribute-reset',
@@ -421,28 +417,29 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
 								width:110
 
 							},{
-								name:'modelendhour',
-								xtype: 'combo',
+                                                                name:'modelendhour',
+                                                                xtype: "timefield",
 								editable:false,
 								forceSelection:true,
 								triggerAction: "all",
+                                                                minValue: '00',  
+                                                                maxValue: '23',  
+                                                                increment: 1,  
+                                                                format:'i',
 								width:40,
-								
-								value:00,
-								store: [00,01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
-
+								value: '00'
 							},{xtype: 'displayfield', value: ':'},{
-								name:'modelendmin',
-								xtype: 'combo',
+                                                                name:'modelendmin',
+                                                                xtype: "timefield",
 								editable:false,
 								forceSelection:true,
 								triggerAction: "all",
+                                                                minValue: '00',  
+                                                                maxValue: '59',  
+                                                                increment: 1,  
+                                                                format:'i',
 								width:40,
-								
-								value:00,
-								store: [00,01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,
-										30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59]
-
+								value: '00'
 							},{
 								xtype:'button',
 								iconCls:'icon-attribute-reset',
@@ -450,7 +447,6 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
 									queryForm.getForm().findField("modelenddate").setValue("");
 									queryForm.getForm().findField("modelendhour").setValue("");
 									queryForm.getForm().findField("modelendmin").setValue("");
-									
 								}
 							}
 						]
@@ -616,6 +612,7 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                                 new OpenLayers.Filter.Comparison({
                                     type: OpenLayers.Filter.Comparison.LIKE,
                                     property: "name",
+                                    mmatchCase: false,
                                     value: "*"+formValues.modelname+"*"
                                 })
                             );
