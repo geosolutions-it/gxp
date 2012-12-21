@@ -28,6 +28,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 	winterText : "Winter",
 	fallText : "Fall",
 	summerText : "Summer",
+        userInput: "User Input",
 	soundPropagationModelParamText: 'Sound Propagation Model param...',
 	soundSourcePointText: 'Sound Source Point',
 	sourcedepthLabel : "Source Depth (m)",
@@ -37,13 +38,22 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 	pointSelectionButtionTip: 'Enable Point Selection',
 	seasonLabelText: 'Season',
 	//securityLevelLabelText : 'Security Level',
-	applyText: 'Apply',
+	applyText: 'Run',
+        saveText: 'Save SPM',
 	resetText: 'Reset',
 	spmList: "SPM List",
 	spmTooltip: "Show the SPM List",
-        spmExecuteTooltip: "Execute SPM",
+        spmSaveTooltip: "Save Sound Propagation Model run",
+        spmExecuteTooltip: "Execute Sound Propagation Model run/runs",
         spmResetTooltip: "Reset SPM Inputs",
-        spmExecuteMessage: "Request sent. Please refresh the SPM table in order to view the status changes",
+        spmExecuteMessage: "Sound Propagation Model run requests sent.",
+        spmSaveMessage: "Sound Propagation Model run <b>{modelName}</b> saved",
+        spmXMLImportMsg: "All SPM XML runs are added",
+        svpImportMsg: "Sound Velocity Profile successfully imported",
+        svpFileMissingMsg: "SVP file is mandatory for \"User Input\" season",
+        spmBatchComposerMsg: "Composer Runs",
+        composerErrorMsg:"Composer Error",
+        composerErrorTitle:"Enter at least two SPM runs to use the composer",
 	//settingColorTitle: 'Color',
 	//end i18n
 	
@@ -51,12 +61,22 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 	
 	wfsGrid: "wfsGridPanel",
         
+        svpUploader: null,
+        
+        spmListUploader: null,
+        
+        svpFile: null,
+        
 	spatialFilterOptions: {
             lonMax: 180,
             lonMin: -180,
             latMax: 90,
             latMin: -90
-    },
+        },
+        
+        runList: [],
+        
+        composerList: [],
 	
 	/*securityLevels: [
 		'NATO_UNCLASSIFIED',
@@ -201,6 +221,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 		this.selectLonLat = new OpenLayers.Control.Click();
 		map.addControl(this.selectLonLat);
 		
+                var me=this;
 		// season combo
 		this.seasonCombo = new Ext.form.ComboBox({
 			width: 150,
@@ -211,8 +232,13 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 			lazyRender:true,
 			fieldLabel:this.seasonLabelText,
 			mode: 'local',
-			store:  [ this.springText,this.summerText,this.fallText,this.winterText],
-			value:  this.springText
+			store:  [ this.springText,this.summerText,this.fallText,this.winterText, this.userInput],
+			value:  this.springText,
+                        listeners: {
+                                select: function(combo, record, index){
+                                   Ext.getCmp("svp_fieldSet").setVisible(combo.getValue() == me.userInput);
+                                }
+                        }
 		});
 
 		/*this.securityLevelCombo=  new Ext.form.ComboBox({
@@ -244,136 +270,145 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 			},
 			bbar: new Ext.Toolbar({
 				items:[{
-						xtype: 'button',
-						iconCls:'spm-list-show',
-						text: this.spmList,
-						tooltip: this.spmTooltip,
-						handler: function(){
-						    this.activateSPMList();
-						},
-						scope:this
-					}, '->',
-					{
-						xtype: 'button',
-						iconCls:'icon-attribute-apply',
-						text: this.applyText,
-                                                id: "executeSPM",
-                                                tooltip: this.spmExecuteTooltip,
-						handler: function(){
-							if(this.spmCreateForm.getForm().isValid()){
-								var today = new Date();
-								//var currentDate= today.getFullYear() + "-" + (today.getMonth()+1) + "-" +today.getDate();
-								var currentDate = today.format("Y-m-d");
-								var wps = this.target.tools[this.wpsManager];
-								var formValues=this.spmCreateForm.getForm().getFieldValues(true);
-								
-								var lat=this.latitudeField.getValue();
-								var lon=this.longitudeField.getValue();
-					
-								var requestObj = {
-									/*storeExecuteResponse: false,
-									lineage:  false,
-									status: false,*/
-									type: "raw",
-									inputs:{
-										octaveExecutablePath: [new OpenLayers.WPSProcess.LiteralData({
-															value:spm.octaveExecutablePath
-										})/*,new OpenLayers.WPSProcess.LiteralData({
-															value:spm.octaveExecutablePath
-										})*/],
-										octaveConfigFilePath: new OpenLayers.WPSProcess.LiteralData({
-															value:spm.octaveConfigFilePath
-										}),
-										userId: new OpenLayers.WPSProcess.LiteralData({
-															value:spm.userId
-										}),
-										
-										outputUrl: new OpenLayers.WPSProcess.LiteralData({
-															value:spm.outputUrl
-										}),
-										runBegin: new OpenLayers.WPSProcess.LiteralData({
-															value:currentDate
-										}),
-										runEnd: new OpenLayers.WPSProcess.LiteralData({
-															value:currentDate
-										}),
-										itemStatus: new OpenLayers.WPSProcess.LiteralData({
-															value:spm.itemStatus
-										}),
-										itemStatusMessage: new OpenLayers.WPSProcess.LiteralData({
-															value:spm.itemStatusMessage
-										}),
-										wsName: new OpenLayers.WPSProcess.LiteralData({
-															value:spm.wsName
-										}),
-										storeName: new OpenLayers.WPSProcess.LiteralData({
-															value:spm.storeName
-										}),
-										layerName: new OpenLayers.WPSProcess.LiteralData({
-															value:spm.layerName
-										}),
-										securityLevel: new OpenLayers.WPSProcess.LiteralData({
-                                                                                    value: 'NATO_UNCLASSIFIED' //this.securityLevelCombo.getValue()
-										}),
-										srcPath: new OpenLayers.WPSProcess.LiteralData({
-															value:spm.srcPath
-										}),
-										season: new OpenLayers.WPSProcess.LiteralData({
-											 value:this.seasonCombo.getValue().toLowerCase()
-										})
-									},
-									outputs: [{
-										identifier: "result",
-										mimeType: "text/xml; subtype=wfs-collection/1.0"
-										//asReference: true,
-										//type: "raw"
-									}]
-								};
-								
-								if(formValues["sourcepressurelevel"])
-									requestObj.inputs.srcPressureLevel= new OpenLayers.WPSProcess.LiteralData({
-												value:formValues["sourcepressurelevel"]
-									});
-								
-								if(formValues["sourcefrequency"])
-									requestObj.inputs.srcFrequency= new OpenLayers.WPSProcess.LiteralData({
-												value:formValues["sourcefrequency"]
-									});
-
-								if(formValues["modelname"])
-									requestObj.inputs.name= new OpenLayers.WPSProcess.LiteralData({
-												value:formValues["modelname"]
-									});
-
-								if(lat!="" && lon!="")
-									 requestObj.inputs.footprint=new OpenLayers.WPSProcess.ComplexData({
-										 value: "POINT("+lon+" "+lat+")",
-										 mimeType: "text/xml; subtype=gml/3.1.1"
-								});
-							
-								var executeInstance = wps.execute("gs:IDASoundPropagationModel",requestObj,
-                                                                    function(response){
-                                                                       // alert("response: " + response);
-                                                                    });                                 
-								this.activateSPMList(true);
- 
-							}      
-						},
-                        scope: this
+					xtype: 'button',
+					iconCls:'spm-list-show',
+					text: this.spmList,
+					tooltip: this.spmTooltip,
+					handler: function(){
+                                            this.activateSPMList();
 					},
-					{
-						xtype: 'button',
-						iconCls:'icon-attribute-reset',
-						text: this.resetText,
-                                                tooltip: this.spmResetTooltip,
-						handler: function(){
+					scope:this
+				       }, '->',
+                                       {
+					xtype: 'button',
+					iconCls:'icon-attribute-add',
+					text: this.saveText,
+                                        id: "saveSPM",
+                                        tooltip: this.spmSaveTooltip,
+					handler: function(){
+                                              var modelName = this.addFormRun();
+                                              if(modelName){
+                                                  //this.spmCreateForm.getForm().reset();
+						  var layer = map.getLayersByName("spm_source")[0];	
+						  if(layer){
+						    map.removeLayer(layer);
+						  }
+                                                  var template = new Ext.XTemplate(
+                                                        this.spmSaveMessage
+                                                  );
+                                                  this.showMsgTooltip(template.apply({
+                                                            modelName : modelName
+                                                  }));
+                                              }         
+					},
+                                        scope: this
+				       },{
+					  xtype: 'button',
+					  iconCls:'icon-attribute-apply',
+					  text: this.applyText,
+                                          id: "executeSPM",
+                                          tooltip: this.spmExecuteTooltip,
+				          handler: function(){
+                                                        me=this;
+                                                        var composer=this.spmCreateForm.getForm().getFieldValues(true)["batch_mode_composer"];
+                                                        
+                                                        var wfsGrid= this.target.tools[this.wfsGrid];
+                                                        var wps = this.target.tools[this.wpsManager];
+                                                        var spmExecIndex=0;
+                                                        var spmExecNum=this.runList.length;
+                                                        if(spmExecNum > 0){
+                                                           var callbackSPM= function(response){
+                                                                wfsGrid.setPage(1);
+                                                                spmExecIndex++;
+                                                                var fc = OpenLayers.Format.XML.prototype.read.apply(this, [response]);
+                                                                       var fid = fc.getElementsByTagName("gml:ftUUID")[0];  
+                                                                       
+                                                                       console.log(me.composerList);
+                                                                       if(!fid){
+                                                                          var wpsError=new OpenLayers.Format.WPSExecute().read(response);
+                                                                               if(wpsError){
+                                                                                    var ex=wpsError.executeResponse.status.exception.exceptionReport.exceptions[0];
+                                                                                    if(ex)
+                                                                                    Ext.Msg.show({
+                                                                                        title:"SPM: " + ex.code,
+                                                                                        msg: ex.texts[0] ,
+                                                                                        buttons: Ext.Msg.OK,
+                                                                                        icon: Ext.MessageBox.ERROR
+                                                                                    });
+                                                                               }
+                                                                          console.log(wpsError); 
+                                                                       }
+                                                                 
+                                                                if(composer){
+                                                                   me.composerList.push(fid);    
+                                                                }
+                                                                if(spmExecIndex< spmExecNum)
+                                                                    wps.execute("gs:IDASoundPropagationModel",
+                                                                        me.runList[spmExecIndex],callbackSPM);
+                                                                else{
+                                                                    delete me.runList;
+                                                                    me.runList= new Array();
+                                                                }
+                                                                    
+                                                           };
+                                                          wps.execute("gs:IDASoundPropagationModel",me.runList[spmExecIndex],callbackSPM);
+                                                           me.activateSPMList(true);
+                                                        }else{
+                                                            if(!composer){
+                                                               if(me.addFormRun()){
+                                                                wps.execute("gs:IDASoundPropagationModel",me.runList[0],
+                                                                    function(response){
+                                                                            var dq = Ext.DomQuery;
+                                                                            var fc = OpenLayers.Format.XML.prototype.read.apply(this, [response]);
+                                                                            var fid = fc.getElementsByTagName("gml:ftUUID")[0];  
+                                                                            //me.composerList.push(fid);
+                                                                            if(!fid){
+                                                                               var wpsError=new OpenLayers.Format.WPSExecute().read(response);
+                                                                               if(wpsError){
+                                                                                    var ex=wpsError.executeResponse.status.exception.exceptionReport.exceptions[0];
+                                                                                    if(ex)
+                                                                                    Ext.Msg.show({
+                                                                                        title:"SPM: " + ex.code,
+                                                                                        msg: ex.texts[0] ,
+                                                                                        buttons: Ext.Msg.OK,
+                                                                                        icon: Ext.MessageBox.ERROR
+                                                                                    });
+                                                                               }
+                                                                               console.log(wpsError); 
+                                                                            }
+                                                                     wfsGrid.setPage(1); 
+                                                                 });      
+                                                                  me.activateSPMList(true);
+                                                                }else
+                                                                    return; 
+                                                            }else{
+                                                                Ext.Msg.show({
+                                                                    title:this.composerErrorTitle,
+								    msg: this.composerErrorMsg,
+								    buttons: Ext.Msg.OK,
+								    icon: Ext.MessageBox.ERROR
+								});
+                                                            }
+                                                            
+                                                        }      
+                                                        
+					   },
+                                           scope: this
+					},{
+					   xtype: 'button',
+					   iconCls:'icon-attribute-reset',
+					   text: this.resetText,
+                                           tooltip: this.spmResetTooltip,
+					   handler: function(){
+                                                        Ext.getCmp("svp_fieldSet").setVisible(false);
 							this.spmCreateForm.getForm().reset();
+                                                        this.svpFile= null;
 							var layer = map.getLayersByName("spm_source")[0];	
 							if(layer){
 								map.removeLayer(layer);
 							}
-						},
-						scope:this
+					   },
+					   scope:this
 					}
 				]
 				
@@ -429,10 +464,78 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 						}/*,
 						this.securityLevelCombo*/
 					]
-				}
+				},{
+                                    xtype: "fieldset",
+                                    title: "Sound Velocity Profile",
+                                    id: "svp_fieldSet",
+                                    autoHeight: true,
+                                    hidden: true,
+                                    autoWidth:true,
+                                    items: [
+                                       this.target.tools[this.svpUploader].getPanel({submitButton: false})
+                                    ]
+                                },{
+                                    xtype: "fieldset",
+                                    title: "Advanced Mode",
+                                    id: "advMod_fieldSet",
+                                    autoHeight: true,
+                                    hidden: false,
+                                    autoWidth:true,
+                                    collapsed: true,
+                                    checkboxToggle: true,
+                                    items: [{
+					   fieldLabel: "Advanced Input 1",
+					   name: 'adv_input_1',
+                                           xtype: 'numberfield',
+					   allowBlank:true
+					}, {
+					    fieldLabel: "Advanced Input 2",
+					    name: 'adv_input_2',
+					    xtype: 'numberfield',
+					    allowBlank:true
+					}
+                                    ]
+                                },{
+                                    xtype: "fieldset",
+                                    title: "Batch Mode",
+                                    id: "batchMode_fieldSet",
+                                    autoHeight: true,
+                                    hidden: false,
+                                    collapsed: true,
+                                    autoWidth:true,
+                                    checkboxToggle: true,
+                                    items: [
+                                        {
+                                         fieldLabel: this.spmBatchComposerMsg,
+					 name: 'batch_mode_composer',
+                                         xtype: 'checkbox',
+					 allowBlank:true  
+                                        },
+                                       this.target.tools[this.spmListUploader].getPanel({submitButton: true})
+                                    ]
+                                }
 			]
 		});
 		
+               
+        this.target.tools[this.spmListUploader].setSuccessCallback(
+             function(content){
+                var responseObj=new OpenLayers.Format.RunList().read(content);
+                var runList= responseObj.runList;
+                for(var i=0; i<runList.length; i++){
+                    me.addRun(runList[i]);
+                }
+                me.showMsgTooltip(me.spmXMLImportMsg);
+             });  
+             
+        this.target.tools[this.svpUploader].setSuccessCallback(
+             function(response){
+                console.log(response.result.code);
+                
+                this.svpFile=response.result.code;
+                me.showMsgTooltip(me.svpImportMsg);
+             });       
+             
         var cpanel = new Ext.Panel({
             border: false,
             layout: "border",
@@ -447,8 +550,6 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
         config = Ext.apply(cpanel, config || {});
         
         var spmPanel = gxp.plugins.IDASpm.superclass.addOutput.call(this, config);
-        //Ext.getCmp("idacontrol").setActiveTab(cpanel);
-        
         return spmPanel;
     },
 	
@@ -458,10 +559,10 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 	var idaLayList = Ext.getCmp('idalaylist').setActiveTab(wfsgrid);
                 
        if(tooltip)         
-         this.showExecuteTooltip();
+         this.showMsgTooltip(this.spmExecuteMessage);
     },
         
-        showExecuteTooltip: function(){
+        showMsgTooltip: function(msg){
           var title="Sound Propagation Model";
           var elTooltop= Ext.getCmp("east").getEl();  
           var t = new Ext.ToolTip({
@@ -470,7 +571,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                },
                width: elTooltop.getWidth()-10,
                title: title,
-               html: this.spmExecuteMessage,
+               html: msg,
                hideDelay: 190000,
                closable: true
          });
@@ -512,7 +613,184 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 		layer.addFeatures([pointFeature]);
 		layer.displayInLayerSwitcher = true;
 		map.addLayer(layer);
-	}
+	},
+        
+        addFormRun: function(){
+            if(this.spmCreateForm.getForm().isValid()){
+              if((this.seasonCombo.getValue() == this.userInput && this.svpFile)
+                    || this.seasonCombo.getValue() != this.userInput){
+                    
+                var infoRun= {};
+                infoRun.inputs={};
+                var formValues=this.spmCreateForm.getForm().getFieldValues(true);	
+                var lat=this.latitudeField.getValue();
+		var lon=this.longitudeField.getValue();
+                var advValues="";
+                   
+                infoRun.inputs["soundVelocityProfile"]={};
+                infoRun.inputs["soundVelocityProfile"].value = this.svpFile; 
+                infoRun.inputs.season={};
+                infoRun.inputs.season.value=this.seasonCombo.getValue();
+                
+                if(formValues["sourcepressurelevel"]){
+                    infoRun.inputs["sourcePressureLevel"]={};
+                    infoRun.inputs["sourcePressureLevel"].value=formValues["sourcepressurelevel"];   
+                }
+                
+                if(formValues["sourcedepth"]){
+                    infoRun.inputs["sourceDepth"]={};
+                    infoRun.inputs["sourceDepth"].value=formValues["sourcedepth"];   
+                }
+                               
+		
+		if(formValues["sourcefrequency"]){
+                  infoRun.inputs["sourceFrequency"]={};    
+                  infoRun.inputs["sourceFrequency"].value=formValues["sourcefrequency"];
+                }
+                   
+                if(formValues["modelname"]){
+                  infoRun.inputs["modelName"]={};   
+                  infoRun.inputs["modelName"].value=formValues["modelname"];
+                }
+                   
+               
+                if(lat!=""){
+                  infoRun.inputs["soundSourcePoint_lat"]={}; 
+                  infoRun.inputs["soundSourcePoint_lat"].value=lat;
+                }
+                   
+                if(lon!=""){
+                  infoRun.inputs["soundSourcePoint_lon"]={};
+                  infoRun.inputs["soundSourcePoint_lon"].value=lon; 
+                }
+                
+                /* Set adv Values*/
+                var i=0;
+                while(i<formValues["adv_input_"+i]){
+                    advValues+=formValues["adv_input_"+i];
+                    i++;
+                }
+                
+            
+                if(advValues!=""){
+                  infoRun.inputs["advParams"]={};
+                  infoRun.inputs["advParams"].value=advValues.substr(0, advValues.length-1); 
+                }
+
+                //console.log(infoRun);
+                this.addRun(infoRun);
+
+                return formValues["modelname"];
+               
+                }else{
+                  Ext.getCmp(this.target.tools[this.svpUploader].getInputFileCmpID(0)).markInvalid(this.svpFileMissingMsg); 
+               } 
+             }
+                
+         return null;
+      },
+            
+         addRun: function(infoRun){
+  
+             var inputs= infoRun.inputs;
+             var today = new Date();
+             var currentDate = today.format("Y-m-d\\TH:i:s")+"Z";
+             var requestObj = {
+			type: "raw",
+			inputs:{
+				/*octaveExecutablePath: [new OpenLayers.WPSProcess.LiteralData({
+					value:spm.octaveExecutablePath
+				}),new OpenLayers.WPSProcess.LiteralData({
+				   value:spm.octaveExecutablePath
+				})],
+				octaveConfigFilePath: new OpenLayers.WPSProcess.LiteralData({
+				    value:spm.octaveConfigFilePath
+				}),*/
+				userId: new OpenLayers.WPSProcess.LiteralData({
+					value:spm.userId
+				}),
+										
+				outputUrl: new OpenLayers.WPSProcess.LiteralData({
+					value:spm.outputUrl
+				}),
+				runBegin: new OpenLayers.WPSProcess.LiteralData({
+					value:currentDate
+				}),
+				/*runEnd: new OpenLayers.WPSProcess.LiteralData({
+					value:currentDate
+				}),*/
+				itemStatus: new OpenLayers.WPSProcess.LiteralData({
+					value:spm.itemStatus
+				}),
+				itemStatusMessage: new OpenLayers.WPSProcess.LiteralData({
+					value:spm.itemStatusMessage
+				}),
+				wsName: new OpenLayers.WPSProcess.LiteralData({
+					value:spm.wsName
+				}),
+                                styleName: new OpenLayers.WPSProcess.LiteralData({
+				    value:spm.styleName
+				}),
+				/*storeName: new OpenLayers.WPSProcess.LiteralData({
+					value:spm.storeName
+				}),
+				layerName: new OpenLayers.WPSProcess.LiteralData({
+					value:spm.layerName
+				}),*/
+				/*securityLevel: new OpenLayers.WPSProcess.LiteralData({
+                                     value: 'NATO_UNCLASSIFIED' //this.securityLevelCombo.getValue()
+				}),*/
+				/*srcPath: new OpenLayers.WPSProcess.LiteralData({
+					value:spm.srcPath
+				}),*/
+				season: new OpenLayers.WPSProcess.LiteralData({
+					value:inputs['season'].value.toLowerCase()
+				})
+				},
+				outputs: [{
+					identifier: "result",
+					mimeType: "text/xml; subtype=wfs-collection/1.0"
+					}]
+				};
+
+                                if(inputs['sourceDepth'])
+                                    requestObj.inputs.sourceDepth= new OpenLayers.WPSProcess.LiteralData({
+                                        value:inputs['sourceDepth'].value
+				});
+                            
+                                if(inputs['soundVelocityProfile'])
+                                    requestObj.inputs.soundVelocityProfile= new OpenLayers.WPSProcess.LiteralData({
+                                        value:inputs['soundVelocityProfile'].value
+				});
+                            
+                                if(inputs['advParams'])
+                                    requestObj.inputs.soundVelocityProfile= new OpenLayers.WPSProcess.LiteralData({
+                                        value:inputs['advParams'].value
+				})
+								
+				if(inputs['sourcePressureLevel'])
+                                    requestObj.inputs.sourcePressureLevel= new OpenLayers.WPSProcess.LiteralData({
+                                        value:inputs['sourcePressureLevel'].value
+				    });
+								
+				if(inputs["sourceFrequency"])
+                                    requestObj.inputs.sourceFrequency= new OpenLayers.WPSProcess.LiteralData({
+                                        value:inputs['sourceFrequency'].value
+				    });
+
+				if(inputs["modelName"])
+                                    requestObj.inputs.modelName= new OpenLayers.WPSProcess.LiteralData({
+                                        value:inputs['modelName'].value
+                                    });
+
+				if(inputs['soundSourcePoint_lat'] && inputs['soundSourcePoint_lon'])
+                                    requestObj.inputs.soundSourceUnit=new OpenLayers.WPSProcess.ComplexData({
+                                        value: "POINT("+inputs['soundSourcePoint_lon'].value+" "+inputs['soundSourcePoint_lat'].value+")",
+					mimeType: "application/wkt"
+                                    });
+                                
+                    this.runList.push(requestObj);  
+         }
 });
 
 Ext.preg(gxp.plugins.IDASpm.prototype.ptype, gxp.plugins.IDASpm);
