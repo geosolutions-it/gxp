@@ -315,6 +315,12 @@
   background-image: url(img/silk/map_delete.png);
 }
 
+/* gxp_mission_script */
+
+.x-btn .gxp-icon-import-missionscript{
+    background-image: url(img/silk/script_code.png);
+}
+
 /* gxp_import_kml */
 
 .x-btn .gxp-icon-export-logfile, .x-tree-node .gxp-icon-export-logfile, .gxp-icon-export-logfile {
