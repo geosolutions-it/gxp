@@ -256,6 +256,10 @@ gxp.plugins.NURCFeatureEditor = Ext.extend(gxp.plugins.FeatureEditor, {
 				var attributes = {};
 				attributes[this.gliderPropertyName] = vehicle;
 				attributes[this.cruisePropertyName] = cruise; 
+				
+				//"2012-09-13 14:22:36" for test
+				var dt = new Date();
+				attributes[this.creationPropertyName] = dt.format("Y-m-d H:i:s");
            
      		    feature.attributes = attributes;
 								
