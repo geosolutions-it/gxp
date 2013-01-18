@@ -316,6 +316,11 @@
 }
 
 /* gxp_import_kml */
+
+.x-btn .gxp-icon-export-logfile, .x-tree-node .gxp-icon-export-logfile, .gxp-icon-export-logfile {
+    background-image: url(img/silk/page_save.png);
+}
+
 .x-btn .gxp-icon-import-kml, .x-tree-node .gxp-icon-import-kml, .gxp-icon-import-kml {
     background-image: url(img/silk/application_get.png);
 }

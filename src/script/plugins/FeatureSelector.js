@@ -292,7 +292,8 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 								self.selectButton.toggle( false );
 								self.selectButton.disable();
 							}
-							self.onUnselected(self, deleted.feature);
+							// self.onUnselected(self, deleted.feature);
+							self.onRemoved(self, deleted.feature);
 						},
 
 						
@@ -368,10 +369,12 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
    },
 	
 	onMultiSelected: function( target, feature ){
+		Ext.getCmp('vselector').deactivate();
         this.target.fireEvent( this.prefix + "multiselected", target, feature);
     },
 	
     onSelected: function( target, feature ){
+		Ext.getCmp('vselector').deactivate();
         this.target.fireEvent( this.prefix + "selected", target, feature);
     },
     onUnselected: function( target, feature ){
@@ -382,6 +385,9 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
     },
 	onChanged: function(target, feature){
 		this.target.fireEvent( this.prefix + "changed", target, feature);
+	},
+	onRemoved: function(target, feature){
+		 this.target.fireEvent( this.prefix + "removed", target, feature);
 	}
 
 });

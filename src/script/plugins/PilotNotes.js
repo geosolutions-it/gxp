@@ -124,6 +124,12 @@ Note = Ext.extend(Ext.util.Observable, {
 		this.fireEvent('reload', newFeature, oldFeature );
 	},
 	cancel: function(feature){
+		this.old = null;
+		this.feature = null;
+		this.isChanged = false;
+		this.fireEvent('unselect', feature);
+	},
+	remove: function(feature){
 		/*if ( this.isChanged ){
 			// it is changed without saving
 			
@@ -161,7 +167,7 @@ Note = Ext.extend(Ext.util.Observable, {
 				this.old = null;
 				this.feature = null;
 				this.isChanged = false;
-				this.fireEvent('deactivate');		
+				this.fireEvent('deactivate', feature);		
 			// }		
 	},
 	// TODO try to use only on select
@@ -384,16 +390,16 @@ Note = Ext.extend(Ext.util.Observable, {
 });
 
 NotePanel = Ext.extend( Ext.FormPanel, {
-		region:'north',
-		frame:false,  
+		// frame:false,  
 		border:false, 
 		autoScroll:true,
-		height:250,
-		// autoHeight:true,
-		width:'350',
+		autoHeight:true,
+		// margins:{ right:50},
+		width:'200',
 		labelAlign:'top', 
 	    title: "Pilot Notes",
 		tbar:[],
+		buttonAlign:'left',
 	
 
 		initComponent: function( ){
@@ -462,44 +468,44 @@ NotePanel = Ext.extend( Ext.FormPanel, {
 				          items:[
 								{   xtype: 'textfield',
 					                fieldLabel: 'Title',
-									width: 200,
+									width: 150,
 									allowBlank: false,
 									disabled: true,
-									anchor:'100%',
+									anchor:'90%',
 									ref:'../name'
 					            },{  
 									xtype: 'textarea',
-									width: 200,
+									width: 150,
 									disabled: true,
 									allowBlank: false,
 					                fieldLabel:'Note', 
-									anchor:'100%',
+									anchor:'90%',
 									ref: '../description'
 					            },{   
 									xtype: 'numberfield',
 								    fieldLabel: 'Latitude',
 									readOnly:true,
 									// allowBlank: false,
-									width: 200,
+									width: 150,
 									decimalPrecision: 5,
 									maxValue:90,
 									minValue:-90,
 									disabled: true,
 									hidden:true,
-									anchor:'100%',
+									anchor:'90%',
 									ref:'../latitude'
 								},{   
 									xtype: 'numberfield',
 									fieldLabel: 'Longitude',
 									readOnly:true,
 									// allowBlank: false,
-									width: 200,
+									width: 150,
 									decimalPrecision: 5,
 									maxValue:180,
 									minValue:-180,
 									disabled: true,
 									hidden:true,
-									anchor:'100%',
+									anchor:'90%',
 									ref:'../longitude'
 								},{
 								    xtype: 'compositefield',
@@ -546,7 +552,7 @@ NotePanel = Ext.extend( Ext.FormPanel, {
 										disabled: true,
 										triggerAction: 'all',
 										ref:'../vehicle',
-										width: 200
+										width: 150
 										
 								},
 								
@@ -561,9 +567,9 @@ NotePanel = Ext.extend( Ext.FormPanel, {
 									xtype: 'textfield',
 							        fieldLabel: 'Operator',
 									readOnly:true,
-									width: 200,
+									width: 150,
 									ref:'../operator',
-									anchor:'100%',
+									anchor:'90%',
 									disabled:true
 							   }
 
@@ -839,11 +845,8 @@ LogbookPanel = Ext.extend(
 	 	{
 			renderTo:'logbook-panel',
 			autoScroll:true,
-			region:'center',
 			frame:false,  
-			autoHeight: true,
-			
-			// height:300,
+			// autoHeight:true,
 			width:'350',
 			title:'Log Book',
 			
@@ -856,10 +859,6 @@ LogbookPanel = Ext.extend(
 		            singleSelect: true
 		    }),
 			
-				viewConfig: {
-		            forceFit: true,
-					autoFill:true
-		        },
 				initComponent: function( ){
 					
 					var visibility = new Object;
@@ -883,7 +882,7 @@ LogbookPanel = Ext.extend(
 					
 					this.colModel = new Ext.grid.ColumnModel({
 				            defaults: {
-				                width : 20
+				                width : 50
 				            },
 				            columns: [ 	
 							{
@@ -898,11 +897,11 @@ LogbookPanel = Ext.extend(
 										// console.log( 'get class');
 									
 								        if ( visibility[ record.id ] ) {
-								           	this.items[0].tooltip = 'Show on map';
-							                return 'view';
-								        } else {
 								           	this.items[0].tooltip = 'Hide from map';
 							                return 'hide';
+								        } else {
+								           	this.items[0].tooltip = 'Show on map';
+							                return 'view';
 								        }
 										
 								    },
@@ -989,24 +988,31 @@ LogbookPanel = Ext.extend(
 						this.getSelectionModel().clearSelections();
 					}
 				},
+				deactivate: function( feature ){
+					if ( feature && feature.attributes.logbookId )
+						this.visibility[ feature.attributes.logbookId ] = false;
+					
+					
+					this.getSelectionModel().clearSelections();
+					this.getStore().reload();
+				},
 				unselect: function(feature){
 					this.getSelectionModel().clearSelections();
 					this.getStore().reload();
 				},
 				reload: function(feature){
 					
-					
 					if ( feature &&  feature.attributes.logbookId ){
 						this.visibility[ feature.attributes.logbookId ] = true;
 					}
 					
-					
+					var store = this.getStore();
 					var handler = function(){
 						this.select(feature);
-						this.getStore().un( 'load', handler);
+						store.un( 'load', handler, this);
 					};
-					this.getStore().on( 'load', handler, this);
-					this.getStore().reload();
+					store.on( 'load', handler, this);
+					store.reload();
 				},
 				isReady: function(){
 					return ( this.getStore() != null && this.getStore() != undefined );
@@ -1101,10 +1107,10 @@ FeatureLayer = Ext.extend(Ext.util.Observable, {
 	
 	unselect: function( feature ){
 		// ! sono già deselezionati alla fonte
-		var selector = this.getSelector();
+		/*var selector = this.getSelector();
 		var modifier = this.getModifier();
 		selector.unselectAll();
-		modifier.deactivate();
+		modifier.deactivate();*/
 	},
 	unselectAll: function(){
 		this.bus.suspendEvents(false);
@@ -1323,7 +1329,16 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		// create an empty note
         this.note = new Note({});
 		this.note.addListener('save', this.handleSave, this);
-		this.note.addListener('remove', this.handleRemoveFromLogbook, this);
+		// this.note.addListener('remove', this.handleRemoveFromLogbook, this);
+		this.note.addListener('change', function(){
+				Ext.getCmp('east').on('resize', function(){
+					var height = Ext.getCmp('east').findParentByType('panel').getHeight() - this.notePanel.getHeight();
+					if ( this.logbookPanel ){
+						this.logbookPanel.setHeight( height > 200 ? height : 200 );
+					}
+					
+				}, this);		
+		}, this);
 		
 		this.manager = new AccessControlManager({
 			note: this.note
@@ -1395,14 +1410,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		});
 			
 		var pn = new Ext.Panel({
-			// margins: '0 0 0 0 ',
 			layout: "fit",
-			flex:1,
-			width:'350',
-			viewConfig: {
-	            forceFit: true
-	        },
-			// layout: { type: 'vbox', pack: 'start', align: 'stretch' },
 			items:[
 				this.notePanel,
 				{
@@ -1410,12 +1418,12 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 					xtype:'panel'
 				}
 			]
-		});
-		
-		
-						
+		});				
 					
 		this.panel = gxp.plugins.PilotNotes.superclass.addOutput.call(this, pn );
+		
+
+			
 		
 		
 		this.target.on("notefeatureselected", 
@@ -1434,6 +1442,11 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 			function unselectFeature(container, feature){
 					// self.note.unselect();
 					self.note.cancel(feature);
+		});
+		
+		this.target.on("notefeatureremoved", 
+			function unselectFeature(container, feature){
+					self.note.remove(feature);
 		});
 		
 		this.target.on("notefeaturechanged", 
@@ -1457,16 +1470,30 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 	},
 	
 	buildLogbookUI: function(){
+
 		this.logbookPanel = new LogbookPanel({
 			store: this.store,
-			note: this.note
+			note: this.note,
+			height:Ext.getCmp('east').findParentByType('panel').getHeight() - this.notePanel.getHeight() 
 		});
+		
+		// hack: fill the empty space
+		/*Ext.EventManager.onWindowResize(function () {
+		    this.logbookPanel.setHeight( 
+				Ext.getCmp('east').findParentByType('panel').getHeight() - this.notePanel.getHeight() );
+		}, this, {delay:1000});*/
+		
+		Ext.getCmp('east').on('resize', function(){
+			var height = Ext.getCmp('east').findParentByType('panel').getHeight() - this.notePanel.getHeight();
+			this.logbookPanel.setHeight( height > 200 ? height : 200 );
+		}, this);
+		
 		this.note.addListener('map_select', this.logbookPanel.select, this.logbookPanel);
 		this.note.addListener('reload', this.logbookPanel.reload, this.logbookPanel);
 		this.note.addListener('unselect', this.logbookPanel.unselect, this.logbookPanel);
-		this.note.addListener('deactivate', this.logbookPanel.unselect, this.logbookPanel);
+		this.note.addListener('deactivate', this.logbookPanel.deactivate, this.logbookPanel);
 		this.note.addListener('persist', this.handleAddToLogbook, this);
-		this.note.addListener('remove', this.logbookPanel.unselect, this.logbookPanel);
+		this.note.addListener('remove', this.logbookPanel.deactivate, this.logbookPanel);
 		this.logbookPanel.on('cellclick', function(grid, rowIndex, columnIndex, e) {
 								if ( columnIndex > 0 ){ // select only if one does not click on action column
 									var record = grid.getSelectionModel().getSelected();
@@ -1542,9 +1569,12 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 						root.layer.addToMap( feature );
 					}
 					var selected = grid.getSelectionModel().getSelected();
-					if ( selected.id == record.id ){
-						root.layer.select( feature );			
+					if (selected){
+						if ( selected.id == record.id ){
+							root.layer.select( feature );			
+						}
 					}
+				
 				
 					
 				}).execute();		
@@ -1581,7 +1611,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 			self.store.load({
 		            params:{
 		                start: 0,
-		                limit: 20
+		                limit: 10
 		            }
 		        });
 			self.buildLogbookUI();
@@ -1694,12 +1724,6 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 				})
 				.success( function(logbookId){
 					appMask.hide();
-					/*Ext.Msg.show({
-						title: 'Note deleted',
-						msg: 'Note  deleted from logbook successfully',
-						buttons: Ext.Msg.OK,
-						icon: Ext.MessageBox.INFO
-					});	*/	
 					
 				   // update and disable		
 				   self.note.unselect();

@@ -116,7 +116,9 @@ gxp.plugins.AddGeometry = Ext.extend(gxp.plugins.Tool, {
 								}
 
 	                        });
-	                    }
+	                    } else {
+							Ext.getCmp('vselector').deactivate();
+						}
 	                },
 	                render: function(button) {
 	                    // toggleGroup should handle this

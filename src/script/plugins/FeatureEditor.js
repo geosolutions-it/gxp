@@ -510,7 +510,9 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
             scope: this
         });
 
-        var toggleGroup = this.toggleGroup || Ext.id();
+        // var toggleGroup = this.toggleGroup || Ext.id();
+
+		var toggleGroup = "toolGroup";
 
         var actions = [];
         var commonOptions = {

@@ -101,7 +101,8 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 			}			
 			return val;
 		}
-					
+				
+		var self = this;
 	    var xg = Ext.grid;
 		this.grid = new xg.GridPanel({
 			id: "vselector",
@@ -110,12 +111,30 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 				reader: reader,
 				data: this.data
 			}),
+			deactivate: function(){
+				this.getSelectionModel().clearSelections();
+				if(self.enableAoi){
+					var manager = self.featureEditor.getFeatureManager();
+					self.setEditorButtons(undefined, manager);	
+				}
+				self.refreshRecords();	
+				
+			},
 			listeners: {
 			    scope: this, 
 				afterrender: function(g){	
 					this.refreshRecords();	
 				},
-				rowclick: function(g, rowIndex, e){				    
+				rowclick: function(g, rowIndex, e){		
+					
+					// find a better way
+					var controls = this.target.mapPanel.map.getControlsBy('name', 'PilotNotes:SelectFeature');
+					if ( controls.length == 1 ){
+						controls[0].unselectAll();
+						controls[0].deactivate();
+					} 
+					/// end
+							    
 					if(this.enableAoi){
 						var store = g.getStore();		
 						var record = store.getAt(rowIndex);						
@@ -177,7 +196,7 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 					{
 						xtype: 'actioncolumn',
 						sortable : false, 
-						width: 30,
+						width: 50,
 						listeners: {
 							scope: this,
 							click: function(column, grd, row, e){

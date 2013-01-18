@@ -98,6 +98,7 @@
 		"plugins/FeatureSelector.js",
 		"plugins/Synchronizer.js",
 		"plugins/VehicleSelector.js",
+		"plugins/LogFiles.js",
         "locale/es.js",
         "locale/ca.js"
     );

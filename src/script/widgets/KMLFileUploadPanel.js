@@ -90,6 +90,7 @@ gxp.KMLFileUploadPanel = Ext.extend(Ext.FormPanel, {
                     // remove the path from the filename - avoids C:/fakepath etc.
                     cmp.setValue(value.split(/[/\\]/).pop());
 					self.filename = cmp.getValue();
+					self.buttons[0].enable();
                 }
             },
             validator: this.fileNameValidator.createDelegate(this)
@@ -98,6 +99,7 @@ gxp.KMLFileUploadPanel = Ext.extend(Ext.FormPanel, {
         
         this.buttons = [{
             text: this.uploadText,
+			disabled:true,
             handler: function() {
 	
 				this.url = this.xmlJsonTranslateService;
