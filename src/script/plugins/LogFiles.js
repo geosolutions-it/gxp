@@ -687,7 +687,7 @@ gxp.plugins.LogFiles = Ext.extend(gxp.plugins.Tool, {
 
 		this.baseUrl_ = geoStoreBaseURL;
 		this.proxy_ = this.target.proxy;
-
+		Ext.getCmp('south').collapse();
 
 		var tab = new Ext.TabPanel({
 			activeTab: 0,
