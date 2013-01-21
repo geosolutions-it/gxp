@@ -75,7 +75,8 @@ gxp.plugins.MissionScriptImporter = Ext.extend(gxp.plugins.Tool, {
 					// create an upload file form
 					var form = new gxp.MissionScriptFileUploadPanel( {
 						xmlJsonTranslateService: xmlJsonTranslateService,
-						encodeURIComp: mHost[2] == location.host ? false : true
+						encodeURIComp: mHost[2] == location.host ? false : true,
+						vehicleData: this.target.vehicleSelector.data
 					} );
 					
 					// open a modal window

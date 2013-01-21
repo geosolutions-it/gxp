@@ -28,7 +28,6 @@ gxp.MissionScriptFileUploadPanel = Ext.extend(Ext.FormPanel, {
     failedUploadingTitle: "Cannot upload file",
     /** end i18n */
 
-    
     /** private: property[fileUpload]
      *  ``Boolean``
      */
@@ -44,8 +43,7 @@ gxp.MissionScriptFileUploadPanel = Ext.extend(Ext.FormPanel, {
 	     allowBlank: false,
 	     msgTarget: 'side'
 	},
-
-    
+	
     /** api: config[validFileExtensions]
      *  ``Array``
      *  List of valid file extensions.  These will be used in validating the 
@@ -63,48 +61,89 @@ gxp.MissionScriptFileUploadPanel = Ext.extend(Ext.FormPanel, {
      */
     constructor: function(config) {
 		this.xmlJsonTranslateService = config.xmlJsonTranslateService;
+		this.vehicleData = config.vehicleData;
         gxp.MissionScriptFileUploadPanel.superclass.constructor.call(this, config);
     },
     
     /** private: method[initComponent]
      */
     initComponent: function() {
-        var self = this;
-        this.items = [{
-            xtype: "fileuploadfield",
-            id: "file",
-            emptyText: this.fieldEmptyText,
-            fieldLabel: this.fileLabel,
-			//width: 200,
-			//labelStyle: 'font-weight:bold; width:150px;',
-            name: "file",
-            buttonText: "",
-            buttonCfg: {
-                iconCls: "gxp-icon-filebrowse"
-            },
-            listeners: {
-                "fileselected": function(cmp, value) {
-                    // remove the path from the filename - avoids C:/fakepath etc.
-                    cmp.setValue(value.split(/[/\\]/).pop());
-					self.filename = cmp.getValue();
-					self.buttons[0].enable();
-                }
-            },
-            validator: this.fileNameValidator.createDelegate(this)
-        }
+        var self = this;		
+		var vstore = new Ext.data.ArrayStore({
+            fields: ['availability', 'name', 'imgurl', 'selected'],
+            data:  this.vehicleData
+        });
+		
+        this.items = [
+			{
+				xtype: "fileuploadfield",
+				id: "file",
+				emptyText: this.fieldEmptyText,
+				fieldLabel: this.fileLabel,
+				//width: 200,
+				//labelStyle: 'font-weight:bold; width:150px;',
+				name: "file",
+				buttonText: "",
+				buttonCfg: {
+					iconCls: "gxp-icon-filebrowse"
+				},
+				listeners: {
+					"fileselected": function(cmp, value) {
+						// remove the path from the filename - avoids C:/fakepath etc.
+						cmp.setValue(value.split(/[/\\]/).pop());
+						self.filename = cmp.getValue();
+						
+						var vname = Ext.getCmp("msvehicle").getValue();
+						if(vname){
+							self.buttons[0].enable();
+						}
+					}
+				},
+				validator: this.fileNameValidator.createDelegate(this)
+			},
+			{
+				xtype: 'combo',
+				fieldLabel: 'Vehicle',
+				id: "msvehicle",
+				width: 150,
+				hideLabel : false,
+				store: vstore,
+				displayField: 'name',	
+				typeAhead: true,
+				mode: 'local',
+				forceSelection: true,
+				triggerAction: 'all',
+				selectOnFocus: true,
+				editable: false,
+				resizable: true,	
+				allowBlank: false,
+				emptyText: 'Select a vehicle ...',
+				listeners: {
+					scope: this,													
+					select: function(cb, record, index) {
+						var value = record.get('name');  
+
+						var msfile = Ext.getCmp("file").getValue();
+						if(msfile){
+							self.buttons[0].enable();
+						}     					
+					}
+				}					
+			}
         ];
         
         this.buttons = [{
             text: this.uploadText,
-			disabled:true,
+			disabled: true,
             handler: function() {
 	
-				this.url = this.xmlJsonTranslateService;
+				this.url = this.xmlJsonTranslateService;				
+				var vname = Ext.getCmp("msvehicle").getValue();
 				
 				var ext = this.filename.slice(-4).toLowerCase();
 				switch( ext ){
 					case '.zip':
-					  this.url += this.encodeURIComp ? encodeURIComponent('FileUploader?moveFile=true&zipName=elettra') : 'FileUploader?moveFile=true&zipName=elettra';
+					  this.url += this.encodeURIComp ? encodeURIComponent('FileUploader?moveFile=true&zipName=' + vname) : 'FileUploader?moveFile=true&zipName=' + vname;
 					  //this.url = encodeURIComponent(this.url);
 					  break;
 					default:
@@ -115,6 +154,7 @@ gxp.MissionScriptFileUploadPanel = Ext.extend(Ext.FormPanel, {
 			
 				var map = this.map;
                 var form = this.getForm();
+				
                 if (form.isValid()) {
                     form.submit({
                         url: this.url, 
