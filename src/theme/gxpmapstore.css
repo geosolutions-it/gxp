@@ -25,6 +25,10 @@
 	background-image: url(img/decline.png) !important;
 }
 
+.icon-attribute-add{
+	background-image: url(img/silk/add.png) !important;
+}
+
 .spm-create-button {
 	background-image: url(img/geosilk/cursor.png) !important;
 }
