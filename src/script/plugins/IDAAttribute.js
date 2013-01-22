@@ -198,7 +198,7 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
             disabled: false,
             title: this.title,
 			bbar: [
-			    {
+			    /*{
 			     text: this.reloadLayerText,
 			     iconCls: "icon-reload-layers",
 			     handler: function(){
@@ -210,7 +210,7 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 							filterFields[i].items.get(0).store.reload();
 						}
 					}
-				},
+				},*/
 					'->',
 				{
 					text: this.applyFilterText,
