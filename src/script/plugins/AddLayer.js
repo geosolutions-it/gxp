@@ -156,6 +156,7 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
      */
 	addLayer: function(msLayerTitle, msLayerName, wmsURL, gnUrl, enableViewTab, msLayerUUID, gnLangStr){		
 		var mask = new Ext.LoadMask(Ext.getBody(), {msg: this.waitMsg});
+		mask.show();
 		
 		this.msLayerTitle = msLayerTitle;
 		this.msLayerName = msLayerName;
@@ -187,7 +188,13 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
 				// In this case is necessary reload the local store to refresh 
 				// the getCapabilities records 
 				// ///////////////////////////////////////////////////////////////
-				this.source.store.reload();
+				var baseParams = this.source.store.baseParams;
+				//alert(baseParams);
+				Ext.apply(baseParams, {
+					datetime: new Date().getTime() // for IE
+				});
+
+				this.source.store.reload(baseParams);
 			}else{
 				this.addLayerRecord();
 			}
