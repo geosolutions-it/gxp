@@ -59,6 +59,8 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
         runListFieldSetName: "Run List (Click Run All to START)",
         runListNoRunMsg: "No SPM run to execute",
         composerErrorTitle:"Enter at least two SPM runs to use the composer",
+        missingParameterTitle:"Missing Parameters",
+        missingParameterMsg:"Please set all mandatory parameters",
 	//settingColorTitle: 'Color',
 	//end i18n
 	
@@ -745,6 +747,13 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                 }else{
                   Ext.getCmp(this.target.tools[this.svpUploader].getInputFileCmpID(0)).markInvalid(this.svpFileMissingMsg); 
                } 
+             }else{
+                 Ext.Msg.show({
+                      title:"SPM: " + this.missingParameterTitle,
+                      msg:  this.missingParameterMsg,
+                      buttons: Ext.Msg.OK,
+                      icon: Ext.MessageBox.ERROR
+                });
              }
                 
          return null;
