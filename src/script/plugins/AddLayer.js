@@ -157,89 +157,111 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
 	addLayer: function(msLayerTitle, msLayerName, wmsURL, gnUrl, enableViewTab, msLayerUUID, gnLangStr){		
 		var mask = new Ext.LoadMask(Ext.getBody(), {msg: this.waitMsg});
 		
+		if(!msLayerName || !wmsURL){
+			Ext.Msg.show({
+				 title: 'Add Layer Plugin',
+				 msg: "The mandatory layer properties are undefined !",
+				 width: 300,
+				 icon: Ext.MessageBox.ERROR
+			}); 
+			
+			return;
+		}
+		
 		this.msLayerTitle = msLayerTitle;
 		this.msLayerName = msLayerName;
-		this.wmsURL = wmsURL;
-		this.gnUrl = gnUrl;
-		this.enableViewTab = enableViewTab;
-		this.msLayerUUID = msLayerUUID;
-		this.gnLangStr = gnLangStr;
-				
-		this.checkLayerSource(this.wmsURL);
-
-		if(this.source){
 		
-			if(!this.source.loaded){
-				this.source.on('ready', function(){
+		var map = this.target.mapPanel.map;
+		if(map.getLayersByName(this.msLayerName).length < 1){
+			this.wmsURL = wmsURL;
+			this.gnUrl = gnUrl;
+			this.enableViewTab = enableViewTab;
+			this.msLayerUUID = msLayerUUID;
+			this.gnLangStr = gnLangStr;
+					
+			this.checkLayerSource(this.wmsURL);
+
+			if(this.source){
+			
+				if(!this.source.loaded){
+					this.source.on('ready', function(){
+						mask.hide();
+						this.target.layerSources[this.source.id].loaded = true; 
+						this.addLayerRecord();
+						
+						if(this.useEvents)
+							this.fireEvents('ready');
+					}, this);
+				}
+				
+				var index = this.source.store.findExact("name", this.msLayerName);
+				
+				if (index < 0) {
+					// ///////////////////////////////////////////////////////////////
+					// In this case is necessary reload the local store to refresh 
+					// the getCapabilities records 
+					// ///////////////////////////////////////////////////////////////
+					var baseParams = this.source.store.baseParams;
+
+					Ext.apply(baseParams, {
+						datetime: new Date().getTime() // for IE
+					});
+
+					mask.show();
+					this.source.store.reload(baseParams);
+				}else{
+					this.addLayerRecord();
+				}
+			}else{
+				mask.show();
+
+				var sourceOpt = {
+					config: {
+					  url: this.wmsURL
+					}
+				};
+			  
+				this.source = this.target.addLayerSource(sourceOpt);
+				
+				//
+				// Waiting GetCapabilities response from the server.
+				//			
+				this.source.on('ready', function(){ 
 					mask.hide();
-					this.target.layerSources[this.source.id].loaded = true; 
+					
+					this.target.layerSources[this.source.id].loaded = true;
 					this.addLayerRecord();
 					
 					if(this.useEvents)
 						this.fireEvents('ready');
 				}, this);
-			}
-			
-		    var index = this.source.store.findExact("name", this.msLayerName);
-			
-			if (index < 0) {
-				// ///////////////////////////////////////////////////////////////
-				// In this case is necessary reload the local store to refresh 
-				// the getCapabilities records 
-				// ///////////////////////////////////////////////////////////////
-				var baseParams = this.source.store.baseParams;
-				//alert(baseParams);
-				Ext.apply(baseParams, {
-					datetime: new Date().getTime() // for IE
-				});
-
-				mask.show();
-				this.source.store.reload(baseParams);
-			}else{
-				this.addLayerRecord();
+			  
+				//
+				// To manage failure in GetCapabilities request (invalid request url in 
+				// GeoNetwork configuration or server error).
+				//
+				this.source.on('failure', function(src, msg){		          
+					mask.hide();
+					
+					if(!this.useEvents){
+						Ext.Msg.show({
+							 title: 'GetCapabilities',
+							 msg: msg + this.capabilitiesFailureMsg,
+							 width: 300,
+							 icon: Ext.MessageBox.ERROR
+						});  
+					}else{
+						this.fireEvents('failure', msg);
+					}
+				}, this);
 			}
 		}else{
-			mask.show();
-
-			var sourceOpt = {
-				config: {
-				  url: this.wmsURL
-				}
-			};
-		  
-			this.source = this.target.addLayerSource(sourceOpt);
-			
-			//
-			// Waiting GetCapabilities response from the server.
-			//			
-			this.source.on('ready', function(){ 
-				mask.hide();
-				
-				this.target.layerSources[this.source.id].loaded = true;
-				this.addLayerRecord();
-				
-				if(this.useEvents)
-					this.fireEvents('ready');
-			}, this);
-		  
-			//
-			// To manage failure in GetCapabilities request (invalid request url in 
-			// GeoNetwork configuration or server error).
-			//
-			this.source.on('failure', function(src, msg){		          
-				mask.hide();
-				
-				if(!this.useEvents){
-					Ext.Msg.show({
-						 title: 'GetCapabilities',
-						 msg: msg + this.capabilitiesFailureMsg,
-						 width: 300,
-						 icon: Ext.MessageBox.ERROR
-					});  
-				}else{
-					this.fireEvents('failure', msg);
-				}
-			}, this);
+			Ext.Msg.show({
+				 title: 'Add Layer Plugin',
+				 msg: "The layer is already present in the map ! You must remove it to be able to re-add",
+				 width: 300,
+				 icon: Ext.MessageBox.ERROR
+			}); 
 		}
 	},
 
