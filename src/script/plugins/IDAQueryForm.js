@@ -119,7 +119,7 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
     /** api: config[disableAdvSearch]
      *  ``Boolean`` default true. Disable the fields for advanced search.
      */
-    disableAdvSearch: true,
+    disableAdvSearch: false,
     
     
     wfsGrid: "wfsGridPanel",
@@ -316,7 +316,7 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
 						valueField: 'myId',
 						displayField: 'displayText',
 						value:  this.allText
-					}),
+					})/*,
 					new Ext.form.ComboBox({
 						width:210,
 						allowBlank: false,
@@ -332,7 +332,7 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
 						valueField: 'myId',
 						value: this.allText,
 						displayField: 'displayText'
-					}),
+					})*/,
 					{
 						fieldLabel: this.sourcedepthLabel,
 						name: 'sourcedepth',
@@ -511,7 +511,7 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                        var wfsGrid=this.target.tools[this.wfsGrid];
                        wfsGrid.resetFilter();
                     }
-                        
+                      
                     
                 }
             }, {
@@ -587,6 +587,8 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                                 icon: Ext.Msg.INFO
                             });
                         }
+                         Ext.getCmp('south').expand(false);
+                         Ext.getCmp('idalaylist').setActiveTab(Ext.getCmp('featuregrid'));
                     }else{
                         var formValues=queryForm.getForm().getFieldValues(true);
 
@@ -611,7 +613,7 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                             SPMFilter.filters.push(
                                 new OpenLayers.Filter.Comparison({
                                     type: OpenLayers.Filter.Comparison.LIKE,
-                                    property: "name",
+                                    property: "modelName",
                                     mmatchCase: false,
                                     value: "*"+formValues.modelname+"*"
                                 })
@@ -622,7 +624,7 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                             SPMFilter.filters.push(
                                 new OpenLayers.Filter.Comparison({
                                     type: OpenLayers.Filter.Comparison.EQUAL_TO,
-                                    property: "srcFrequency",
+                                    property: "sourceFrequency",
                                     value: formValues.sourcefrequency
                                 })
                             );
@@ -633,7 +635,7 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                             SPMFilter.filters.push(
                                 new OpenLayers.Filter.Comparison({
                                     type: OpenLayers.Filter.Comparison.EQUAL_TO,
-                                    property: "srcPressureLevel",
+                                    property: "sourcePressureLevel",
                                     value: formValues.sourcepressurelevel
                                 })
                             );
