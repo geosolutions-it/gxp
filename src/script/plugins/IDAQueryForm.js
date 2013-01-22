@@ -614,7 +614,7 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                                 new OpenLayers.Filter.Comparison({
                                     type: OpenLayers.Filter.Comparison.LIKE,
                                     property: "modelName",
-                                    mmatchCase: false,
+                                    matchCase: false,
                                     value: "*"+formValues.modelname+"*"
                                 })
                             );
