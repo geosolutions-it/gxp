@@ -43,15 +43,17 @@ gxp.form.IDAFilterField = Ext.extend(Ext.form.CompositeField, {
      * Property: coveragesComboConfig
      * {Object}
      */
-    coveragesComboConfig: null,
+       coveragesComboConfig: null,
 	
 	baseURL: null,
 	
-	version: "1.1.1",
+	version: "1.0.0",
 	
 	proxy: null,
 	
 	coveragesSettings: [],
+        
+        defualtCoverageSetting: null,
 	
     initComponent: function() {
                 
@@ -81,7 +83,7 @@ gxp.form.IDAFilterField = Ext.extend(Ext.form.CompositeField, {
 		var pattern = /(.+:\/\/)?([^\/]+)(\/.*)*/i;
         var mHost = pattern.exec(this.baseURL);
 
-        var mUrl = this.baseURL + "/ows?service=wcs&" + this.version + "&request=GetCapabilities";
+        var mUrl = this.baseURL + "/ows?service=wcs&version=" + this.version + "&request=GetCapabilities";
 		
 		var coverages = new Ext.data.Store({
 			reader : new WCSCapabilitiesReader({
@@ -122,6 +124,9 @@ gxp.form.IDAFilterField = Ext.extend(Ext.form.CompositeField, {
 			resizable: true,
 			minChars:2,
             listeners: {
+                "expand": function(combo) {
+                    combo.store.reload();
+                },
                 select: function(combo, record) {
                     this.items.get(1).enable();
 					
@@ -132,7 +137,7 @@ gxp.form.IDAFilterField = Ext.extend(Ext.form.CompositeField, {
 					this.filter.property = record.get("name");
                     this.fireEvent("change", this.filter);
                 },
-				// //////////////////////////////////////////////////////////////
+		// //////////////////////////////////////////////////////////////
                 // Workaround for select event not being fired when tab is hit
                 // after field was autocompleted with forceSelection
 				// //////////////////////////////////////////////////////////////
@@ -184,7 +189,9 @@ gxp.form.IDAFilterField = Ext.extend(Ext.form.CompositeField, {
 	 * Define rules about the slider/multislider switching.
      */
 	setSlider: function(){
-		var data = this.coveragesSettings, min = 0, max = 250;
+		var data = this.coveragesSettings, 
+                min = this.defualtCoverageSetting.min, 
+                max = this.defualtCoverageSetting.max;
 		for(var i=0; i<data.length; i++){
 		    var name = this.items.get(0).getValue();
 			if(data[i].name == name){
@@ -239,8 +246,8 @@ gxp.form.IDAFilterField = Ext.extend(Ext.form.CompositeField, {
     createFilterItems: function() {
         this.slider = new Ext.Slider({
 			disabled: true,
-			minValue: 0,
-			maxValue: 250,	
+			minValue: this.defualtCoverageSetting.min,
+			maxValue: this.defualtCoverageSetting.max,	
 			width: 100,
 			listeners: {
 				change: function (field, newv, oldv){
@@ -255,9 +262,9 @@ gxp.form.IDAFilterField = Ext.extend(Ext.form.CompositeField, {
 			width: 100,
 			disabled: false,
 			hidden: true,
-			minValue: 0,
-			maxValue: 250,
-			values  : [0, 250],
+			minValue: this.defualtCoverageSetting.min,
+			maxValue: this.defualtCoverageSetting.max,
+			values  : [this.defualtCoverageSetting.min, this.defualtCoverageSetting.max],
 			plugins : new Ext.slider.Tip(),
 			listeners: {
 			      show: function(field){
@@ -292,7 +299,7 @@ gxp.form.IDAFilterField = Ext.extend(Ext.form.CompositeField, {
 					[OpenLayers.Filter.Comparison.LESS_THAN, "<"],
 					[OpenLayers.Filter.Comparison.GREATER_THAN, ">"],
 					[OpenLayers.Filter.Comparison.LESS_THAN_OR_EQUAL_TO, "<="],
-                    [OpenLayers.Filter.Comparison.GREATER_THAN_OR_EQUAL_TO, ">="],
+                                        [OpenLayers.Filter.Comparison.GREATER_THAN_OR_EQUAL_TO, ">="],
 					[OpenLayers.Filter.Comparison.BETWEEN, ".."]
 				],
                 disabled: true,
@@ -337,9 +344,10 @@ gxp.form.IDAFilterField = Ext.extend(Ext.form.CompositeField, {
                     scope: this
                 }
             }, {
-                xtype: "textfield",
-				readOnly: true,
-                disabled: true,
+               // xtype: "textfield",
+                xtype: 'numberfield',
+		//readOnly: true,
+                //disabled: true,
                 value: this.filter.value,
                 width: 50,
                 allowBlank: this.allowBlank,
@@ -356,9 +364,9 @@ gxp.form.IDAFilterField = Ext.extend(Ext.form.CompositeField, {
                     scope: this
                 }
             }, cfield, {
-                xtype: "textfield",
-				readOnly: true,
-                disabled: true,
+                xtype: "numberfield",
+		//readOnly: true,
+                //disabled: true,
                 value: this.filter.value,
                 width: 50,
                 allowBlank: this.allowBlank,
