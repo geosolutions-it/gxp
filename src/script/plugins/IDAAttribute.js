@@ -25,6 +25,8 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
     title: "Layer Attribute",
 	
 	settingsTitle: "Base Settings",
+        
+        rasterAlgebraExecuteMessage: "Raster Algebra run request sent.",
 	
 	settingNameTitle: "Name",
 	
@@ -38,18 +40,30 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 	
 	reloadLayerText: "Reload Layers",
 	
-	applyFilterText: "Apply",
+	applyFilterText: "Run",
 
 	resetText: "Reset",
+        
+        wpsManager: null,
+        
+        wfsGrid: null,
+        
+        wpsProcess: "gs:IDARasterAlgebra",
 	
 	store:[
 		'ALL',
-		'NATO UNCLASSIFIED',
-		'NATO RESTRICTED',
-		'NATO CONFIDENTAL',
-		'NATO SECRET',
-		'NATO TOP SECRET'						
+		'UNCLASSIFIED',
+		'RESTRICTED',
+		'CONFIDENTAL',
+		'SECRET',
+		'TOPSECRET'						
 	],
+        
+        /** api: config[colorStyles]
+        *  ``Array String``
+        *  
+        */
+        colorStyles: null,
 	
 	defaultBuilder: {
 		// The attributes conrespont to the IDA raste layers (SPM + Habitat)
@@ -59,6 +73,8 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 		allowBlank: true,
 		allowGroups: true
 	},
+        
+        attributeField: null,
     
     /** private: method[constructor]
      *  :arg config: ``Object``
@@ -77,7 +93,7 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 		//
 		// Fix for ExtJs 3 version
 		//
-		Ext.override(Ext.Element, {
+		/*Ext.override(Ext.Element, {
 			getColor: function(attr, defaultValue, prefix){
 				var v = this.getStyle(attr), color = typeof prefix == "undefined" ? "#" : prefix, h;
 				if (!v || /transparent|inherit/.test(v)) {
@@ -94,45 +110,50 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 				}
 				return (color.length > 5 ? color.toLowerCase() : defaultValue);
 			}
-		});
+		});*/
+        
+               this.attributeField= {
+			 xtype: 'textfield',
+			 fieldLabel: this.settingNameTitle,
+                         readOnly: true,
+			 width: 200,
+			 name: this.settingNameTitle,
+			 value: 'Attribute match-' + new Date().getTime()
+	       };
 	
 		var settings = new Ext.form.FieldSet({
                 title: this.settingsTitle,
                 autoHeight: true,
 				labelWidth: 80,
-                items: [{
-						xtype: 'textfield',
-						fieldLabel: this.settingNameTitle,
-						width: 200,
-						name: this.settingNameTitle,
-						value: 'Attribute match-' + new Date().getTime()
-					}, {
-						xtype: 'colorpickerfield',
-						fieldLabel: this.settingColorTitle,
-						width: 200,
-						name: this.settingColorTitle,
-						editable: false,
-						value: this.settingColor
-					}, {
-						xtype: 'combo',
-						allowBlank: false,
-						editable: false,
-						triggerAction: "all",
-						resizable: true,
-						fieldLabel: this.settingClassificationTitle,
-						width: 200,
-						name: this.settingClassificationTitle,
-						store: this.store,
-						value: 'ALL'
-				}]
+                items: [this.attributeField, {
+				xtype: 'combo',
+				allowBlank: false,
+				editable: false,
+				triggerAction: "all",
+				resizable: true,
+				fieldLabel: this.settingColorTitle,
+				width: 200,
+				name: this.settingColorTitle,
+				store: this.colorStyles,
+				value: this.colorStyles[0]
+			}, {
+				xtype: 'combo',
+				allowBlank: false,
+				editable: false,
+				triggerAction: "all",
+				resizable: true,
+				fieldLabel: this.settingClassificationTitle,
+				width: 200,
+				name: this.settingClassificationTitle,
+				store: this.store,
+				value: 'ALL'
+			}]
 		});
 		settings.getMetadata = function(){
 			var meta = {};
-			
 			meta.name = this.items.get(0).getValue();
 			meta.color = this.items.get(1).getValue();
 			meta.classify = this.items.get(2).getValue();
-			
 			return meta;
 		};
 		
@@ -144,6 +165,9 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 		
 		if(this.target.riskData.coveragesSettings)
 			params.coveragesSettings = this.target.riskData.coveragesSettings;
+                    
+                if(this.target.riskData.defualtCoverageSetting)
+			params.defualtCoverageSetting = this.target.riskData.defualtCoverageSetting;
 		
 		var filterBuilder = new gxp.IDAFilterBuilder(params);
 		
@@ -166,7 +190,7 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 			labelAlign: 'left',
 			items: [settings, filter]
 		});		
-	
+	var me=this;
         var cpanel = new Ext.Panel({
             border: false,
 			autoScroll: true,
@@ -175,9 +199,9 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
             title: this.title,
 			bbar: [
 			    {
-					text: this.reloadLayerText,
-					iconCls: "icon-reload-layers",
-					handler: function(){
+			     text: this.reloadLayerText,
+			     iconCls: "icon-reload-layers",
+			     handler: function(){
 					    //
 						// Find sub components by type and reload the combo store on the fly. 
 						//
@@ -196,14 +220,45 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 						var f = filterBuilder.getFilter();
 						
 						if(f){
-							var filterFormat = new OpenLayers.Format.Filter();
-							var filterOGC = filterFormat.write(f);  
-											
-							var xmlFormat = new OpenLayers.Format.XML();                  
-							filterOGC = xmlFormat.write(filterOGC);
+                                                        var infoRun= {};
+                                                        me.attributeField.setValue('Attribute match-' + new Date().getTime());
+                                                        var wfsGrid= me.target.tools[this.wfsGrid];
+                                                        infoRun.inputs={};
+                                                        infoRun.inputs=settings.getMetadata();
+							var filterFormat = /*new OpenLayers.Format.Filter()*/new OpenLayers.Format.CQL();
+							var filterCQL = filterFormat.write(f);  
+                                                        
+                                                        infoRun.inputs.attributeFilter= filterCQL;
+							/*var xmlFormat = new OpenLayers.Format.XML();                  
+							filterOGC = xmlFormat.write(filterOGC);*/
+                                                        
+                                                        var wps = me.target.tools[me.wpsManager];
+                                                        
+                                                        var runProcess= me.getRARun(infoRun);
+                                                        
+                                                        
+                                                        wps.execute(me.wpsProcess,runProcess,function(response){
+                                                               wfsGrid.refresh();
+                                                                var fc = OpenLayers.Format.XML.prototype.read.apply(this, [response]);
+                                                                       var fid = fc.getElementsByTagName("gml:ftUUID")[0];  
+                                                                       if(!fid){
+                                                                          var wpsError=new OpenLayers.Format.WPSExecute().read(response);
+                                                                               if(wpsError){
+                                                                                    var ex=wpsError.executeResponse.status.exception.exceptionReport.exceptions[0];
+                                                                                    if(ex)
+                                                                                    Ext.Msg.show({
+                                                                                        title:"Raster Algebra: " + ex.code,
+                                                                                        msg: ex.texts[0] ,
+                                                                                        buttons: Ext.Msg.OK,
+                                                                                        icon: Ext.MessageBox.ERROR
+                                                                                    });
+                                                                               }
+                                                                       }    
+                                                               wfsGrid.refresh();         
+                                                         });
 							
-							alert(filterOGC);
-							//var meta = settings.getMetadata(); // to JOIN in the request
+							me.activateRasterAlgebraList(true);
+                                                        
 						}else{
 							Ext.Msg.show({
 								title: "Filter Apply",
@@ -242,6 +297,76 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
         //Ext.getCmp("idacontrol").setActiveTab(cpanel);
         
         return attributePanel;
+    },
+    
+    getRARun: function(infoRun){
+             var inputs= infoRun.inputs;
+             var today = new Date();
+             var currentDate = today.format("Y-m-d\\TH:i:s")+"Z";
+             var requestObj = {
+			type: "raw",
+			inputs:{
+				attributeName: new OpenLayers.WPSProcess.LiteralData({
+					value:inputs['name']
+				}),
+				runBegin: new OpenLayers.WPSProcess.LiteralData({
+					value:currentDate
+				}),
+				wsName: new OpenLayers.WPSProcess.LiteralData({
+					value:rasterAlgebra.wsName
+				}),
+                                storeName: new OpenLayers.WPSProcess.LiteralData({
+				    value:rasterAlgebra.storeName
+				}),
+                                outputUrl: new OpenLayers.WPSProcess.LiteralData({
+					value:rasterAlgebra.outputUrl
+				}),
+				classification: new OpenLayers.WPSProcess.LiteralData({
+					value:inputs['classify']
+				}),
+                                styleName: new OpenLayers.WPSProcess.LiteralData({
+					value: "layerattribute_"+inputs['color'].toLowerCase()
+				}),
+                                attributeFilter: new OpenLayers.WPSProcess.ComplexData({
+                                        value: inputs['attributeFilter'],
+                                        mimeType: "text/plain; subtype=cql"
+                                })
+                                
+				},
+			outputs: [{
+					identifier: "result",                                 
+					mimeType: "text/xml; subtype=wfs-collection/1.0"
+                                        
+			}]
+		};
+          
+            return requestObj;
+         },
+         
+   activateRasterAlgebraList: function(tooltip){
+	var wfsgrid = Ext.getCmp(this.wfsGrid);
+	Ext.getCmp('south').expand(false);
+	Ext.getCmp('idalaylist').setActiveTab(wfsgrid);
+                
+       if(tooltip)         
+         this.showMsgTooltip(this.rasterAlgebraExecuteMessage);
+    },
+    
+     showMsgTooltip: function(msg){
+          var title="Layer Attribute";
+          var elTooltop= Ext.getCmp("east").getEl();  
+          var t = new Ext.ToolTip({
+               floating: {
+                          shadow: false
+               },
+               width: elTooltop.getWidth()-10,
+               title: title,
+               html: msg,
+               hideDelay: 190000,
+               closable: true
+         });
+         t.showAt([elTooltop.getX()+5, elTooltop.getBottom()-100]);
+         t.el.slideIn('b');  
     }
 });
 
