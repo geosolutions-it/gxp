@@ -126,6 +126,12 @@ gxp.form.IDAFilterField = Ext.extend(Ext.form.CompositeField, {
             listeners: {
                 "expand": function(combo) {
                     combo.store.reload();
+                    combo.list.setWidth( 'auto' );
+                    combo.innerList.setWidth( 'auto' );
+                   /* var widthForScroll= combo.list.getWidth()+10;
+                    alert(widthForScroll);
+                    combo.list.setWidth( widthForScroll );
+                    combo.innerList.setWidth( widthForScroll );*/
                 },
                 select: function(combo, record) {
                     this.items.get(1).enable();
