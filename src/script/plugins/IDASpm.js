@@ -39,6 +39,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 	seasonLabelText: 'Season',
 	//securityLevelLabelText : 'Security Level',
 	applyText: 'Run',
+        applyMultiText: 'Run All',
         saveText: 'Save SPM',
 	resetText: 'Reset',
 	spmList: "SPM List",
@@ -53,6 +54,10 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
         svpFileMissingMsg: "SVP file is mandatory for \"User Input\" season",
         spmBatchComposerMsg: "Composer Runs",
         composerErrorMsg:"Composer Error",
+        removeMsg: "Remove",
+        runNameMsg: "Run Name",
+        runListFieldSetName: "Run List (Click Run All to START)",
+        runListNoRunMsg: "No SPM run to execute",
         composerErrorTitle:"Enter at least two SPM runs to use the composer",
 	//settingColorTitle: 'Color',
 	//end i18n
@@ -75,6 +80,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
         },
         
         runList: [],
+        runStore: null,
         
         composerList: [],
 	
@@ -87,6 +93,8 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 	],*/
 	
 	settingColor: 'FF0000',
+        
+        runListView: null,
 	
     /** private: method[constructor]
      *  :arg config: ``Object``
@@ -128,7 +136,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 				  }
 			  }
 			}
-        });
+                    });
 		
 		//latitude text field
 		this.latitudeField = new Ext.form.NumberField({
@@ -258,6 +266,35 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 		//
 		// whole form
 		//
+                
+                this.runStore=new Ext.data.ArrayStore({
+                            fields: ['name'],
+                            data : []
+                });
+                
+                this.runListView = new Ext.list.ListView({
+                    store: this.runStore,
+                    multiSelect: false,
+                    id:'runListView',
+                    emptyText: me.runListNoRunMsg,
+                    reserveScrollOffset: true,
+                    removeRecord:function(name){
+                        me.removeRun(name);
+                    },
+                    columns: [{
+                        header: me.runNameMsg,
+                        width: .6,
+                        dataIndex: 'name'
+                    },{
+                      //  header: 'Run Name',
+                        width: .4,
+                        tpl: new Ext.XTemplate(
+                            '<a onclick=\"Ext.getCmp(\'runListView\').removeRecord(\'{name}\')\">'+me.removeMsg+'<a>'
+                        )
+                      
+                    }]
+                });
+                
 		this.spmCreateForm = new Ext.form.FormPanel({
 			region:'center',
 			layout: "form",
@@ -287,6 +324,10 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                                         tooltip: this.spmSaveTooltip,
 					handler: function(){
                                               var modelName = this.addFormRun();
+                                              Ext.getCmp("modelName_Cmp").setValue("");
+                                              Ext.getCmp("batchMode_fieldSet").expand(false);
+                                              if(me.runList.length > 1)
+                                                Ext.getCmp("executeSPM").setText(me.applyMultiText);
                                               if(modelName){
                                                   //this.spmCreateForm.getForm().reset();
 						  var layer = map.getLayersByName("spm_source")[0];	
@@ -311,19 +352,21 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 				          handler: function(){
                                                         me=this;
                                                         var composer=this.spmCreateForm.getForm().getFieldValues(true)["batch_mode_composer"];
-                                                        
                                                         var wfsGrid= this.target.tools[this.wfsGrid];
+                                                        wfsGrid.resetFilter();
                                                         var wps = this.target.tools[this.wpsManager];
                                                         var spmExecIndex=0;
-                                                        var spmExecNum=this.runList.length;
+                                                        var spmExecNum=me.runList.length;
                                                         if(spmExecNum > 0){
                                                            var callbackSPM= function(response){
                                                                 wfsGrid.setPage(1);
+                                                                var recordIndex=me.runStore.find("name", me.runList[spmExecIndex].inputs.modelName.value);
+                                                                if(recordIndex !=  -1)
+                                                                    me.runStore.remove(me.runStore.getAt( recordIndex )); 
+                                                                
                                                                 spmExecIndex++;
                                                                 var fc = OpenLayers.Format.XML.prototype.read.apply(this, [response]);
                                                                        var fid = fc.getElementsByTagName("gml:ftUUID")[0];  
-                                                                       
-                                                                       console.log(me.composerList);
                                                                        if(!fid){
                                                                           var wpsError=new OpenLayers.Format.WPSExecute().read(response);
                                                                                if(wpsError){
@@ -336,7 +379,6 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                                                                                         icon: Ext.MessageBox.ERROR
                                                                                     });
                                                                                }
-                                                                          console.log(wpsError); 
                                                                        }
                                                                  
                                                                 if(composer){
@@ -345,7 +387,9 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                                                                 if(spmExecIndex< spmExecNum)
                                                                     wps.execute("gs:IDASoundPropagationModel",
                                                                         me.runList[spmExecIndex],callbackSPM);
+                                                                        
                                                                 else{
+                                                                    me.runList= null;
                                                                     delete me.runList;
                                                                     me.runList= new Array();
                                                                 }
@@ -358,25 +402,27 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                                                                if(me.addFormRun()){
                                                                 wps.execute("gs:IDASoundPropagationModel",me.runList[0],
                                                                     function(response){
-                                                                            var dq = Ext.DomQuery;
+                                                                            me.runList= null;
+                                                                            delete me.runList;
+                                                                            me.runList= new Array();   
+                                                                            wfsGrid.setPage(1);
                                                                             var fc = OpenLayers.Format.XML.prototype.read.apply(this, [response]);
                                                                             var fid = fc.getElementsByTagName("gml:ftUUID")[0];  
                                                                             //me.composerList.push(fid);
                                                                             if(!fid){
-                                                                               var wpsError=new OpenLayers.Format.WPSExecute().read(response);
-                                                                               if(wpsError){
-                                                                                    var ex=wpsError.executeResponse.status.exception.exceptionReport.exceptions[0];
-                                                                                    if(ex)
-                                                                                    Ext.Msg.show({
-                                                                                        title:"SPM: " + ex.code,
-                                                                                        msg: ex.texts[0] ,
-                                                                                        buttons: Ext.Msg.OK,
-                                                                                        icon: Ext.MessageBox.ERROR
-                                                                                    });
-                                                                               }
-                                                                               console.log(wpsError); 
-                                                                            }
-                                                                     wfsGrid.setPage(1); 
+                                                                            var wpsError=new OpenLayers.Format.WPSExecute().read(response);
+                                                                                if(wpsError){
+                                                                                        var ex=wpsError.executeResponse.status.exception.exceptionReport.exceptions[0];
+                                                                                        if(ex)
+                                                                                        Ext.Msg.show({
+                                                                                            title:"SPM: " + ex.code,
+                                                                                            msg: ex.texts[0] ,
+                                                                                            buttons: Ext.Msg.OK,
+                                                                                            icon: Ext.MessageBox.ERROR
+                                                                                        });
+                                                                                }
+                                                                        }
+                                                                     
                                                                  });      
                                                                   me.activateSPMList(true);
                                                                 }else
@@ -459,6 +505,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 						}, {
 							fieldLabel: this.modelnameLabel,
 							name: 'modelname',
+                                                        id: "modelName_Cmp",
 							xtype: 'textfield',
 							allowBlank:false
 						}/*,
@@ -511,9 +558,23 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                                          xtype: 'checkbox',
 					 allowBlank:true  
                                         },
-                                       this.target.tools[this.spmListUploader].getPanel({submitButton: true})
+                                       this.target.tools[this.spmListUploader].getPanel({submitButton: true}),
+                                       {
+                                         xtype: "fieldset",
+                                         title: me.runListFieldSetName,
+                                         id: "runList_fieldSet",
+                                         autoHeight: true,
+                                         hidden: false,
+                                         collapsed: false,
+                                         autoWidth:true,
+                                         checkboxToggle: false,
+                                         items: [
+                                          this.runListView
+                                         ]
+                                       }
                                     ]
                                 }
+                                       
 			]
 		});
 		
@@ -525,13 +586,13 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                 for(var i=0; i<runList.length; i++){
                     me.addRun(runList[i]);
                 }
+                 if(me.runList.length > 1)
+                   Ext.getCmp("executeSPM").setText(me.applyMultiText);
                 me.showMsgTooltip(me.spmXMLImportMsg);
              });  
              
         this.target.tools[this.svpUploader].setSuccessCallback(
              function(response){
-                console.log(response.result.code);
-                
                 this.svpFile=response.result.code;
                 me.showMsgTooltip(me.svpImportMsg);
              });       
@@ -677,7 +738,6 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                   infoRun.inputs["advParams"].value=advValues.substr(0, advValues.length-1); 
                 }
 
-                //console.log(infoRun);
                 this.addRun(infoRun);
 
                 return formValues["modelname"];
@@ -691,7 +751,6 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
       },
             
          addRun: function(infoRun){
-  
              var inputs= infoRun.inputs;
              var today = new Date();
              var currentDate = today.format("Y-m-d\\TH:i:s")+"Z";
@@ -790,6 +849,24 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                                     });
                                 
                     this.runList.push(requestObj);  
+                    
+                    this.runStore.add(new this.runStore.recordType({
+                        name: inputs['modelName'].value
+                    }));
+         },
+         
+         removeRun: function (name){
+             var recordIndex=this.runStore.find("name", name);
+             for (var u = 0; u < this.runList.length; u++) {
+                     if(this.runList[u].inputs.modelName == name){
+                         this.runList.splice(u,1); 
+                         break;
+                     } 
+             }
+             if(recordIndex !=  -1)
+               this.runStore.remove(this.runStore.getAt( recordIndex ));  
+            
+              
          }
 });
 
