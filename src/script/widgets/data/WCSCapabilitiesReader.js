@@ -79,10 +79,10 @@ WCSCapabilitiesReader = Ext.extend(Ext.data.DataReader, {
 			data = this.meta.format.read(data);		
 		}
 		
-		var contents = data.getElementsByTagName("wcs:Contents")[0];
+		var contents = data.getElementsByTagName("wcs:Contents")[0] || data.getElementsByTagName("wcs:ContentMetadata")[0];
 		
 		if(!contents || contents == null){
-			contents = data.getElementsByTagName('Contents')[0];
+			contents = data.getElementsByTagName('Contents')[0] || data.getElementsByTagName('ContentMetadata')[0];
 		}
 		
 		contents = contents.childNodes;
@@ -90,10 +90,10 @@ WCSCapabilitiesReader = Ext.extend(Ext.data.DataReader, {
 		var records = [];
 		
 		for(var i=0; i<contents.length; i++){
-		    var coverage = contents[i].getElementsByTagName("wcs:Identifier")[0];
+		    var coverage = contents[i].getElementsByTagName("wcs:Identifier")[0] || contents[i].getElementsByTagName("wcs:name")[0];
 			
 			if(!coverage || coverage == null){
-				coverage = contents[i].getElementsByTagName('Identifier')[0];
+				coverage = contents[i].getElementsByTagName('Identifier')[0] || contents[i].getElementsByTagName('name')[0];
 			}
 		
 			var name = this.meta.format.getChildValue(coverage);
