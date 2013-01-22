@@ -112,14 +112,14 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 			}
 		});*/
         
-               this.attributeField= {
+               this.attributeField= new Ext.form.TextField({
 			 xtype: 'textfield',
 			 fieldLabel: this.settingNameTitle,
                          readOnly: true,
 			 width: 200,
 			 name: this.settingNameTitle,
 			 value: 'Attribute match-' + new Date().getTime()
-	       };
+	       });
 	
 		var settings = new Ext.form.FieldSet({
                 title: this.settingsTitle,
