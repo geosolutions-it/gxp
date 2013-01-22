@@ -156,7 +156,6 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
      */
 	addLayer: function(msLayerTitle, msLayerName, wmsURL, gnUrl, enableViewTab, msLayerUUID, gnLangStr){		
 		var mask = new Ext.LoadMask(Ext.getBody(), {msg: this.waitMsg});
-		mask.show();
 		
 		this.msLayerTitle = msLayerTitle;
 		this.msLayerName = msLayerName;
@@ -194,6 +193,7 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
 					datetime: new Date().getTime() // for IE
 				});
 
+				mask.show();
 				this.source.store.reload(baseParams);
 			}else{
 				this.addLayerRecord();
