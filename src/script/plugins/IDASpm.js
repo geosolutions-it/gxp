@@ -402,10 +402,14 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                                                         }else{
                                                             if(!composer){
                                                                if(me.addFormRun()){
+                                                                   Ext.getCmp("modelName_Cmp").setValue("");
                                                                 wps.execute("gs:IDASoundPropagationModel",me.runList[0],
                                                                     function(response){
                                                                             me.runList= null;
                                                                             delete me.runList;
+                                                                            var recordIndex=me.runStore.find("name", me.runList[spmExecIndex].inputs.modelName.value);
+                                                                            if(recordIndex !=  -1)
+                                                                                me.runStore.remove(me.runStore.getAt( recordIndex )); 
                                                                             me.runList= new Array();   
                                                                             wfsGrid.setPage(1);
                                                                             var fc = OpenLayers.Format.XML.prototype.read.apply(this, [response]);
