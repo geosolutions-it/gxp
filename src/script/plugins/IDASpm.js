@@ -871,7 +871,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
          removeRun: function (name){
              var recordIndex=this.runStore.find("name", name);
              for (var u = 0; u < this.runList.length; u++) {
-                     if(this.runList[u].inputs.modelName == name){
+                     if(this.runList[u].inputs.modelName.value == name){
                          this.runList.splice(u,1); 
                          break;
                      } 
