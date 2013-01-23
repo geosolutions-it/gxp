@@ -25,25 +25,19 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
     title: "Layer Attribute",
 	
 	settingsTitle: "Base Settings",
-        
         rasterAlgebraExecuteMessage: "Raster Algebra run request sent.",
-	
 	settingNameTitle: "Name",
-	
 	settingColorTitle: "Color",
-	
 	settingClassificationTitle: "Classification",
-	
-	settingColor: '000000',
-	
-	filterTitle: "Filter",
-	
-	reloadLayerText: "Reload Layers",
-	
-	applyFilterText: "Run",
-
+        filterApplyTitle: "Filter Apply",
+	filterApplyMsg: "Your filter is empty or not properly formatted!",
+        filterTitle: "Filter",
+        reloadLayerText: "Reload Layers",
+        applyFilterText: "Run",
 	resetText: "Reset",
         
+	settingColor: '000000',
+
         wpsManager: null,
         
         wfsGrid: null,
@@ -247,7 +241,7 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
                                                                                     var ex=wpsError.executeResponse.status.exception.exceptionReport.exceptions[0];
                                                                                     if(ex)
                                                                                     Ext.Msg.show({
-                                                                                        title:"Raster Algebra: " + ex.code,
+                                                                                        title:"Layer Attribute: " + ex.code,
                                                                                         msg: ex.texts[0] ,
                                                                                         buttons: Ext.Msg.OK,
                                                                                         icon: Ext.MessageBox.ERROR
@@ -261,8 +255,8 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
                                                         
 						}else{
 							Ext.Msg.show({
-								title: "Filter Apply",
-								msg: "Your filter is empty or not properly formatted!",
+								title: me.filterApplyTitle,
+								msg: me.filterApplyMsg,
 								buttons: Ext.Msg.OK,
 								icon: Ext.Msg.INFO
 							});
