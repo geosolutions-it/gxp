@@ -61,6 +61,10 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
         composerErrorTitle:"Enter at least two SPM runs to use the composer",
         missingParameterTitle:"Missing Parameters",
         missingParameterMsg:"Please set all mandatory parameters",
+        svpFileImportErrorTitle: "SVP Upload Error.",
+        svpFileImportErrorMsg: "SVP file is not correctly loaded.",
+        xmlRunListImportWinTitle: "Import Runs from XML",
+        importRunButton: "Import Runs",
 	//settingColorTitle: 'Color',
 	//end i18n
 	
@@ -246,7 +250,12 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 			value:  this.springText,
                         listeners: {
                                 select: function(combo, record, index){
-                                   Ext.getCmp("svp_fieldSet").setVisible(combo.getValue() == me.userInput);
+                                    if(combo.getValue() == me.userInput)
+                                        me.target.tools[me.svpUploader].getWindowPanel({
+                                            winTitle: "Sound Velocity Profile",
+                                            submitButton: false,
+                                            width: 380
+                                        });
                                 }
                         }
 		});
@@ -405,11 +414,11 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                                                                    Ext.getCmp("modelName_Cmp").setValue("");
                                                                 wps.execute("gs:IDASoundPropagationModel",me.runList[0],
                                                                     function(response){
-                                                                            me.runList= null;
-                                                                            delete me.runList;
                                                                             var recordIndex=me.runStore.find("name", me.runList[spmExecIndex].inputs.modelName.value);
                                                                             if(recordIndex !=  -1)
                                                                                 me.runStore.remove(me.runStore.getAt( recordIndex )); 
+                                                                            me.runList= null;
+                                                                            delete me.runList;
                                                                             me.runList= new Array();   
                                                                             wfsGrid.setPage(1);
                                                                             var fc = OpenLayers.Format.XML.prototype.read.apply(this, [response]);
@@ -452,7 +461,6 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 					   text: this.resetText,
                                            tooltip: this.spmResetTooltip,
 					   handler: function(){
-                                                        Ext.getCmp("svp_fieldSet").setVisible(false);
 							this.spmCreateForm.getForm().reset();
                                                         this.svpFile= null;
 							var layer = map.getLayersByName("spm_source")[0];	
@@ -517,7 +525,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 						}/*,
 						this.securityLevelCombo*/
 					]
-				},{
+				},/*{
                                     xtype: "fieldset",
                                     title: "Sound Velocity Profile",
                                     id: "svp_fieldSet",
@@ -527,7 +535,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                                     items: [
                                        this.target.tools[this.svpUploader].getPanel({submitButton: false})
                                     ]
-                                },{
+                                },*/{
                                     xtype: "fieldset",
                                     title: "Advanced Mode",
                                     id: "advMod_fieldSet",
@@ -539,12 +547,10 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                                     items: [{
 					   fieldLabel: "Advanced Input 1",
 					   name: 'adv_input_1',
-                                           xtype: 'numberfield',
 					   allowBlank:true
 					}, {
 					    fieldLabel: "Advanced Input 2",
 					    name: 'adv_input_2',
-					    xtype: 'numberfield',
 					    allowBlank:true
 					}
                                     ]
@@ -556,6 +562,10 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                                     hidden: false,
                                     collapsed: true,
                                     autoWidth:true,
+                                    listeners: {
+                                        "expand": function (){
+                                        }
+                                    },
                                     checkboxToggle: true,
                                     items: [
                                         {
@@ -563,8 +573,8 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 					 name: 'batch_mode_composer',
                                          xtype: 'checkbox',
 					 allowBlank:true  
-                                        },
-                                       this.target.tools[this.spmListUploader].getPanel({submitButton: true}),
+                                        },/*,
+                                       this.target.tools[this.spmListUploader].getPanel({submitButton: true}),*/
                                        {
                                          xtype: "fieldset",
                                          title: me.runListFieldSetName,
@@ -577,9 +587,23 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                                          items: [
                                           this.runListView
                                          ]
-                                       }
+                                       },{
+					   xtype: 'button',
+					   iconCls:'icon-attribute-add',
+					   text: me.importRunButton,
+                                           tooltip: me.xmlRunListImportWinTitle,
+					   handler: function(){
+                                               me.target.tools[me.spmListUploader].getWindowPanel({
+                                                    winTitle: me.xmlRunListImportWinTitle,
+                                                    submitButton: true,
+                                                    width: 380
+                                                });
+					   },
+					   scope:this
+					}/*,this.target.tools[this.spmListUploader].getPanel({submitButton: false})*/
                                     ]
                                 }
+                                
                                        
 			]
 		});
@@ -594,14 +618,39 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                 }
                  if(me.runList.length > 1)
                    Ext.getCmp("executeSPM").setText(me.applyMultiText);
+                me.target.tools[me.spmListUploader].closeWindowPanel();
                 me.showMsgTooltip(me.spmXMLImportMsg);
              });  
              
         this.target.tools[this.svpUploader].setSuccessCallback(
              function(response){
-                this.svpFile=response.result.code;
-                me.showMsgTooltip(me.svpImportMsg);
-             });       
+                 me.target.tools[me.svpUploader].closeWindowPanel();
+                 if(response.result.code){
+                     me.svpFile=response.result.code;
+                     me.showMsgTooltip(me.svpImportMsg);
+                 }else{
+                     me.seasonCombo.setValue(me.springText);
+                     Ext.Msg.show({
+                      title: this.svpFileImportErrorTitle,
+                      msg: this.svpFileImportErrorMsg + this.svpFileMissingMsg,
+                      buttons: Ext.Msg.OK,
+                      icon: Ext.MessageBox.ERROR
+                    }); 
+                    
+                 }
+             });   
+             
+        this.target.tools[this.svpUploader].setFailureCallback(
+            function(error){
+                    me.seasonCombo.setValue(me.springText);
+                     Ext.Msg.show({
+                      title: this.svpFileImportErrorTitle,
+                      msg: error + this.svpFileImportErrorMsg + this.svpFileMissingMsg,
+                      buttons: Ext.Msg.OK,
+                      icon: Ext.MessageBox.ERROR
+                    }); 
+            }        
+        );     
              
         var cpanel = new Ext.Panel({
             border: false,
@@ -609,9 +658,9 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
             disabled: false,
 			autoScroll:false,
             title: this.title,
-			items: [
-				this.spmCreateForm
-			]
+	    items: [
+		this.spmCreateForm
+	    ]
         });
         
         config = Ext.apply(cpanel, config || {});
@@ -748,9 +797,9 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 
                 return formValues["modelname"];
                
-                }else{
+                }/*else{
                   Ext.getCmp(this.target.tools[this.svpUploader].getInputFileCmpID(0)).markInvalid(this.svpFileMissingMsg); 
-               } 
+               } */
              }else{
                  Ext.Msg.show({
                       title:"SPM: " + this.missingParameterTitle,
