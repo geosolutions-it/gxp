@@ -133,7 +133,7 @@ gxp.plugins.NURCFeatureEditor = Ext.extend(gxp.plugins.FeatureEditor, {
                         /*this.target.mapPanel.map.events.register(
                             "click", this, this.noFeatureClick
                         );*/
-
+						
 						var features = featureManager.featureLayer.features;
 			
 						if(features.length > 0){						    
@@ -146,7 +146,7 @@ gxp.plugins.NURCFeatureEditor = Ext.extend(gxp.plugins.FeatureEditor, {
 								for(var i=0; i<features.length; i++){
 									var vname = features[i].attributes[this.gliderPropertyName];
 									if(vname == vehicle.toLowerCase()){
-										var geom = features[i].geometry;
+										/*var geom = features[i].geometry;
 										//alert(geom.getBounds().toBBOX());
 										//var c = geom.getCentroid();
 										
@@ -156,8 +156,13 @@ gxp.plugins.NURCFeatureEditor = Ext.extend(gxp.plugins.FeatureEditor, {
 										var evt = {
 											xy: pixel,
 											bbox: geom.getBounds().toBBOX()
-										};									
-										this.noFeatureClick(evt);
+										};	*/
+										
+										//alert("before   " + parseInt(evt.xy.x));		
+										//alert("before   " + parseInt(evt.xy.y));
+		
+										featureManager.featureLayer.events.triggerEvent("featureselected", {feature:features[i]});
+										//this.noFeatureClick(evt);
 										break;
 									}
 								}
@@ -272,9 +277,9 @@ gxp.plugins.NURCFeatureEditor = Ext.extend(gxp.plugins.FeatureEditor, {
                     // deactivate select control so no other features can be
                     // selected until the popup is closed
                     if (this.readOnly === false) {
-                        this.selectControl.deactivate();
-                        // deactivate will hide the layer, so show it again
-                        featureManager.showLayer(this.id, this.showSelectedOnly && "selected");
+                        //this.selectControl.deactivate();
+                        //deactivate will hide the layer, so show it again
+                        //featureManager.showLayer(this.id, this.showSelectedOnly && "selected");
                     }
                     popup = this.addOutput({
                         xtype: "gxp_featureeditpopup",
@@ -298,6 +303,9 @@ gxp.plugins.NURCFeatureEditor = Ext.extend(gxp.plugins.FeatureEditor, {
                                 /*if(feature.layer && feature.layer.selectedFeatures.indexOf(feature) !== -1) {
                                     this.selectControl.unselect(feature);
                                 }*/
+								
+								this.selectControl.deactivate();
+								
                                 if (feature === this.autoLoadedFeature) {
                                     if (feature.layer) {
                                         feature.layer.removeFeatures([evt.feature]);
@@ -495,6 +503,7 @@ gxp.plugins.NURCFeatureEditor = Ext.extend(gxp.plugins.FeatureEditor, {
         } else {
             actions.push(new GeoExt.Action(commonOptions));
         }
+		
         actions.push(new GeoExt.Action({
             tooltip: this.editFeatureActionTip,
             text: this.editFeatureActionText,
@@ -506,7 +515,7 @@ gxp.plugins.NURCFeatureEditor = Ext.extend(gxp.plugins.FeatureEditor, {
             allowDepress: true,
             control: this.selectControl,
             deactivateOnDisable: true,
-            map: this.target.mapPanel.map
+            map: this.target.mapPanel.map			
         }));
 
         actions = gxp.plugins.FeatureEditor.superclass.addActions.call(this, actions);
@@ -546,12 +555,10 @@ gxp.plugins.NURCFeatureEditor = Ext.extend(gxp.plugins.FeatureEditor, {
             // if the feature manager has no layer currently set, do nothing
             return;
         }
-
-	
-        
-        // construct params for GetFeatureInfo request
+		
+	    // construct params for GetFeatureInfo request
         // layer is not added to map, so we do this manually
-        var map = this.target.mapPanel.map;
+        var map = this.target.mapPanel.map;		
         var size = map.getSize();
         var params = Ext.applyIf({
             REQUEST: "GetFeatureInfo",

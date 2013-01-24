@@ -133,11 +133,11 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 					
 					// find a better way
 					var controls = this.target.mapPanel.map.getControlsBy('name', 'PilotNotes:SelectFeature');
-					if ( controls.length == 1 ){
+					if (controls.length == 1 ){
 						controls[0].unselectAll();
 						controls[0].deactivate();
 					} 
-					/// end
+					// end
 							    
 					if(this.enableAoi){
 						var store = g.getStore();		
@@ -307,14 +307,7 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 				tooltip: 'Refresh All Vehicles',
 				scope: this,
 				handler : function(){
-				    this.grid.getSelectionModel().deselectRange(0, this.data.length - 1); 
-					
-					if(this.enableAoi){
-						var manager = this.featureEditor.getFeatureManager();
-						this.setEditorButtons(undefined, manager);	
-					}							
-					
-					this.refreshRecords();
+				    this.refreshAllVehicles();
 				}
 			}]
 		});
@@ -371,6 +364,10 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 							this.pluginMask.hide();
 						}						
 					}, this);
+					
+					this.featureEditor.selectControl.events.register("deactivate", this, function() {	
+						this.refreshAllVehicles();
+					});
 				},
 				scope: this
 			});
@@ -379,6 +376,17 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 	    var panel = gxp.plugins.VehicleSelector.superclass.addOutput.call(this, this.grid);
         return panel;
     },
+	
+	refreshAllVehicles: function(){
+		this.grid.getSelectionModel().deselectRange(0, this.data.length - 1); 
+		
+		if(this.enableAoi){
+			var manager = this.featureEditor.getFeatureManager();
+			this.setEditorButtons(undefined, manager);	
+		}							
+		
+		this.refreshRecords();
+	},
 	
 	setEditorButtons: function(vehicle, manager){
 		
