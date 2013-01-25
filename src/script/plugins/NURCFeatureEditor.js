@@ -146,23 +146,7 @@ gxp.plugins.NURCFeatureEditor = Ext.extend(gxp.plugins.FeatureEditor, {
 								for(var i=0; i<features.length; i++){
 									var vname = features[i].attributes[this.gliderPropertyName];
 									if(vname == vehicle.toLowerCase()){
-										/*var geom = features[i].geometry;
-										//alert(geom.getBounds().toBBOX());
-										//var c = geom.getCentroid();
-										
-										var c = geom.getVertices()[0];
-										
-										var pixel = this.target.mapPanel.map.getLayerPxFromLonLat(new OpenLayers.LonLat(c.x, c.y));
-										var evt = {
-											xy: pixel,
-											bbox: geom.getBounds().toBBOX()
-										};	*/
-										
-										//alert("before   " + parseInt(evt.xy.x));		
-										//alert("before   " + parseInt(evt.xy.y));
-		
 										featureManager.featureLayer.events.triggerEvent("featureselected", {feature:features[i]});
-										//this.noFeatureClick(evt);
 										break;
 									}
 								}
@@ -245,8 +229,7 @@ gxp.plugins.NURCFeatureEditor = Ext.extend(gxp.plugins.FeatureEditor, {
                     return !popup.editing;
                 }
             },
-            "featureselected": function(evt) {
-			
+            "featureselected": function(evt) {			
 			    //
 				// Auto fill the AOI field 
 				//
@@ -303,7 +286,7 @@ gxp.plugins.NURCFeatureEditor = Ext.extend(gxp.plugins.FeatureEditor, {
                                 /*if(feature.layer && feature.layer.selectedFeatures.indexOf(feature) !== -1) {
                                     this.selectControl.unselect(feature);
                                 }*/
-								
+
 								this.selectControl.deactivate();
 								
                                 if (feature === this.autoLoadedFeature) {
@@ -530,117 +513,13 @@ gxp.plugins.NURCFeatureEditor = Ext.extend(gxp.plugins.FeatureEditor, {
         return actions;
     },
 	
-	/** private: method[noFeatureClick]
-     *  :arg evt: ``Object``
+	/** private: method[select]
+     *  :arg feature: ``OpenLayers.Feature.Vector``
      */
-    noFeatureClick: function(evt) {
-        if (!this.selectControl) {
-            this.selectControl = new OpenLayers.Control.SelectFeature(
-                this.target.tools[this.featureManager].featureLayer,
-                this.initialConfig.controlOptions
-            );
-        }
-        var evtLL = this.target.mapPanel.map.getLonLatFromPixel(evt.xy);
-        var featureManager = this.target.tools[this.featureManager];
-        var page = featureManager.page;
-		
-        /*if (featureManager.visible() == "all" && featureManager.paging && page && page.extent.containsLonLat(evtLL)) {
-            // no need to load a different page if the clicked location is
-            // inside the current page bounds and all features are visible
-            return;
-        }*/
-
-        var layer = featureManager.layerRecord && featureManager.layerRecord.getLayer();
-        if (!layer) {
-            // if the feature manager has no layer currently set, do nothing
-            return;
-        }
-		
-	    // construct params for GetFeatureInfo request
-        // layer is not added to map, so we do this manually
-        var map = this.target.mapPanel.map;		
-        var size = map.getSize();
-        var params = Ext.applyIf({
-            REQUEST: "GetFeatureInfo",
-            BBOX: map.getExtent().toBBOX(), // evt.bbox,
-            WIDTH: size.w,
-            HEIGHT: size.h,
-            X: parseInt(evt.xy.x),
-            Y: parseInt(evt.xy.y),
-            QUERY_LAYERS: layer.params.LAYERS,
-            INFO_FORMAT: "application/vnd.ogc.gml",
-            EXCEPTIONS: "application/vnd.ogc.se_xml",
-            FEATURE_COUNT: 1,
-			// BUFFER: 15
-			BUFFER: this.featureInfoBuffer
-        }, layer.params);
-        if (typeof this.tolerance === "number") {
-            for (var i=0, ii=this.toleranceParameters.length; i<ii; ++i) {
-                params[this.toleranceParameters[i]] = this.tolerance;
-            }
-        }
-
-        var projection = map.getProjectionObject();
-        var layerProj = layer.projection;
-        if (layerProj && layerProj.equals(projection)) {
-            projection = layerProj;
-        }
-        if (parseFloat(layer.params.VERSION) >= 1.3) {
-            params.CRS = projection.getCode();
-        } else {
-            params.SRS = projection.getCode();
-        }
-        
-        var store = new GeoExt.data.FeatureStore({
-            fields: {},
-            proxy: new GeoExt.data.ProtocolProxy({
-                protocol: new OpenLayers.Protocol.HTTP({
-                    url: (typeof layer.url === "string") ? layer.url : layer.url[0],
-                    params: params,
-                    format: new OpenLayers.Format.WMSGetFeatureInfo()
-                })
-            }),
-            autoLoad: true,
-            listeners: {
-                "load": function(store, records) {
-                    if (records.length > 0) {
-                        var fid = records[0].get("fid");
-                        var filter = new OpenLayers.Filter.FeatureId({
-                            fids: [fid] 
-                        });
-
-                        var autoLoad = function() {
-                            featureManager.loadFeatures(
-                                filter, function(features) {
-                                    if (features.length) {
-                                        this.autoLoadedFeature = features[0];
-                                        this.select(features[0]);
-                                    }
-                                }, this
-                            );
-                        }.createDelegate(this);
-                        
-                        var feature = featureManager.featureLayer.getFeatureByFid(fid);                        
-                        if (feature) {
-                            this.select(feature);
-                        } else if (featureManager.paging && featureManager.pagingType === gxp.plugins.FeatureManager.QUADTREE_PAGING) {
-                            var lonLat = this.target.mapPanel.map.getLonLatFromPixel(evt.xy);
-                            featureManager.setPage({lonLat: lonLat}, function() {
-                                var feature = featureManager.featureLayer.getFeatureByFid(fid);
-                                if (feature) {
-                                    this.select(feature);
-                                } else if (this.autoLoadFeatures === true) {
-                                    autoLoad();
-                                }
-                            }, this);
-                        } else {
-                            autoLoad();
-                        }
-                    }
-                },
-                scope: this
-            }
-        });
+    select: function(feature) {
+        this.selectControl.unselectAll(
+            this.popup && this.popup.editing && {except: this.popup.feature});
+        this.selectControl.select(feature);
     }
 });
 

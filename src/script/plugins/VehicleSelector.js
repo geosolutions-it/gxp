@@ -121,17 +121,16 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 					var manager = self.featureEditor.getFeatureManager();
 					self.setEditorButtons(undefined, manager);	
 				}
-				self.refreshRecords();	
-				
+				self.refreshRecords();					
 			},
 			listeners: {
 			    scope: this, 
 				afterrender: function(g){	
 					this.refreshRecords();	
 				},
-				rowclick: function(g, rowIndex, e){		
-					
-					// find a better way
+				rowclick: function(g, rowIndex, e){	
+				
+					/*// find a better way
 					var controls = this.target.mapPanel.map.getControlsBy('name', 'PilotNotes:SelectFeature');
 					if (controls.length == 1 ){
 						controls[0].unselectAll();
@@ -159,7 +158,7 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 						if(popup && popup.isVisible()){
 							popup.hide();
 						}	
-					}			
+					}*/		
 				}
 			},
 			cm: new xg.ColumnModel({
@@ -312,6 +311,49 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 			}]
 		});
 		
+		this.grid.getSelectionModel().on({
+			beforerowselect: function(selModel, rowIndex, keepExisting, record){
+				var popup = this.featureEditor.popup;
+				if(popup && popup.isVisible()){
+					Ext.Msg.show({
+					   title: 'Grid Selection',
+					   msg: 'The Editor Popup must be closed before !',
+					   buttons: Ext.Msg.OK,
+					   icon: Ext.MessageBox.INFO
+					});
+					return false;
+				}	
+			},
+			rowselect: function(selModel, rowIndex, r){
+				// find a better way
+				var controls = this.target.mapPanel.map.getControlsBy('name', 'PilotNotes:SelectFeature');
+				if (controls.length == 1 ){
+					controls[0].unselectAll();
+					controls[0].deactivate();
+				} 
+				// end
+							
+				if(this.enableAoi){		
+					var record = r;					
+					var vehicle = record.get("vehicle");
+		
+					var manager = this.featureEditor.getFeatureManager();
+					var schema = manager.schema;
+						
+					if(!schema){  			
+						this.pluginMask = new Ext.LoadMask(this.grid.getEl(), {msg:"Please wait..."});
+						this.pluginMask.show();					
+						manager.activate();
+					}else{					
+						this.setEditorButtons(vehicle, manager);
+					}		
+				}	
+			},
+			scope: this
+		});	
+
+		
+
 		//
 		// Synchup when the Real Time Synch is enabled
 		//
