@@ -96,10 +96,14 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 						this.newSelection = false;
 						this.modifyControl.deactivate();
 						this.selectorControl.unselectAll();
+						this.selectorControl.deactivate();
 						// this.onUnselected(self);	
 						// this.deleteButton.disable();
 						this.newSelection = false;
 					} else {
+						if(this.vheicleSelector){
+							this.vheicleSelector.grid.deactivate();
+						}
 						this.modifyControl.activate();
 						this.selectorControl.activate();
 					} 
@@ -146,7 +150,11 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 				map.addControl( this.selectorControl );
 				map.addControl(this.deleteControl);
 
-
+				for(var tool in this.target.tools){
+					if(this.target.tools[tool].ptype == "gxp_vehicle_selector"){
+						this.vheicleSelector = this.target.tools[tool];
+					}
+				}
 
 		}, this);    
 
@@ -289,8 +297,10 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
 							self.newSelection = false;
 							self.modifyControl.unselectFeature(deleted.feature);
 							if ( self.layer.features.length <= 0 ){
-								self.selectButton.toggle( false );
+								self.selectButton.toggle(false);
+								self.selectorControl.deactivate();
 								self.selectButton.disable();
+								
 							}
 							// self.onUnselected(self, deleted.feature);
 							self.onRemoved(self, deleted.feature);
@@ -374,7 +384,7 @@ gxp.plugins.FeatureSelector = Ext.extend(gxp.plugins.Tool, {
     },
 	
     onSelected: function( target, feature ){
-		Ext.getCmp('vselector').deactivate();
+		//Ext.getCmp('vselector').deactivate();
         this.target.fireEvent( this.prefix + "selected", target, feature);
     },
     onUnselected: function( target, feature ){

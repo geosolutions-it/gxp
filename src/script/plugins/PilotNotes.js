@@ -129,47 +129,6 @@ Note = Ext.extend(Ext.util.Observable, {
 		this.isChanged = false;
 		this.fireEvent('unselect', feature);
 	},
-	remove: function(feature){
-		/*if ( this.isChanged ){
-			// it is changed without saving
-			
-			Ext.MessageBox.show({
-		           title:'Save Changes?',
-		           msg: 'You are leaving a note that has unsaved changes. <br />Would you like to save your changes?',
-		           buttons: Ext.MessageBox.YESNO,
-		           fn: function(btn){
-					 if (btn==='yes'){ 
-							var canceled = feature;
-							canceled.attributes = this.feature.attributes;
-							if ( this.feature.geometry instanceof OpenLayers.Geometry.Point ){
-								canceled.geometry.x = this.feature.geometry.x;
-								canceled.geometry.y = this.feature.geometry.y;
-							}
-						this.feature = null;
-						this.isChanged = false;
-						this.old = null;	
-							
-						// this.save( feature );
-						this.fireEvent('deactivate');
-					 } else if (btn==='no'){ // no
-						this.isChanged = false;
-						this.fireEvent('deactivate');
-					 } else {
-						// this code should never be reached!
-						console.error('something went wrong: ' + btn + ' is not a valid option');
-					}
-
-				   },
-		           icon: Ext.MessageBox.QUESTION,
-				   scope:this
-		       });
-			} else {*/
-				this.old = null;
-				this.feature = null;
-				this.isChanged = false;
-				this.fireEvent('deactivate', feature);		
-			// }		
-	},
 	// TODO try to use only on select
 	// TODO pull out message boxes
 	selectFromLogbook: function( feature ){
@@ -840,12 +799,10 @@ NotePanel = Ext.extend( Ext.FormPanel, {
 		   }
 	    });
 
-LogbookPanel = Ext.extend(
-		Ext.grid.GridPanel,
-	 	{
+LogbookPanel = Ext.extend(Ext.grid.GridPanel, {
 			renderTo:'logbook-panel',
-			autoScroll:true,
-			frame:false,  
+			autoScroll: true,
+			frame: false,  
 			// autoHeight:true,
 			width:'350',
 			title:'Log Book',
@@ -855,12 +812,20 @@ LogbookPanel = Ext.extend(
 			hideIcon: '../theme/app/img/silk/map_delete.png',
 			showIcon: '../theme/app/img/silk/map_add.png',
 			
+			logbookPageSize: 10,
+			
+			/** private: method[constructor]
+			 */
+			constructor: function(config) {
+				LogbookPanel.superclass.constructor.apply(this, arguments);  
+				this.logbookPageSize = config.logbookPageSize;				
+			},
+	
 			sm: new Ext.grid.RowSelectionModel({
 		            singleSelect: true
 		    }),
 			
-				initComponent: function( ){
-					
+			initComponent: function(){
 					var visibility = new Object;
 					this.visibility = visibility;
 					
@@ -905,7 +870,7 @@ LogbookPanel = Ext.extend(
 								        }
 										
 								    },
-								  handler: function(grid, rowIndex, colIndex, column, event){
+								    handler: function(grid, rowIndex, colIndex, column, event){
 									
 									var record = grid.getStore().getAt( rowIndex );
 									 
@@ -971,7 +936,7 @@ LogbookPanel = Ext.extend(
 				        });
 					
 					this.bbar = new Ext.PagingToolbar({
-			            pageSize : 20,
+			            pageSize : this.logbookPageSize,
 			            store : this.store,
 			            displayInfo: true
 			        });
@@ -1321,7 +1286,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 	deleteButtonText:"Delete",
 	deleteButtonTooltip:"Delete this feature",
 
-
+	logbookPageSize: 10,
     
     /** private: method[constructor]
      */
@@ -1329,7 +1294,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		// create an empty note
         this.note = new Note({});
 		this.note.addListener('save', this.handleSave, this);
-		// this.note.addListener('remove', this.handleRemoveFromLogbook, this);
+		this.note.addListener('remove', this.handleRemoveFromLogbook, this);
 		this.note.addListener('change', function(){
 				Ext.getCmp('east').on('resize', function(){
 					var height = Ext.getCmp('east').findParentByType('panel').getHeight() - this.notePanel.getHeight();
@@ -1421,11 +1386,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		});				
 					
 		this.panel = gxp.plugins.PilotNotes.superclass.addOutput.call(this, pn );
-		
 
-			
-		
-		
 		this.target.on("notefeatureselected", 
 			function selectFeature(container, feature){
 					if ( !feature.attributes.owner && ! Application.user.isGuest() ){
@@ -1465,8 +1426,6 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		});	
 
 		return this.panel;
-
-
 	},
 	
 	buildLogbookUI: function(){
@@ -1474,6 +1433,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		this.logbookPanel = new LogbookPanel({
 			store: this.store,
 			note: this.note,
+			logbookPageSize: this.logbookPageSize,
 			height:Ext.getCmp('east').findParentByType('panel').getHeight() - this.notePanel.getHeight() 
 		});
 		
@@ -1495,48 +1455,48 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		this.note.addListener('persist', this.handleAddToLogbook, this);
 		this.note.addListener('remove', this.logbookPanel.deactivate, this.logbookPanel);
 		this.logbookPanel.on('cellclick', function(grid, rowIndex, columnIndex, e) {
-								if ( columnIndex > 0 ){ // select only if one does not click on action column
-									var record = grid.getSelectionModel().getSelected();
-									var root = this;
-									this.logbook
-										.findById( record.id )
-										.success( function(data){ 
-											// convert KML blob to feature
-											var format = new OpenLayers.Format.KML({
-													    	extractStyles: true, 
-															extractAttributes: true,
-															maxDepth: 2 
-													    });
-											var features = format.read( data.blob );
-											var feature = features[0];
-											feature.attributes.logbookId = record.id;
-											feature.attributes.owner = data.owner;
-											var attributes = feature.attributes;
-											for (var attributeName in attributes ){
-												if (typeof attributes[attributeName] == "object") {
-													if (attributes[attributeName].value) {
-														attributes[attributeName] = attributes[attributeName].value;
-													}
-												}
-											}
-											root.note.selectFromLogbook( feature );
-											
-											root.layer.unselectAll();
-											
-											if ( root.logbookPanel.visibility[ record.id] ){
-												if ( root.layer.hasFeature( record.id )  ){
-													root.layer.select( feature );
-												} else {
-													root.layer.addToMap( feature );
-												}
-											}
-											
-											
-										}).execute();		
-									return true;						
+			if ( columnIndex > 0 ){ // select only if one does not click on action column
+				var record = grid.getSelectionModel().getSelected();
+				var root = this;
+				this.logbook
+					.findById( record.id )
+					.success( function(data){ 
+						// convert KML blob to feature
+						var format = new OpenLayers.Format.KML({
+										extractStyles: true, 
+										extractAttributes: true,
+										maxDepth: 2 
+									});
+						var features = format.read( data.blob );
+						var feature = features[0];
+						feature.attributes.logbookId = record.id;
+						feature.attributes.owner = data.owner;
+						var attributes = feature.attributes;
+						for (var attributeName in attributes ){
+							if (typeof attributes[attributeName] == "object") {
+								if (attributes[attributeName].value) {
+									attributes[attributeName] = attributes[attributeName].value;
 								}
+							}
+						}
+						root.note.selectFromLogbook( feature );
+						
+						root.layer.unselectAll();
+						
+						if ( root.logbookPanel.visibility[ record.id] ){
+							if ( root.layer.hasFeature( record.id )  ){
+								root.layer.select( feature );
+							} else {
+								root.layer.addToMap( feature );
+							}
+						}
+						
+						
+					}).execute();		
+				return true;						
+			}
 
-				            }, this); 
+		}, this); 
 	   // hack: I need to intercept this event when mouse clicks on a line between cells
 	   /* this.logbookPanel.on('rowclick', function(grid, rowIndex, e){
 			this.logbookPanel.fireEvent('cellclick', grid, rowIndex, 1, e);
@@ -1609,11 +1569,11 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		cursor.success( function(store){
 			self.store = store;
 			self.store.load({
-		            params:{
-		                start: 0,
-		                limit: 10
-		            }
-		        });
+				params:{
+					start: 0,
+					limit: self.logbookPageSize
+				}
+			});
 			self.buildLogbookUI();
 			
 		});
@@ -1648,7 +1608,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 						self.store.load({
 					            params:{
 					                start: 0,
-					                limit: 20
+					                limit: self.logbookPageSize
 					            }
 					        });
 						self.buildLogbookUI();

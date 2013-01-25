@@ -129,36 +129,6 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 					this.refreshRecords();	
 				},
 				rowclick: function(g, rowIndex, e){	
-				
-					/*// find a better way
-					var controls = this.target.mapPanel.map.getControlsBy('name', 'PilotNotes:SelectFeature');
-					if (controls.length == 1 ){
-						controls[0].unselectAll();
-						controls[0].deactivate();
-					} 
-					// end
-							    
-					if(this.enableAoi){
-						var store = g.getStore();		
-						var record = store.getAt(rowIndex);						
-						var vehicle = record.get("vehicle");
-			
-						var manager = this.featureEditor.getFeatureManager();
-						var schema = manager.schema;
-							
-						if(!schema){  			
-							this.pluginMask = new Ext.LoadMask(g.getEl(), {msg:"Please wait..."});
-							this.pluginMask.show();					
-							manager.activate();
-						}else{					
-							this.setEditorButtons(vehicle, manager);
-						}		
-
-						var popup = this.featureEditor.popup;
-						if(popup && popup.isVisible()){
-							popup.hide();
-						}	
-					}*/		
 				}
 			},
 			cm: new xg.ColumnModel({
@@ -325,13 +295,17 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 				}	
 			},
 			rowselect: function(selModel, rowIndex, r){
-				// find a better way
-				var controls = this.target.mapPanel.map.getControlsBy('name', 'PilotNotes:SelectFeature');
-				if (controls.length == 1 ){
-					controls[0].unselectAll();
-					controls[0].deactivate();
-				} 
-				// end
+				// 
+				// Disble the Pilot Notes Selection tool if exists
+				//
+				if(this.pilotNotesSelector){
+					var scontrols = this.pilotNotesSelector.selectorControl;
+					if (scontrols){
+						scontrols.unselectAll();
+						scontrols.deactivate();
+						this.pilotNotesSelector.selectButton.toggle(false);
+					}
+				}
 							
 				if(this.enableAoi){		
 					var record = r;					
@@ -351,9 +325,7 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 			},
 			scope: this
 		});	
-
 		
-
 		//
 		// Synchup when the Real Time Synch is enabled
 		//
@@ -381,6 +353,9 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 					for(var tool in this.target.tools){
 						if(this.target.tools[tool].ptype == "gxp_nurcfeatureeditor"){
 							this.featureEditor = this.target.tools[tool];
+						}
+						if(this.target.tools[tool].ptype == "gxp_feature_selector"){
+							this.pilotNotesSelector = this.target.tools[tool];
 						}
 					}
 					
