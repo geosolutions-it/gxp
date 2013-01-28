@@ -283,16 +283,18 @@ gxp.plugins.VehicleSelector = Ext.extend(gxp.plugins.Tool, {
 		
 		this.grid.getSelectionModel().on({
 			beforerowselect: function(selModel, rowIndex, keepExisting, record){
-				var popup = this.featureEditor.popup;
-				if(popup && popup.isVisible()){
-					Ext.Msg.show({
-					   title: 'Grid Selection',
-					   msg: 'The Editor Popup must be closed before !',
-					   buttons: Ext.Msg.OK,
-					   icon: Ext.MessageBox.INFO
-					});
-					return false;
-				}	
+				if(this.featureEditor){
+					var popup = this.featureEditor.popup;
+					if(popup && popup.isVisible()){
+						Ext.Msg.show({
+						   title: 'Grid Selection',
+						   msg: 'The Editor Popup must be closed before !',
+						   buttons: Ext.Msg.OK,
+						   icon: Ext.MessageBox.INFO
+						});
+						return false;
+					}	
+				}
 			},
 			rowselect: function(selModel, rowIndex, r){
 				// 

@@ -1106,22 +1106,23 @@ FeatureLayer = Ext.extend(Ext.util.Observable, {
 		// selector.select(oldFeature);
 		// modifier.selectFeature(oldFeature);
 		
-		this.bus.resumeEvents();
-		
+		this.bus.resumeEvents();		
 		this.note.resumeEvents();
 	},
 	reload: function( newFeature, oldFeature){
+		this.bus.suspendEvents(false);
 		
 		var layer = this.getLayer();
 		var modifier = this.getModifier();
 		var selector = this.getSelector();
 		
-		// Hack: it is better to search for the actual old feature
+		// Hack: it is better to search for the actual old feature 
 		layer.removeFeatures( layer.selectedFeatures ); 
 		layer.addFeatures( [newFeature] );
 		selector.select(newFeature);
 		modifier.selectFeature(newFeature);
 		
+		this.bus.resumeEvents();
 	},
 	save: function( feature ){
 		var layer = this.getLayer();
