@@ -403,6 +403,8 @@ gxp.IDAFilterBuilder = Ext.extend(Ext.Container, {
 				baseURL: this.baseURL,  // new custom field
 				coveragesSettings: this.coveragesSettings, // new custom field
                                 defualtCoverageSetting: this.defualtCoverageSetting,
+                                spmCoverageSetting: this.spmCoverageSetting,
+                                layerAttributeCoverageSetting: this.layerAttributeCoverageSetting,
 				proxy: this.proxy, // new custom field 
 				filter: filter,
 				columnWidth: 1,
@@ -533,6 +535,8 @@ gxp.IDAFilterBuilder = Ext.extend(Ext.Container, {
 			    baseURL: this.baseURL,  // new custom field
 				coveragesSettings: this.coveragesSettings, // new custom field
 				defualtCoverageSetting: this.defualtCoverageSetting,
+                                spmCoverageSetting: this.spmCoverageSetting,
+                                layerAttributeCoverageSetting: this.layerAttributeCoverageSetting,
                                 proxy: this.proxy, // new custom field 
                 columnWidth: 1,
                 filter: grandchild,
