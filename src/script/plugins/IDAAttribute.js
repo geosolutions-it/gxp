@@ -53,6 +53,8 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 		'TOPSECRET'						
 	],
         
+        layerNamePrefix: "AttributeMatch",
+        
         /** api: config[colorStyles]
         *  ``Array String``
         *  
@@ -112,7 +114,7 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
                          readOnly: true,
 			 width: 200,
 			 name: this.settingNameTitle,
-			 value: 'Attribute match-' + new Date().getTime()
+			 value: this.layerNamePrefix + new Date().getTime()
 	       });
 	
 		var settings = new Ext.form.FieldSet({
@@ -162,6 +164,12 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
                     
                 if(this.target.riskData.defualtCoverageSetting)
 			params.defualtCoverageSetting = this.target.riskData.defualtCoverageSetting;
+                    
+               if(this.target.riskData.spmCoverageSetting)
+			params.spmCoverageSetting = this.target.riskData.spmCoverageSetting;
+               
+               if(this.target.riskData.layerAttributeCoverageSetting)
+			params.layerAttributeCoverageSetting = this.target.riskData.layerAttributeCoverageSetting;
 		
 		var filterBuilder = new gxp.IDAFilterBuilder(params);
 		
@@ -215,7 +223,7 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 						
 						if(f){
                                                         var infoRun= {};
-                                                        me.attributeField.setValue('Attribute match-' + new Date().getTime());
+                                                        
                                                         var wfsGrid= me.target.tools[this.wfsGrid];
                                                         infoRun.inputs={};
                                                         infoRun.inputs=settings.getMetadata();
@@ -229,6 +237,7 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
                                                         var wps = me.target.tools[me.wpsManager];
                                                         
                                                         var runProcess= me.getRARun(infoRun);
+                                                        me.attributeField.setValue(me.layerNamePrefix + new Date().getTime());
                                                         
                                                         
                                                         wps.execute(me.wpsProcess,runProcess,function(response){
@@ -300,6 +309,10 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
              var requestObj = {
 			type: "raw",
 			inputs:{
+                                areaOfInterest: new OpenLayers.WPSProcess.ComplexData({
+                                        value: this.target.mapPanel.map.getExtent().toGeometry().toString(),
+					mimeType: "application/wkt"
+                                }),
 				attributeName: new OpenLayers.WPSProcess.LiteralData({
 					value:inputs['name']
 				}),
