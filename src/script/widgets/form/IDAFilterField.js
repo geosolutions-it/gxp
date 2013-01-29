@@ -54,6 +54,10 @@ gxp.form.IDAFilterField = Ext.extend(Ext.form.CompositeField, {
 	coveragesSettings: [],
         
         defualtCoverageSetting: null,
+        
+        spmCoverageSetting: null,
+        
+        layerAttributeCoverageSetting: null,
 	
     initComponent: function() {
                 
@@ -198,14 +202,28 @@ gxp.form.IDAFilterField = Ext.extend(Ext.form.CompositeField, {
 		var data = this.coveragesSettings, 
                 min = this.defualtCoverageSetting.min, 
                 max = this.defualtCoverageSetting.max;
+                var spm =  this.spmCoverageSetting,
+                la=  this.layerAttributeCoverageSetting;
+                var name = this.items.get(0).getValue();
+                
+                if(name.indexOf(spm.ws+":") == 0){
+                    min = spm.min;
+		    max = spm.max;
+                }else{
+                   if(name.indexOf(la.ws+":") == 0){
+                      min = la.min;
+                      max = la.max;
+                   } 
+               }
+                
 		for(var i=0; i<data.length; i++){
-		    var name = this.items.get(0).getValue();
+		    
 			if(data[i].name == name){
 				min = data[i].min;
 				max = data[i].max;
 			}
 		}
-		
+                
 		if(this.items.get(1).getValue()){
 			if(this.items.get(1).getValue() != ".."){
 				this.slider.setMinValue(min);
@@ -255,6 +273,7 @@ gxp.form.IDAFilterField = Ext.extend(Ext.form.CompositeField, {
 			minValue: this.defualtCoverageSetting.min,
 			maxValue: this.defualtCoverageSetting.max,	
 			width: 100,
+                        increment: 1,
 			listeners: {
 				change: function (field, newv, oldv){
 					this.items.get(2).setValue(newv);
@@ -268,6 +287,7 @@ gxp.form.IDAFilterField = Ext.extend(Ext.form.CompositeField, {
 			width: 100,
 			disabled: false,
 			hidden: true,
+                        increment: 1,
 			minValue: this.defualtCoverageSetting.min,
 			maxValue: this.defualtCoverageSetting.max,
 			values  : [this.defualtCoverageSetting.min, this.defualtCoverageSetting.max],
