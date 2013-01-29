@@ -65,6 +65,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
         svpFileImportErrorMsg: "SVP file is not correctly loaded.",
         xmlRunListImportWinTitle: "Import Runs from XML",
         importRunButton: "Import Runs",
+        errorLayerNameMsg: "The model name can not begin with a digit </br>, can not contain blank space and can not contain characters '_', '*' ,'%', '-'",
 	//settingColorTitle: 'Color',
 	//end i18n
 	
@@ -89,6 +90,8 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
         runStore: null,
         
         composerList: [],
+        
+        modelNameRegEx: "^[0-9]|[._./*.%.-]|[. ]",
 	
 	/*securityLevels: [
 		'NATO_UNCLASSIFIED',
@@ -254,7 +257,11 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                                         me.target.tools[me.svpUploader].getWindowPanel({
                                             winTitle: "Sound Velocity Profile",
                                             submitButton: false,
-                                            width: 380
+                                            width: 380,
+                                            close: function(){
+                                                if(! me.svpFile)
+                                                    me.seasonCombo.setValue(me.springText);
+                                            }
                                         });
                                 }
                         }
@@ -521,6 +528,17 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 							name: 'modelname',
                                                         id: "modelName_Cmp",
 							xtype: 'textfield',
+                                                        listeners: {
+                                                            "change": function (field, newValue, oldValue){
+                                                                var layerPat = new RegExp(me.modelNameRegEx);
+                                                               
+                                                                
+                                                                if(layerPat.test(newValue)){
+                                                                     field.markInvalid(me.errorLayerNameMsg);
+                                                                      
+                                                                }
+                                                            }   
+                                                        },
 							allowBlank:false
 						}/*,
 						this.securityLevelCombo*/
@@ -547,10 +565,12 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                                     items: [{
 					   fieldLabel: "Advanced Input 1",
 					   name: 'adv_input_1',
+                                           xtype: 'textfield',
 					   allowBlank:true
 					}, {
 					    fieldLabel: "Advanced Input 2",
 					    name: 'adv_input_2',
+                                            xtype: 'textfield',
 					    allowBlank:true
 					}
                                     ]
@@ -618,6 +638,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                 }
                  if(me.runList.length > 1)
                    Ext.getCmp("executeSPM").setText(me.applyMultiText);
+               
                 me.target.tools[me.spmListUploader].closeWindowPanel();
                 me.showMsgTooltip(me.spmXMLImportMsg);
              });  
@@ -628,6 +649,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                  if(response.result.code){
                      me.svpFile=response.result.code;
                      me.showMsgTooltip(me.svpImportMsg);
+                     me.seasonCombo.setValue(me.userInput);
                  }else{
                      me.seasonCombo.setValue(me.springText);
                      Ext.Msg.show({
@@ -636,7 +658,6 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                       buttons: Ext.Msg.OK,
                       icon: Ext.MessageBox.ERROR
                     }); 
-                    
                  }
              });   
              
@@ -732,13 +753,16 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 	},
         
         addFormRun: function(){
+            var layerPat = new RegExp(this.modelNameRegEx);
+            var formValues=this.spmCreateForm.getForm().getFieldValues(true);
             if(this.spmCreateForm.getForm().isValid()){
+              if(!(layerPat.test(formValues["modelname"]))){
               if((this.seasonCombo.getValue() == this.userInput && this.svpFile)
                     || this.seasonCombo.getValue() != this.userInput){
                     
                 var infoRun= {};
                 infoRun.inputs={};
-                var formValues=this.spmCreateForm.getForm().getFieldValues(true);	
+                	
                 var lat=this.latitudeField.getValue();
 		var lon=this.longitudeField.getValue();
                 var advValues="";
@@ -797,9 +821,16 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 
                 return formValues["modelname"];
                
-                }/*else{
-                  Ext.getCmp(this.target.tools[this.svpUploader].getInputFileCmpID(0)).markInvalid(this.svpFileMissingMsg); 
-               } */
+                }
+              }else{
+                  Ext.getCmp("modelName_Cmp").markInvalid(this.errorLayerNameMsg); 
+                  Ext.Msg.show({
+                      title:"SPM: " + this.missingParameterTitle,
+                      msg:  this.errorLayerNameMsg,
+                      buttons: Ext.Msg.OK,
+                      icon: Ext.MessageBox.ERROR
+                  }); 
+               }
              }else{
                  Ext.Msg.show({
                       title:"SPM: " + this.missingParameterTitle,
@@ -816,6 +847,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
              var inputs= infoRun.inputs;
              var today = new Date();
              var currentDate = today.format("Y-m-d\\TH:i:s")+"Z";
+             
              var requestObj = {
 			type: "raw",
 			inputs:{
@@ -852,6 +884,9 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                                 styleName: new OpenLayers.WPSProcess.LiteralData({
 				    value:spm.styleName
 				}),
+                                
+                                
+                                
 				/*storeName: new OpenLayers.WPSProcess.LiteralData({
 					value:spm.storeName
 				}),
@@ -909,6 +944,8 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                                         value: "POINT("+inputs['soundSourcePoint_lon'].value+" "+inputs['soundSourcePoint_lat'].value+")",
 					mimeType: "application/wkt"
                                     });
+                                
+                                
                                 
                     this.runList.push(requestObj);  
                     
