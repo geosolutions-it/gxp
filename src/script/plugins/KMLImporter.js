@@ -64,7 +64,16 @@ gxp.plugins.KMLImporter = Ext.extend(gxp.plugins.Tool, {
 	addOutput: function(config){
 			var self = this;
 			var map = this.target.mapPanel.map;
-			var xmlJsonTranslateService = this.target.proxy + this.target.xmlJsonTranslateService;
+			
+			var xmlJsonTranslateService = this.target.xmlJsonTranslateService;
+			
+			var pattern=/(.+:\/\/)?([^\/]+)(\/.*)*/i;
+			
+			var mHost = pattern.exec(xmlJsonTranslateService);
+			var mUrl = xmlJsonTranslateService;
+			
+			xmlJsonTranslateService = mHost[2] == location.host ? mUrl : this.target.proxy + mUrl;
+			
 			// open an upload file window
 	        var actions = [{
 				toggleGroup: self.toggleGroup,
@@ -92,17 +101,29 @@ gxp.plugins.KMLImporter = Ext.extend(gxp.plugins.Tool, {
 					form.on("uploadcomplete", function addKMLToLayer(caller, response){
 							// the code to access the uploaded file
 							var code = response.code;
+							var nfname = response.nfname;
 							var url = response.url;
-
+							
+							var pattern=/(.+:\/\/)?([^\/]+)(\/.*)*/i;
+							
+							var mHost = pattern.exec(url);
+							var mUrl = url;
+							
+							url = mHost[2] == location.host ? mUrl  + '?' + 'code=' + code + '&filename=' + nfname : self.target.proxy + mUrl +  + '?' + encodeURIComponent('code=' + code + '&filename=' + nfname);
+			   
+							var appMask = new Ext.LoadMask(Ext.getBody(), {msg:"Please wait, loading..."});
+							appMask.show();
+							
 							var Request = Ext.Ajax.request({
-						       // url: xmlJsonTranslateService+'/FileUploader?code='+code,
-							   url: url + '?code=' + code,
+							   url: url ,
 						       method: 'GET',
 						       headers:{
 						          'Content-Type' : 'application/xml'
 						       },
 						       scope: this,
 						       success: function(response, opts){
+									appMask.hide();
+									
 									var format = new OpenLayers.Format.KML({
 								    	extractStyles: true, 
 										extractAttributes: true,
@@ -110,24 +131,34 @@ gxp.plugins.KMLImporter = Ext.extend(gxp.plugins.Tool, {
 										// externalProjection: new OpenLayers.Projection("EPSG:4326"),
 										// internalProjection: map.getProjection()
 								    });
+									
 									// console.log( response.responseText );
 								    var features = format.read(response.responseText);
 								
-									// for imported features create a string represention of their value
-									for (var i=0; i<features.length; i++){
-										var attributes = features[i].attributes;
-										for (var attributeName in attributes ){
-											// console.log(attributeName);
-											if (typeof attributes[attributeName] == "object") {
-												if (attributes[attributeName].value) {
-													attributes[attributeName] = attributes[attributeName].value;
+									if(features){
+										// for imported features create a string represention of their value
+										for (var i=0; i<features.length; i++){
+											var attributes = features[i].attributes;
+											for (var attributeName in attributes ){
+												// console.log(attributeName);
+												if (typeof attributes[attributeName] == "object") {
+													if (attributes[attributeName].value) {
+														attributes[attributeName] = attributes[attributeName].value;
+													}
 												}
 											}
 										}
+									
+										// console.log(features);
+										self.layer.addFeatures( features );
+									}else{
+										Ext.Msg.show({
+										   title: "KML/KMZ Upload",
+										   msg: "Error while reading the server response",
+										   buttons: Ext.Msg.OK,
+										   icon: Ext.MessageBox.ERROR
+										});
 									}
-								
-									// console.log(features);
-								    self.layer.addFeatures( features );
 						       },
 						       failure:  function(response, opts){
 						       		console.error(response);

@@ -352,7 +352,7 @@ gxp.plugins.FeatureDetails = Ext.extend(gxp.plugins.Tool, {
 	},
 	
 	isChanged: function(){
-		if (!this.feature.isNew){ 
+		if (this.feature && !this.feature.isNew){ 
 			var data = this.feature.attributes;
 			var name = Ext.getCmp("details-name-textfield").getValue();
 			var description = Ext.getCmp("details-description-textfield").getValue();

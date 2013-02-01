@@ -199,6 +199,7 @@ gxp.KMLFileUploadPanel = Ext.extend(Ext.FormPanel, {
 		var filename = this.filename;
 		var response = new Object;
 		response.filename = filename;
+		response.nfname = obj.result.newFileName;
 		response.code = obj.result.code;
 		response.url = this.url;
         this.fireEvent("uploadcomplete", this, response);
