@@ -1408,7 +1408,9 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		
 		this.target.on("notefeatureremoved", 
 			function unselectFeature(container, feature){
+				if(feature.attributes.logbookId != -1){
 					self.note.remove(feature);
+				}					
 		});
 		
 		this.target.on("notefeaturechanged", 
@@ -1691,7 +1693,8 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 				}).execute();			
 		} else {
 			// this code should never be reached
-			console.error('feature does not have a logbook id');
+			// console.error('feature does not have a logbook id');
+			appMask.hide();
 		}
 	},
 	
