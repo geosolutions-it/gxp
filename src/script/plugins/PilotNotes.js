@@ -74,7 +74,7 @@ AccessControlManager = Ext.extend(Ext.util.Observable, {
             "revoke_delete_from_logbook" : true,
             "revoke_update_logbook" : true
         });
-        AccessControlManager.superclass.constructor.apply(this, config);
+        AccessControlManager.superclass.constructor.apply(this, arguments);
     },
 
 	change: function(feature){
@@ -112,7 +112,7 @@ Note = Ext.extend(Ext.util.Observable, {
 			"reload": true
         });
         this.listeners = config.listeners;
-        Note.superclass.constructor.apply(this, config);
+        Note.superclass.constructor.apply(this, arguments);
     },
 	isEmpty: function(){
 		return (this.feature === null || this.feature === undefined);
@@ -1001,7 +1001,7 @@ FeatureLayer = Ext.extend(Ext.util.Observable, {
 		this.note = config.note;
 		this.bus = config.bus;
 	
-        FeatureLayer.superclass.constructor.apply(this, config);	
+        FeatureLayer.superclass.constructor.apply(this, arguments);	
     },
 
 	
@@ -1563,12 +1563,15 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 		
 		// connect to geostore and load the logbook
 		var conn = GeoStore.connect({
-						url: geoStoreBaseURL, 
-						proxy: this.target.proxy, 
-						token: Application.user.token
-					});
+			url: geoStoreBaseURL, 
+			proxy: this.target.proxy, 
+			token: Application.user.token
+		});
+		
 		this.logbook = conn.getResource(category);
+		
 		var cursor = this.logbook.find('*');
+		
 		cursor.success( function(store){
 			self.store = store;
 			self.store.load({
@@ -1577,9 +1580,11 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 					limit: self.logbookPageSize
 				}
 			});
+			
 			self.buildLogbookUI();
 			
 		});
+		
 		cursor.failure( function(response){
 			Ext.Msg.show({
 				title: 'Pilot notes error',
@@ -1588,6 +1593,7 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 				icon: Ext.MessageBox.ERROR
 			});
 		});
+		
 		cursor.getStoreAsync();
 		
 		// listen to authentication events
