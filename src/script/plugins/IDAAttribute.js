@@ -21,6 +21,8 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
     
     /** api: ptype = gxp_idaattribute */
     ptype: "gxp_idaattribute",
+    
+    id: null,
 
     title: "Layer Attribute",
 	
@@ -108,13 +110,14 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 			}
 		});*/
         
+               var now = new Date();
                this.attributeField= new Ext.form.TextField({
 			 xtype: 'textfield',
 			 fieldLabel: this.settingNameTitle,
                          readOnly: true,
 			 width: 200,
 			 name: this.settingNameTitle,
-			 value: this.layerNamePrefix + new Date().getTime()
+			 value: this.layerNamePrefix + "_" +now.format("Y_m_d_H_i")
 	       });
 	
 		var settings = new Ext.form.FieldSet({
@@ -223,22 +226,21 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 						
 						if(f){
                                                         var infoRun= {};
-                                                        
+                                                        var now= new Date();
+                                                        me.attributeField.setValue(me.layerNamePrefix + "_" + now.format("Y_m_d_H_i"));
                                                         var wfsGrid= me.target.tools[this.wfsGrid];
                                                         infoRun.inputs={};
                                                         infoRun.inputs=settings.getMetadata();
-							var filterFormat = /*new OpenLayers.Format.Filter()*/new OpenLayers.Format.CQL();
+							var filterFormat = new OpenLayers.Format.CQL();
 							var filterCQL = filterFormat.write(f);  
                                                         
                                                         infoRun.inputs.attributeFilter= filterCQL;
-							/*var xmlFormat = new OpenLayers.Format.XML();                  
-							filterOGC = xmlFormat.write(filterOGC);*/
-                                                        
+
                                                         var wps = me.target.tools[me.wpsManager];
                                                         
                                                         var runProcess= me.getRARun(infoRun);
-                                                        me.attributeField.setValue(me.layerNamePrefix + new Date().getTime());
-                                                        
+                                                        now= new Date();
+                                                        me.attributeField.setValue(me.layerNamePrefix + "_" + now.format("Y_m_d_H_i"));
                                                         
                                                         wps.execute(me.wpsProcess,runProcess,function(response){
                                                                wfsGrid.refresh();
@@ -320,7 +322,7 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 					value:currentDate
 				}),
 				wsName: new OpenLayers.WPSProcess.LiteralData({
-					value:rasterAlgebra.wsName
+					value:inputs.wsName || rasterAlgebra.wsName
 				}),
                                 storeName: new OpenLayers.WPSProcess.LiteralData({
 				    value:rasterAlgebra.storeName
@@ -332,13 +334,15 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 					value:inputs['classify']
 				}),
                                 styleName: new OpenLayers.WPSProcess.LiteralData({
-					value: "layerattribute_"+inputs['color'].toLowerCase()
+					value: inputs.styleName || "layerattribute_"+inputs['color'].toLowerCase()
 				}),
-                                attributeFilter: new OpenLayers.WPSProcess.ComplexData({
+                                /*attributeFilter: new OpenLayers.WPSProcess.ComplexData({
                                         value: inputs['attributeFilter'],
                                         mimeType: "text/plain; subtype=cql"
+                                })*/
+                                attributeFilter: new OpenLayers.WPSProcess.LiteralData({
+                                        value: inputs['attributeFilter']
                                 })
-                                
 				},
 			outputs: [{
 					identifier: "result",                                 
