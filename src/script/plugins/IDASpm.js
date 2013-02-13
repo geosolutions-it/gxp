@@ -65,11 +65,14 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
         svpFileImportErrorMsg: "SVP file is not correctly loaded.",
         xmlRunListImportWinTitle: "Import Runs from XML",
         importRunButton: "Import Runs",
-        errorLayerNameMsg: "The model name can not begin with a digit </br>, can not contain blank space and can not contain characters '_', '*' ,'%', '-'",
+        errorLayerNameMsg: "The model name can not begin with a digit </br>, can not contain blank space and can not contain characters '*' ,'%', '-'",
+        composerOperationLabelText: "Operation",
 	//settingColorTitle: 'Color',
 	//end i18n
 	
 	wpsManager: null,
+        
+        idaAttribute: null,
 	
 	wfsGrid: "wfsGridPanel",
         
@@ -91,7 +94,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
         
         composerList: [],
         
-        modelNameRegEx: "^[0-9]|[._./*.%.-]|[. ]",
+        modelNameRegEx: "^[0-9]|[./*.%.-]|[. ]",
 	
 	/*securityLevels: [
 		'NATO_UNCLASSIFIED',
@@ -100,6 +103,15 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 		'NATO_SECRET',
 		'NATO_TOP_SECRET'
 	],*/
+    
+        batchModeComposerOp: null,
+        
+        composerOperations: [
+            ["MIN", "min2"],
+            ["MAX", "max2"]
+        ],
+        
+        compOperation: null,
 	
 	settingColor: 'FF0000',
         
@@ -266,20 +278,29 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                                 }
                         }
 		});
-
-		/*this.securityLevelCombo=  new Ext.form.ComboBox({
+           
+		this.batchModeComposerOp=  new Ext.form.ComboBox({
 			width: 150,
-			allowBlank: false,
-			forceSelection: true,
+                        forceSelection: true,
 			editable: false,
 			triggerAction: 'all',
 			lazyRender:true,
-			fieldLabel: this.securityLevelLabelText,
+			allowBlank: false,
+                        disabled: true,
+			fieldLabel: this.composerOperationLabelText,
+                        displayField: 'name',
 			mode: 'local',
-			store:  this.securityLevels,
-			
-			value: this.securityLevels[0]
-		});*/
+                        listeners: {
+                            select: function(cb, record, index) {
+                                me.compOperation= record.get('value');    
+                            }
+                        },
+			store: new Ext.data.ArrayStore({
+                            fields: ['name', 'value'],
+                            data :  me.composerOperations
+                        })/*,
+                        value: me.composerOperations[0][0]*/
+               });
 		
 		//
 		// whole form
@@ -373,6 +394,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                                                         var wfsGrid= this.target.tools[this.wfsGrid];
                                                         wfsGrid.resetFilter();
                                                         var wps = this.target.tools[this.wpsManager];
+                                                        
                                                         var spmExecIndex=0;
                                                         var spmExecNum=me.runList.length;
                                                         if(spmExecNum > 0){
@@ -383,9 +405,12 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                                                                     me.runStore.remove(me.runStore.getAt( recordIndex )); 
                                                                 
                                                                 spmExecIndex++;
-                                                                var fc = OpenLayers.Format.XML.prototype.read.apply(this, [response]);
-                                                                       var fid = fc.getElementsByTagName("gml:ftUUID")[0];  
-                                                                       if(!fid){
+                                                                var fc = new OpenLayers.Format.XML().read(response);
+                                                                var layerName=OpenLayers.Util.getXmlNodeValue(OpenLayers.Ajax.getElementsByTagNameNS(fc, "http://www.opengis.net/gml","gml", "layerName")[0]);
+                                                                var wsName=OpenLayers.Util.getXmlNodeValue(OpenLayers.Ajax.getElementsByTagNameNS(fc, "http://www.opengis.net/gml","gml", "wsName")[0]);
+                                                               /* var layerName = fc.getElementsByTagName("gml:layerName")[0].childNodes[0].nodeValue; 
+                                                                var wsName = fc.getElementsByTagName("gml:wsName")[0].childNodes[0].nodeValue;  */
+                                                                       if(!layerName){
                                                                           var wpsError=new OpenLayers.Format.WPSExecute().read(response);
                                                                                if(wpsError){
                                                                                     var ex=wpsError.executeResponse.status.exception.exceptionReport.exceptions[0];
@@ -400,7 +425,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                                                                        }
                                                                  
                                                                 if(composer){
-                                                                   me.composerList.push(fid);    
+                                                                   me.composerList.push(wsName+":"+layerName);    
                                                                 }
                                                                 if(spmExecIndex< spmExecNum)
                                                                     wps.execute("gs:IDASoundPropagationModel",
@@ -410,8 +435,46 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                                                                     me.runList= null;
                                                                     delete me.runList;
                                                                     me.runList= new Array();
-                                                                }
-                                                                    
+                                                                    if(composer){
+                                                                       var idaAttribute = this.target.tools[me.idaAttribute]; 
+                                                                       var wpsRasterAlgebra= idaAttribute.target.tools[idaAttribute.wpsManager];
+                                                                       var wfsRAGrid= idaAttribute.target.tools[idaAttribute.wfsGrid];
+                                                                       
+                                                                       var now = new Date();
+                                                                       var idaComposerRun=idaAttribute.getRARun({
+                                                                           inputs:{
+                                                                               name: "batch_"+ now.format("Y_m_d_H_i"),
+                                                                               classify: "NONE",
+                                                                               wsName: spm.wsName,
+                                                                               styleName: "spm",
+                                                                               attributeFilter: me.compOperation +"(" + me.composerList +")"
+                                                                           }
+                                                                       });
+                                                                       wpsRasterAlgebra.execute(idaAttribute.wpsProcess,idaComposerRun,function(response){
+                                                                        me.composerList= null;
+                                                                        delete me.composerList;
+                                                                        me.composerList= new Array();   
+                                                                        wfsRAGrid.refresh();
+                                                                        var fc = OpenLayers.Format.XML.prototype.read.apply(this, [response]);
+                                                                            var fid = fc.getElementsByTagName("gml:ftUUID")[0];  
+                                                                            if(!fid){
+                                                                                var wpsError=new OpenLayers.Format.WPSExecute().read(response);
+                                                                                    if(wpsError){
+                                                                                            var ex=wpsError.executeResponse.status.exception.exceptionReport.exceptions[0];
+                                                                                            if(ex)
+                                                                                            Ext.Msg.show({
+                                                                                                title:"Layer Attribute: " + ex.code,
+                                                                                                msg: ex.texts[0] ,
+                                                                                                buttons: Ext.Msg.OK,
+                                                                                                icon: Ext.MessageBox.ERROR
+                                                                                            });
+                                                                                    }
+                                                                            }    
+                                                                        wfsRAGrid.refresh();         
+                                                                     });
+                                                                     idaAttribute.activateRasterAlgebraList(true);
+                                                                    }
+                                                                }    
                                                            };
                                                           wps.execute("gs:IDASoundPropagationModel",me.runList[spmExecIndex],callbackSPM);
                                                            me.activateSPMList(true);
@@ -592,9 +655,17 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                                          fieldLabel: this.spmBatchComposerMsg,
 					 name: 'batch_mode_composer',
                                          xtype: 'checkbox',
+                                         listeners:{
+                                             check: function(checkbox,checked){
+                                                 if(checked)
+                                                    me.batchModeComposerOp.enable();
+                                                 else
+                                                    me.batchModeComposerOp.disable(); 
+                                             }
+                                         },
 					 allowBlank:true  
-                                        },/*,
-                                       this.target.tools[this.spmListUploader].getPanel({submitButton: true}),*/
+                                        },
+                                        this.batchModeComposerOp,
                                        {
                                          xtype: "fieldset",
                                          title: me.runListFieldSetName,
