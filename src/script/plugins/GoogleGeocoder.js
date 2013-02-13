@@ -1,10 +1,10 @@
 /**
- * Copyright (c) 2008-2011 The Open Planning Project
- * 
- * Published under the BSD license.
- * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
- * of the license.
- */
+* Copyright (c) 2008-2011 The Open Planning Project
+*
+* Published under the GPL license.
+* See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
+* of the license.
+*/
 
 /**
  * @requires plugins/Tool.js
@@ -56,18 +56,12 @@ gxp.plugins.GoogleGeocoder = Ext.extend(gxp.plugins.Tool, {
     markerName: "Marker",
     
     pointRadiusMarkers: 14,
-    
     externalGraphicMarkers: 'theme/app/img/markers/star_red.png',
-    
     backgroundGraphicMarkers: 'theme/app/img/markers/markers_shadow.png',
-    
-    backgroundXOffsetMarkers: -8,
-    
-    backgroundYOffsetMarkers: -21,
-    
-    graphicXOffsetMarkers: -13,
-    
-    graphicYOffsetMarkers: -28,        
+    externalGraphicXOffsetMarkers:-13,
+    externalGraphicYOffsetMarkers:-28,
+    backgroundXOffsetMarkers: -7,
+    backgroundYOffsetMarkers: -22,
     
     init: function(target) {
 
@@ -113,7 +107,7 @@ gxp.plugins.GoogleGeocoder = Ext.extend(gxp.plugins.Tool, {
     /** api: method[addOutput]
      */
     addOutput: function(config) {
-        return gxp.plugins.GoogleGeocoder.superclass.addOutput.call(this, ['->','-',this.removeMarkerBtn,'-',this.combo]);
+        return gxp.plugins.GoogleGeocoder.superclass.addOutput.call(this, ['-',this.removeMarkerBtn,this.combo]);
     },
     
     /** private: method[onComboSelect]
@@ -126,7 +120,10 @@ gxp.plugins.GoogleGeocoder = Ext.extend(gxp.plugins.Tool, {
                 new OpenLayers.Projection("EPSG:4326"),
                 map.getProjectionObject()
             );
-            map.getLayersByName('Google Hybrid')[0].setVisibility(true);
+			var bgLayer = map.getLayersByName('Google Hybrid')[0];
+			if(bgLayer){
+				bgLayer.setVisibility(true); 
+			}
             if (location instanceof OpenLayers.Bounds) {
                 // Set the z-indexes of both graphics to make sure the background
                 // graphics stay in the background
@@ -141,11 +138,11 @@ gxp.plugins.GoogleGeocoder = Ext.extend(gxp.plugins.Tool, {
                 var styleMarkers = new OpenLayers.StyleMap({
                     pointRadius: this.pointRadiusMarkers,
                     externalGraphic: this.externalGraphicMarkers,
+					graphicXOffset:this.externalGraphicXOffsetMarkers,
+					graphicYOffset:this.externalGraphicYOffsetMarkers,
                     backgroundGraphic: this.backgroundGraphicMarkers,
                     backgroundXOffset: this.backgroundXOffsetMarkers,
                     backgroundYOffset: this.backgroundYOffsetMarkers,
-                    graphicXOffset: this.graphicXOffsetMarkers,
-                    graphicYOffset: this.graphicYOffsetMarkers,                 
                     graphicZIndex: MARKER_Z_INDEX,
                     backgroundGraphicZIndex: SHADOW_Z_INDEX
                 });
