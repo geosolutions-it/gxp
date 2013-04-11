@@ -110,7 +110,7 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
             },
            
             'afterrender' : function(slider) {
-                this.sliderTip = slider.plugins[0];
+                //this.sliderTip = slider.plugins[0];
                 if(this.timeManager.units && slider.thumbs.length > 1) {
                     slider.setThumbStyles();
                 }
@@ -208,7 +208,7 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
                 this.setValue(tailIndex, this.thumbs[tailIndex].value + offset);
             }
               
-            this.updateTimeDisplay();
+            //this.updateTimeDisplay();
             
             //TODO use relay event instead, fire this directly from the slider
             toolbar.fireEvent('timechange', toolbar, currentTime);
@@ -424,9 +424,8 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
     onSliderChange: function(slider, value, thumb, silent, sync){
         var slideTime = new Date(value);
         var timeManager = slider.timeManager;
-        var pippo = true;
-        timeManager.setTime(slideTime, pippo);
-        this.updateTimeDisplay();
+        timeManager.setTime(slideTime, true);
+        //this.updateTimeDisplay();
     } 
 
 });

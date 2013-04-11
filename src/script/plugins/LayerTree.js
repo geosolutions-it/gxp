@@ -399,7 +399,7 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                             var timeManagers = this.target.mapPanel.map.getControlsByClass('OpenLayers.Control.TimeManager');
                             //var loading = this.target.mapPanel.map.getControlsByClass('OpenLayers.Control.LoadingPanel');
                             var layer = node.layer;
-                            if (layer instanceof OpenLayers.Layer.WMS && timeManagers[0]){
+                            if (layer instanceof OpenLayers.Layer.WMS && layer.dimensions && layer.dimensions.time && timeManagers[0]){
                                 timeManagers[0].timeAgents[0].applyTime(layer,timeManagers[0].currentTime);
                             }
                         }

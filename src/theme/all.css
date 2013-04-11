@@ -162,6 +162,16 @@
     background-image: url(img/silk/information.png);
 }
 
+/* gxp_wmsgetgraphs */
+.x-btn .gxp-icon-graph-wms, .x-menu-item .gxp-icon-graph-wms, .x-tree-node .gxp-icon-graph-wms {
+    background-image: url(img/silk/chart_curve.png);
+}
+
+/* gxp_wfsgetgraphs */
+.x-btn .gxp-icon-graph-wfs, .x-menu-item .gxp-icon-graph-wfs, .x-tree-node .gxp-icon-graph-wfs {
+    background-image: url(img/silk/chart_curve.png);
+}
+
 /* gxp_featureeditor */
 .x-btn .gxp-icon-addfeature, .x-menu-item .gxp-icon-addfeature {
     background-image: url(img/silk/pencil_add.png);

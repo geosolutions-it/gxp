@@ -141,6 +141,7 @@ gxp.plugins.LayerSource = Ext.extend(Ext.util.Observable, {
             visibility: layer.getVisibility(),
             opacity: layer.opacity || undefined,
             group: record.get("group"),
+            getGraph: record.get("getGraph"),
             uuid : record.get("uuid"),
             gnURL: record.get("gnURL"),
             fixed: record.get("fixed"),

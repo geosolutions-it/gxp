@@ -46,15 +46,23 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
     animationFieldsetText: "Animation Options",
     startText:'Start',
     endText:'End',
+    saveText: 'Save',
+    cancelText: 'Cancel',
     listOnlyText:'Use Exact List Values Only',
     stepText:'Animation Step',
     unitsText:'Animation Units',
-    frameRateText:'Animation Request',
+    frameRateText:'Animation Delay (s)',
     noUnitsText:'Snap To Time List',
     loopText:'Loop Animation',
     reverseText:'Reverse Animation',
     rangeChoiceText:'Choose the range for the time control',
     rangedPlayChoiceText:'Playback Mode',
+    secondsText: 'Seconds', 
+    minutesText: 'Minutes', 
+    hoursText: 'Hours', 
+    daysText: 'Days', 
+    monthsText: 'Months', 
+    yearsText: 'Years',
     
     /** private: method[initComponent]
      */
@@ -103,7 +111,7 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
                 }, {
                     xtype: 'fieldset',
                     title: this.animationFieldsetText,
-                    labelWidth:120,
+                    labelWidth:130,
                     items: [
                    /* {
                       boxLabel:this.listOnlyText,
@@ -139,12 +147,12 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
                         anchor:'-5',
                         //TODO: i18n these time units
                         store: [
-                            [OpenLayers.TimeUnit.SECONDS,'Seconds'], 
-                            [OpenLayers.TimeUnit.MINUTES,'Minutes'], 
-                            [OpenLayers.TimeUnit.HOURS,'Hours'], 
-                            [OpenLayers.TimeUnit.DAYS,'Days'], 
-                            [OpenLayers.TimeUnit.MONTHS,"Months"], 
-                            [OpenLayers.TimeUnit.YEARS,'Years']
+                            [OpenLayers.TimeUnit.SECONDS,this.secondsText], 
+                            [OpenLayers.TimeUnit.MINUTES,this.minutesText], 
+                            [OpenLayers.TimeUnit.HOURS,this.hoursText], 
+                            [OpenLayers.TimeUnit.DAYS,this.daysText], 
+                            [OpenLayers.TimeUnit.MONTHS,this.monthsText], 
+                            [OpenLayers.TimeUnit.YEARS,this.yearsText]
                         ],
                         valueNotFoundText:this.noUnitsText,
                         mode:'local',
@@ -157,7 +165,7 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
                             scope: this
                         },
                         ref: '../../stepUnitsField'
-                    },{
+                    }/*,{
                         //TODO: provide user information about these modes (Change to radio group?)
                         fieldLabel:this.rangedPlayChoiceText,
                         xtype:'gxp_playbackmodecombo',
@@ -168,7 +176,7 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
                             scope:this
                         },
                         ref:'../../playbackModeField'
-                    }]
+                    }*/]
                 },
                 {
                     xtype:'checkbox',
@@ -188,11 +196,11 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
             ],
             listeners:{'show':this.populateForm,scope:this},
             bbar: [{
-                text: 'Save',
+                text: this.saveText, //'Save',
                 handler: this.saveValues,
                 scope: this
             }, {
-                text: 'Cancel',
+                text: this.cancelText, //'Cancel',
                 handler: this.cancelChanges,
                 scope: this
             }]
@@ -318,13 +326,13 @@ gxp.PlaybackOptionsPanel = Ext.extend(Ext.Panel, {
             this.stepUnitsField.originalValue = this.timeManager.units;
             //this.listOnlyCheck.setValue(this.timeManager.snapToIntervals);
             //this.listOnlyCheck.originalValue = this.timeManager.snapToIntervals;
-            var playbackMode = this.playbackToolbar.playbackMode;
+            /*var playbackMode = this.playbackToolbar.playbackMode;
             if(playbackMode == 'track' || !playbackMode) { playbackMode = false; }
             if(!this.playbackModeField.timeAgents || !this.playbackModeField.timeAgents.length){
                 this.playbackModeField.timeAgents = this.timeManager.timeAgents;
             }
             this.playbackModeField.setValue(playbackMode);
-            this.playbackModeField.originalValue = playbackMode;
+            this.playbackModeField.originalValue = playbackMode;*/
             this.loopModeCheck.setValue(this.timeManager.loop);
             this.loopModeCheck.originalValue=this.timeManager.loop;
             this.reverseModeCheck.setValue(this.timeManager.step<0);

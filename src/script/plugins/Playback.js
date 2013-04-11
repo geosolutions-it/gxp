@@ -98,8 +98,10 @@ gxp.plugins.Playback = Ext.extend(gxp.plugins.Tool, {
             autoPlay:this.autoStart,
             optionsWindow: new Ext.Window({
                 title: gxp.PlaybackOptionsPanel.prototype.titleText,
-                width: 350,
-                height: 425,
+                width: 270,
+                height: 370,
+                modal: true,
+                constrainHeader: true,
                 layout: 'fit',
                 items: [{xtype: 'gxp_playbackoptions'}],
                 closeable: true,

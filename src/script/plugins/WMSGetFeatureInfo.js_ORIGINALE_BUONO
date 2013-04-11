@@ -8,8 +8,6 @@
 
 /**
  * @requires plugins/Tool.js
- * @requires plugins/FeatureEditorGrid.js
- * @requires GeoExt/widgets/Popup.js
  * @requires OpenLayers/Control/WMSGetFeatureInfo.js
  * @requires OpenLayers/Format/WMSGetFeatureInfo.js
  */
@@ -58,11 +56,6 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
      */
     popupTitle: "Feature Info",
     
-    /** api: config[text]
-     *  ``String`` Text for the GetFeatureInfo button (i18n).
-     */
-    buttonText: "Identify",
-    
     /** api: config[format]
      *  ``String`` Either "html" or "grid". If set to "grid", GML will be
      *  requested from the server and displayed in an Ext.PropertyGrid.
@@ -81,7 +74,7 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
      *  ``Array`` List of param names that should be taken from the layer and
      *  added to the GetFeatureInfo request (e.g. ["CQL_FILTER"]).
      */
-     layerParams: ["TIME","ELEVATION"],     
+     layerParams: ["TIME","ELEVATION"],
     /** api: config[itemConfig]
      *  ``Object`` A configuration object overriding options for the items that
      *  get added to the popup for each server response or feature. By default,
@@ -103,7 +96,6 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
         var actions = gxp.plugins.WMSGetFeatureInfo.superclass.addActions.call(this, [{
             tooltip: this.infoActionTip,
             iconCls: "gxp-icon-getfeatureinfo",
-            buttonText: this.buttonText,
             toggleGroup: this.toggleGroup,
             enableToggle: true,
             allowDepress: true,
@@ -160,14 +152,14 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
                         getfeatureinfo: function(evt) {
                             var title = x.get("title") || x.get("name");
                             if (infoFormat == "text/html") {
-                                var match = evt.text.match(/<body[^>]*>([\s\S]*)<\/body>/);
+                                var match = evt.text.match(/<html[^>]*>([\s\S]*)<\/html>/);
                                 if (match && !match[1].match(/^\s*$/)) {
                                     this.displayPopup(evt, title, match[1]);
                                 }
                             } else if (infoFormat == "text/plain") {
                                 this.displayPopup(evt, title, '<pre>' + evt.text + '</pre>');
-                            } else if (evt.features && evt.features.length > 0) {
-                                this.displayPopup(evt, title, null,  x.get("getFeatureInfo"));
+                            } else {
+                                this.displayPopup(evt, title);
                             }
                         },
                         scope: this
@@ -196,14 +188,11 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
      *     reporting the info to the user
      * :arg text: ``String`` Body text.
      */
-    displayPopup: function(evt, title, text, featureinfo) {
+    displayPopup: function(evt, title, text) {
         var popup;
         var popupKey = evt.xy.x + "." + evt.xy.y;
-        featureinfo = featureinfo || {};
+
         if (!(popupKey in this.popupCache)) {
-            for(var oldkey in this.popupCache){
-                this.popupCache[oldkey].close();
-            }            
             popup = this.addOutput({
                 xtype: "gx_popup",
                 title: this.popupTitle,
@@ -230,7 +219,6 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
                     scope: this
                 }
             });
-            
             this.popupCache[popupKey] = popup;
         } else {
             popup = this.popupCache[popupKey];
@@ -242,17 +230,14 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
             for (var i=0,ii=features.length; i<ii; ++i) {
                 feature = features[i];
                 config.push(Ext.apply({
-                    xtype: "gxp_editorgrid",
-                    readOnly: true,
+                    xtype: "propertygrid",
                     listeners: {
-                        'beforeedit': function (e) {
-                            return false;
-                        }
+                        'beforeedit': function (e) { 
+                            return false; 
+                        } 
                     },
                     title: feature.fid ? feature.fid : title,
-                    feature: feature,
-                    fields: featureinfo.fields,
-                    propertyNames: featureinfo.propertyNames
+                    source: feature.attributes
                 }, this.itemConfig));
             }
         } else if (text) {

@@ -576,7 +576,7 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
         this.portal = new Constructor(Ext.applyIf(this.portalConfig || {}, {
             layout: "fit",
             hideBorders: true,
-            title: this.mapTitle ? this.mapTitle : this.viewTabTitle ? this.viewTabTitle : 'map',
+            //title: this.mapTitle ? this.mapTitle : this.viewTabTitle ? this.viewTabTitle : 'map',
             items: {
                 layout: "border",
                 deferredRender: false,
@@ -586,7 +586,7 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
 
          if(this.appType == "default"){
             var portalContainer = Ext.getCmp(this.renderToTab);
-            portalContainer.add(this.portal);
+            portalContainer.add(Ext.apply(this.portal, {title: this.mapTitle ? this.mapTitle : this.viewTabTitle ? this.viewTabTitle : 'map'}));
             portalContainer.doLayout();
             portalContainer.setActiveTab(1);
                         
@@ -612,7 +612,7 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
         
         if(this.appType == "public"){
             var portalContainer = Ext.getCmp(this.renderToTab);
-            portalContainer.add(this.portal);
+            portalContainer.add(Ext.apply(this.portal, {title: this.mapTitle ? this.mapTitle : this.viewTabTitle ? this.viewTabTitle : 'map'}));
             portalContainer.doLayout();
             portalContainer.setActiveTab(1);
                         
@@ -640,15 +640,15 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
             var portalContainer = Ext.getCmp(this.renderToTab);
             portalContainer.add(this.portal);
             portalContainer.doLayout();
-            portalContainer.setActiveTab(1);
+            //portalContainer.setActiveTab(0);
                         
             //Ext.getCmp('west').collapse();
             
             var map = this.mapPanel.map;
-            var activeTab = portalContainer.getActiveTab();
+            //var activeTab = portalContainer.getActiveTab();
             app.on({
               'portalready' : function(){
-                activeTab.addListener("activate", function(){
+                /*activeTab.addListener("activate", function(){
                     Ext.getCmp('west').expand();
 
                     map.size.w += 1;
@@ -657,7 +657,7 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
                     map.updateSize();
                 });
                 
-                portalContainer.setActiveTab(1);
+                portalContainer.setActiveTab(1);*/
               }
             });
         }

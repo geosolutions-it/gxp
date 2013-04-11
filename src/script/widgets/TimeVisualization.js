@@ -85,7 +85,7 @@ gxp.TimeVisualization = Ext.extend(Ext.Panel, {
             OpenLayers.Util.extend(timeVisualizationControl, {
                 draw: function () {
                     OpenLayers.Control.prototype.draw.apply(this, arguments);
-                    this.div.innerHTML = '<div class=\"olTimeBack\" id=\"olTimeBack\" ><div class=\"olTime\" id=\"olTime\" style=\"'+ self.position +'\" ></div></div>';
+                    this.div.innerHTML = '<div class=\"olTime\" id=\"olTime\" style=\"'+ self.position +'\" ></div>';
 
                     return this.div;
                 }

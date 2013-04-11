@@ -454,7 +454,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
             original = this.store.getAt(index);
         } else if (Ext.isObject(config.capability)) {
             original = this.store.reader.readRecords({capability: {
-                request: {getmap: {href: this.url}},
+                request: {getmap: {href: this.trimUrl(this.url, this.baseParams)}},
                 layers: [config.capability]}
             }).records[0];
         } else if (this.layerConfigComplete(config)) {
@@ -517,12 +517,15 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
             });*/
             
             var singleTile = false;
+            var transEffect = null;
             if ("tiled" in config) {
                 singleTile = !config.tiled;
+                transEffect = config.tiled;
             } else {
                 // for now, if layer has a time dimension, use single tile
                 if (original.data.dimensions && original.data.dimensions.time) {
                     singleTile = true;
+                    transEffect = true;
                 }
             }
 
@@ -537,8 +540,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
                 opacity: ("opacity" in config) ? config.opacity : 1,
                 buffer: ("buffer" in config) ? config.buffer : 1,
                 dimensions: original.data.dimensions,
-                transitionEffect: singleTile ? 'resize' : null,
-		//transitionEffect: null, //singleTile ? 'resize' : null,
+                transitionEffect: transEffect ? 'resize' : null,
                 minScale: config.minscale,
                 maxScale: config.maxscale,
 				displayInLayerSwitcher: ("displayInLayerSwitcher" in config) ? config.displayInLayerSwitcher : true
@@ -556,7 +558,12 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
                 fixed: config.fixed,
                 selected: "selected" in config ? config.selected : false,
                 restUrl: this.restUrl,
-                layer: layer
+                layer: layer,
+                getGraph: config.getGraph,
+                graphTable: config.graphTable,
+                graphAttribute: config.graphAttribute, 
+                cumulative: config.cumulative,
+                queryable: config.queryable
             }, original.data);
             
             // add additional fields
@@ -571,7 +578,12 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
                 {name: "fixed", type: "boolean"},
                 {name: "selected", type: "boolean"},
                 {name: "restUrl", type: "string"},
-                {name: "infoFormat", type: "string"}
+                {name: "infoFormat", type: "string"},
+                {name: "getGraph", type: "boolean"},
+                {name: "graphTable", type: "string"},
+                {name: "graphAttribute", type: "string"},
+                {name: "cumulative", type: "boolean"},
+                {name: "queryable", type: "boolean"}
             ];
             original.fields.each(function(field) {
                 fields.push(field);
