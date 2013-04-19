@@ -657,3 +657,6 @@ div.olMap div.gx-overlay-playback {
 .thumb-mapbox-world-print {
     background-image:url('img/thumbs/mapbox/world-print.png');
 }
+.x-btn .icon-disk{
+	background-image: url(img/silk/disk.png);
+}

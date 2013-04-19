@@ -18,6 +18,7 @@ Ext.ns("gxp.slider");
 gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
     ref : 'slider',
     cls : 'gx_timeslider',
+    id:"multislider",
     indexMap : null,
     width : 200,
     animate : false,

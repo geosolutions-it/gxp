@@ -71,6 +71,8 @@ gxp.plugins.WFSGetGraphs = Ext.extend(gxp.plugins.Tool, {
      */
     format: "grid",
     
+    url: "http://159.213.57.108/geoserver/ows?",
+    
     /** api: config[vendorParams]
      *  ``Object``
      *  Optional object with properties to be serialized as vendor specific
@@ -227,12 +229,10 @@ gxp.plugins.WFSGetGraphs = Ext.extend(gxp.plugins.Tool, {
     
     displayChart: function(count, evt, title, featureinfo, table, attribute, cumulative, displayGraph){
 
-        for(var oldkey in this.popupCache){
-            this.popupCache[oldkey].close();
-        }   
+
             
         var protocol = new OpenLayers.Protocol.WFS({
-            url: "http://159.213.57.108/geoserver/ows",
+            url: this.url,
             version: "1.1.0",
             featureType: evt.features[0].gml.featureType,
             featureNS: evt.features[0].gml.featureNS,
@@ -259,7 +259,17 @@ gxp.plugins.WFSGetGraphs = Ext.extend(gxp.plugins.Tool, {
         
         var checkCumulative = function() {
             return cumulative;
-        }        
+        }   
+
+        
+        var checkListValues = function() {
+            var listValue = {
+                attribute: findCampo(),
+                layers: evt.features[0].gml.featureType,
+                id: evt.features[0].data.id
+            };
+            return listValue;
+        }         
         
         var popup;
         var tabPanel;
@@ -267,7 +277,11 @@ gxp.plugins.WFSGetGraphs = Ext.extend(gxp.plugins.Tool, {
         featureinfo = featureinfo || {};
         
         if (!(popupKey in this.popupCache)) {
-            
+        
+            for(var oldkey in this.popupCache){
+                this.popupCache[oldkey].close();
+            }
+        
             popup = this.addOutput({
                 xtype: "gx_popup",
                 title: this.popupTitle,
@@ -309,101 +323,108 @@ gxp.plugins.WFSGetGraphs = Ext.extend(gxp.plugins.Tool, {
         
         Ext.getCmp('wfsGraphTab').add({
             title: title,
-            resizeTabs      : true,
-            html: "<div id='chartContainer_" + title + "' style='min-height: 305px; min-width: 584px'></div>"
+            resizeTabs: true,
+            html: "<div id='chartContainer_" + title + "' style='min-height: 305px; min-width: 584px'></div>",
+			bbar:[
+				"->",{xtype:'button',text:'CSV Export',iconCls:'icon-disk',handler:function(){
+                    var campo = checkListValues();
+                    var geoUrl = this.ownerCt.ownerCt.scope.url;
+					window.open(geoUrl + "propertyName=fornitore%2Cnome%2Cid%2Cdata_ora%2Clat%2Clon%2Cquota%2C"+campo.attribute+"&service=WFS&version=1.0.0&request=GetFeature&typeName=lamma_stazioni%3A"+campo.layers+"&outputFormat=CSV&sortby=data_ora&CQL_FILTER=id="+campo.id);
+				}}],
+            scope: this
         });
         
         Ext.getCmp('wfsGraphTab').doLayout();
         
         Ext.getCmp('wfsGraphTab').setActiveTab(0);
-        
+        var chart;
         var protRead = protocol.read({
             filter: featureFilter,
             callback: function(response) {
             
                 if(response.features.length > 0) {
                     if(displayGraph){
-                    var campo = findCampo();
-                    var data = "[";
-                    
-                    for (var i = 0; i<response.features.length; i++){
-                        var time = OpenLayers.Date.parse(response.features[i].data.data_ora);
-                        var cccc = new Date(time);
-                        data += "[" + cccc.getTime() + "," + response.features[i].data[campo] + "],";
-                    }
-                    
-                    data = delLastChar(data);   
-                    data += "]";
-                    data = Ext.util.JSON.decode(data);
-                    data = data.sort();
-                    
-                    var cum = checkCumulative();
-                    
-                    if (cum){
-                        var makeCumulative = parseFloat(data[0].slice(1));
-                        data[0].splice(1,1,makeCumulative);
+                        var campo = findCampo();
+                        var data = "[";
                         
-                        for (var  i = 1; i<data.length; i++){
-                            makeCumulative = makeCumulative + parseFloat(data[i].slice(1));
-                            data[i].splice(1,1,parseFloat(makeCumulative.toFixed(2)));
+                        for (var i = 0; i<response.features.length; i++){
+                            var time = OpenLayers.Date.parse(response.features[i].data.data_ora);
+                            var cccc = new Date(time);
+                            data += "[" + cccc.getTime() + "," + response.features[i].data[campo] + "],";
                         }
-                    }
-
-                    //Ext.onReady(function () {
-                        var chart = new Highcharts.StockChart({
-                            chart : {
-                                type: 'line',
-                                renderTo : "chartContainer_" + title
-                            },
-                            rangeSelector : {                                
-                                buttons: [{
-                                    type: 'day',
-                                    count: 0.25,
-                                    text: '6 h'
-                                },{
-                                    type: 'day',
-                                    count: 0.5,
-                                    text: '12 h'
-                                },{
-                                    type: 'day',
-                                    count: 1,
-                                    text: '1 d'
-                                }, {
-                                    type: 'all',
-                                    text: 'All'
-                                }],                                
-                                selected : 3,
-                                enabled: true
-                            },
-                            legend: {
-                                enabled: false
-                            },
-
-                            title : {
-                                text : title,
-                                style: {
-                                    color: '#3E576F',
-                                    fontSize: '12px'
-                                }        
-                            },
-                            subtitle : {
-                                text : response.features[0].data.fornitore + " - " + response.features[0].data.nome + " - Quota: " + response.features[0].data.quota,
-                                style: {
-                                    color: '#3E576F',
-                                    fontSize: '10px'
-                                }        
-                            },                            
-                            series : [{
-                                name : title,
-                                data: data,
-                                tooltip: {
-                                    valueDecimals: 2
-                                }
-                            }]
+                        
+                        data = delLastChar(data);   
+                        data += "]";
+                        data = Ext.util.JSON.decode(data);
+                        data = data.sort();
+                        
+                        var cum = checkCumulative();
+                        
+                        if (cum){
+                            var makeCumulative = parseFloat(data[0].slice(1));
+                            data[0].splice(1,1,makeCumulative);
+                            
+                            for (var  i = 1; i<data.length; i++){
+                                makeCumulative = makeCumulative + parseFloat(data[i].slice(1));
+                                data[i].splice(1,1,parseFloat(makeCumulative.toFixed(2)));
+                            }
                         }
-                        );
-     
-                    //});
+
+                        Ext.onReady(function () {
+                            var chart = new Highcharts.StockChart({
+                                chart : {
+                                    type: 'line',
+                                    renderTo : "chartContainer_" + title
+                                },
+                                rangeSelector : {                                
+                                    buttons: [{
+                                        type: 'day',
+                                        count: 0.25,
+                                        text: '6 h'
+                                    },{
+                                        type: 'day',
+                                        count: 0.5,
+                                        text: '12 h'
+                                    },{
+                                        type: 'day',
+                                        count: 1,
+                                        text: '1 d'
+                                    }, {
+                                        type: 'all',
+                                        text: 'All'
+                                    }],                                
+                                    selected : 3,
+                                    enabled: true
+                                },
+                                legend: {
+                                    enabled: false
+                                },
+
+                                title : {
+                                    text : title,
+                                    style: {
+                                        color: '#3E576F',
+                                        fontSize: '12px'
+                                    }        
+                                },
+                                subtitle : {
+                                    text : response.features[0].data.fornitore + " - " + response.features[0].data.nome + " - Quota: " + response.features[0].data.quota,
+                                    style: {
+                                        color: '#3E576F',
+                                        fontSize: '10px'
+                                    }        
+                                },                            
+                                series : [{
+                                    name : title,
+                                    data: data,
+                                    tooltip: {
+                                        valueDecimals: 2
+                                    }
+                                }]
+                            }
+                            );
+         
+                        });
                     }else{
                         var doc = document.getElementById("chartContainer_" + title);
                         doc.style.backgroundImage = "url('../theme/app/img/silk/nograph.png')";
@@ -411,7 +432,7 @@ gxp.plugins.WFSGetGraphs = Ext.extend(gxp.plugins.Tool, {
                         doc.style.backgroundRepeat = "no-repeat";             
                     }
                 }
-            }
+            }, scope: this
         });
     }  
 });

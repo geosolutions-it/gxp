@@ -144,7 +144,12 @@ gxp.plugins.Playback = Ext.extend(gxp.plugins.Tool, {
         this.target.on('ready',function() {
             this._ready += 1;
             if (this._ready > 1) {
-                this.addOutput();
+                var tab = Ext.getCmp('appTabs');
+                tab.setActiveTab(1);
+                //tab.addListener("activate", function(){
+                    this.addOutput();
+                //});                
+                
             }
         }, this);
     },

@@ -400,6 +400,14 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                             //var loading = this.target.mapPanel.map.getControlsByClass('OpenLayers.Control.LoadingPanel');
                             var layer = node.layer;
                             if (layer instanceof OpenLayers.Layer.WMS && layer.dimensions && layer.dimensions.time && timeManagers[0]){
+                                var loading = this.target.mapPanel.map.getControlsByClass('OpenLayers.Control.LoadingPanel');
+                                /*timeManagers[0].events.triggerEvent('tick', {
+                                    'currentTime' : timeManagers[0].currentTime
+                                });*/                       
+                                /*layer.events.unregister('loadstart', loading[0], loading[0].increaseCounter);                                
+                                layer.events.unregister('loadend', loading[0], loading[0].decreaseCounter);
+                                layer.events.register('loadstart', loading[0], loading[0].increaseCounter); 
+                                layer.events.register('loadend', loading[0], loading[0].decreaseCounter);*/
                                 timeManagers[0].timeAgents[0].applyTime(layer,timeManagers[0].currentTime);
                             }
                         }
