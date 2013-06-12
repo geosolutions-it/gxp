@@ -301,8 +301,8 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 	    //Latitude and longitude fieldset: velocity profile  point
 		this.vplonLatFieldSet = new Ext.form.FieldSet({
 			title: this.svpsoundSourcePointText,
-			checkboxToggle: true,
-			disabled: true,
+			//checkboxToggle: true,
+			//disabled: true,
 			labelAlign: 'top',
 			layout: 'table',
 			autoWidth:true,
@@ -318,7 +318,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 			listeners: {
 				scope: this,
 				afterrender: function(cmp){
-					cmp.collapse(true);
+					//cmp.collapse(true);
 				},
 				beforeexpand: function(p, animate){
 					var combo = this.seasonCombo;
@@ -430,8 +430,8 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 			listeners: {
 				select: function(combo, record, index){
 					if(combo.getValue() == me.userInput){
-					    me.vplonLatFieldSet.enable();
-						me.vplonLatFieldSet.expand();
+					    //me.vplonLatFieldSet.enable();
+						//me.vplonLatFieldSet.expand();
 						
 						me.target.tools[me.svpUploader].getWindowPanel({
 							winTitle: me.svpUploadDialogTitle,
@@ -440,14 +440,14 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 							close: function(){
 								if(!me.svpFile){
 									me.seasonCombo.setValue(me.springText);
-									me.vplonLatFieldSet.collapse();
-									me.vplonLatFieldSet.disable();
+									//me.vplonLatFieldSet.collapse();
+									//me.vplonLatFieldSet.disable();
 								}
 							}
 						});
 					}else{
-						me.vplonLatFieldSet.collapse();
-						me.vplonLatFieldSet.disable();
+						//me.vplonLatFieldSet.collapse();
+						//me.vplonLatFieldSet.disable();
 					}
 				}
 			}
@@ -806,6 +806,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 				},
 				*/
 				this.lonLatFieldSet,
+				this.vplonLatFieldSet,
 				{
 					xtype:'fieldset',
 					autoWidth:true,
@@ -817,7 +818,6 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 					},
 					items:[
 						this.seasonCombo,
-						this.vplonLatFieldSet,
 						/*{
 							name: 'color',
 							xtype: 'colorpickerfield',
@@ -872,7 +872,8 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 					items: [
 					   this.target.tools[this.svpUploader].getPanel({submitButton: false})
 					]
-				},*/{				
+				},*/
+				{				
 					xtype: "fieldset",
 					title: this.advancedTitle,
 					id: "advMod_fieldSet",
