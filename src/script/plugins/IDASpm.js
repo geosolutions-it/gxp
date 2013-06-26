@@ -77,22 +77,39 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 	
 	tlModelLabelText: "TL Model",
 	tlModelEmptyText: "TL Model Selection",
-	tlModelIsoVelocity: "IsoVelocity",
+	tlModelStore: [
+		"IsoVelocity",
+		"Bellhop",
+		"RAM"
+	],
+	/*tlModelIsoVelocity: "IsoVelocity",
 	tlModelBellhop: "Bellhop",
-	tlModelRAM: "RAM",
+	tlModelRAM: "RAM",*/
 	
 	bottomTypeEmptyText: "Bottom type Selection",
 	bottomTypeLabelText: "Bottom Type",
-	bottomTypeSilt: "Silt",
+	bottomTypeStore: [
+		"Silt",
+		"Gravel",
+		"Limestone",
+		"Basalt"
+	],
+	
+	/*bottomTypeSilt: "Silt",
 	bottomTypeGravel: "Gravel",
 	bottomTypeLimestone: "Limestone",
-	bottomTypeBasalt: "Basalt",
+	bottomTypeBasalt: "Basalt",*/
 	
 	qualityEmptyText: "Quality Selection",
-	qualityLabelText:	 "Quality",		
-	qualityLow: "low",
+	qualityLabelText: "Quality",
+	qualityStore: [
+		"low",
+		"medium",
+		"high"
+	],	
+	/*qualityLow: "low",
 	qualityMedium: "medium",
-	qualityHigh: "high",
+	qualityHigh: "high",*/
 	
 	maxRangeText: "Max Range",
 	maxRangeMin: 0,
@@ -464,7 +481,8 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 			emptyText: this.tlModelEmptyText,
 			fieldLabel: this.tlModelLabelText,
 			mode: 'local',
-			store: ["", this.tlModelIsoVelocity,this.tlModelBellhop,this.tlModelRAM],
+			value: this.tlModelStore[0],
+			store: this.tlModelStore,
 			listeners: {
 				select: function(combo, record, index){
 				}
@@ -482,7 +500,8 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 			emptyText: this.bottomTypeEmptyText,
 			fieldLabel: this.bottomTypeLabelText,
 			mode: 'local',
-			store: ["", this.bottomTypeSilt,this.bottomTypeGravel,this.bottomTypeLimestone, this.bottomTypeBasalt],
+			value: this.bottomTypeStore[0],
+			store: this.bottomTypeStore,
 			listeners: {
 				select: function(combo, record, index){
 				}
@@ -500,7 +519,8 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 			emptyText: this.qualityEmptyText,
 			fieldLabel: this.qualityLabelText,
 			mode: 'local',
-			store: ["", this.qualityLow, this.qualityMedium, this.qualityHigh],
+			value: this.qualityStore[0],
+			store: this.qualityStore,
 			listeners: {
 				select: function(combo, record, index){
 				}

@@ -152,6 +152,10 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
 	summerText : "Summer",
 	modelRunDateText:'Model Run Date',
 	modelEndDateText:'Model End Date',
+	
+	qualityLabel: "Quality",
+	bottomTypeLabel: "Bottom Type",
+	tlModelLabel: "TL Model",
     // End i18n.
     
     spatialFilterOptions: {
@@ -353,14 +357,26 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
 						width:210
 
 					}, {
+						fieldLabel: this.tlModelLabel,
+						name: 'tlmodel',
+						xtype: 'textfield',
+						width:210
+					}, {
+						fieldLabel: this.bottomTypeLabel,
+						name: 'bottomtype',
+						xtype: 'textfield',
+						width:210
+					}, {
+						fieldLabel: this.qualityLabel,
+						name: 'quality',
+						xtype: 'textfield',
+						width:210
+					}, {
 						fieldLabel: this.modelnameLabel,
 						name: 'modelname',
 						xtype: 'textfield',
 						width:210
-
-					},
-					
-					{
+					}, {
 						xtype: 'compositefield',
 						fieldLabel: this.modelRunDateText,
 						defaults:{
@@ -640,7 +656,39 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                                 })
                             );
                         }
-                        
+												
+						if(formValues.tlmodel){
+                            SPMFilter.filters.push(
+                                new OpenLayers.Filter.Comparison({
+                                    type: OpenLayers.Filter.Comparison.LIKE,
+                                    property: "tlModel",
+                                    matchCase: false,
+                                    value: "*"+formValues.tlmodel+"*"
+                                })
+                            );
+                        }    
+
+						if(formValues.bottomtype){
+                            SPMFilter.filters.push(
+                                new OpenLayers.Filter.Comparison({
+                                    type: OpenLayers.Filter.Comparison.LIKE,
+                                    property: "bottomType",
+                                    matchCase: false,
+                                    value: "*"+formValues.bottomtype+"*"
+                                })
+                            );
+                        } 		
+
+						if(formValues.quality){
+                            SPMFilter.filters.push(
+                                new OpenLayers.Filter.Comparison({
+                                    type: OpenLayers.Filter.Comparison.LIKE,
+                                    property: "quality",
+                                    matchCase: false,
+                                    value: "*"+formValues.quality+"*"
+                                })
+                            );
+                        } 							
                         
                         if(formValues.season){
                             SPMFilter.filters.push(
