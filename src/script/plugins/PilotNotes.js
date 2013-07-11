@@ -1593,9 +1593,8 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
                     icon: Ext.MessageBox.ERROR
                 });
             });
-            cursor.getStoreAsync();
 		}
-		
+		cursor.getStoreAsync();
 		
 		// listen to authentication events
 		// TODO sposta nel giusto costruttore
