@@ -1584,17 +1584,18 @@ gxp.plugins.PilotNotes = Ext.extend(gxp.plugins.Tool, {
 			self.buildLogbookUI();
 			
 		});
+		if(Application.user.token){
+            cursor.failure( function(response){
+                Ext.Msg.show({
+                    title: 'Pilot notes error',
+                    msg: 'Logbook cannot be initialized properly: ' + response,
+                    buttons: Ext.Msg.OK,
+                    icon: Ext.MessageBox.ERROR
+                });
+            });
+            cursor.getStoreAsync();
+		}
 		
-		cursor.failure( function(response){
-			Ext.Msg.show({
-				title: 'Pilot notes error',
-				msg: 'Logbook cannot be initialized properly: ' + response,
-				buttons: Ext.Msg.OK,
-				icon: Ext.MessageBox.ERROR
-			});
-		});
-		
-		cursor.getStoreAsync();
 		
 		// listen to authentication events
 		// TODO sposta nel giusto costruttore
