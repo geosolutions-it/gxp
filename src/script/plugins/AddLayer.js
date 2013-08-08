@@ -1,3 +1,23 @@
+/**
+ *  Copyright (C) 2007 - 2012 GeoSolutions S.A.S.
+ *  http://www.geo-solutions.it
+ *
+ *  GPLv3 + Classpath exception
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+ 
 Ext.namespace("gxp.plugins");
 
 /** api: constructor
@@ -6,8 +26,10 @@ Ext.namespace("gxp.plugins");
  *    Base class to add a new layer on the map accordingly the gxp rules.
  *    This means WMS source check/creation and also creation fo layerrecord 
  *    (for the layer tree) to add the new layer to the map.
- 
+ *
  *    ``createLayerRecord`` method.
+ *      
+ *	  Author: Tobia Di Pisa at tobia.dipisa@geo-solutions.it
  */   
 gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
    
@@ -21,11 +43,11 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
      *  The object that this plugin is plugged into.
      */
      
-    /** api: property[title]
+    /** api: property[untitledText]
      *  ``String``
      *  A descriptive title for this layer source.
      */
-    title: "",
+    untitledText: "",
 	
 	/** api: property[waitMsg]
      *  ``String``
@@ -44,6 +66,12 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
      *  
      */
 	useEvents: false,
+	
+	/** api: property[showCapabilitiesGrid]
+     *  ``Boolean``
+     *  
+     */
+	showCapabilitiesGrid: false,
     
     /** private: method[constructor]
      */
@@ -84,9 +112,16 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
 			title: this.msLayerTitle,
 			source: this.source.id
 		};
+		
+		if(this.customParams){
+			props = Ext.applyIf(
+				props,
+				this.customParams
+			);
+		}
 		  
-		if(this.layerUUID)
-			props.uuid = this.layerUUID;
+		if(this.msLayerUUID)
+			props.uuid = this.msLayerUUID;
 		
 		if(this.gnUrl && this.gnLangStr)
 			props.gnURL = this.gnUrl + "srv/" + this.gnLangStr + "/";
@@ -102,10 +137,13 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
 		    //
 			// If tabs are used the View tab is Activated
 			//
-			if(this.target.renderToTab && this.enableViewTab){
+			/*if(this.target.renderToTab && this.enableViewTab){
 				var portalContainer = Ext.getCmp(this.target.renderToTab);
-				portalContainer.setActiveTab(1);
-			}					
+				
+				if(portalContainer instanceof Ext.TabPanel){
+					portalContainer.setActiveTab(1);
+				}				
+			}*/					
 						
 			// //////////////////////////
 			// Zoom To Layer extent
@@ -135,6 +173,7 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
 	 * api: method[checkLayerSource]
      */
 	checkLayerSource: function(wmsURL){
+	    var s;
 		for (var id in this.target.layerSources) {
 			  var src = this.target.layerSources[id];    
 			  var url  = src.initialConfig.url; 
@@ -142,107 +181,149 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
 			  // //////////////////////////////////////////
 			  // Checking if source URL aldready exists
 			  // //////////////////////////////////////////
-			  if(url && url.indexOf(wmsURL) != -1){
-				  this.source = src;
+			  if(url != undefined && url.indexOf(wmsURL) != -1){
+				  s = src;
 				  break;
 			  }
 		} 
 
-		return this.source;
+		return s;
 	},
 	
 	/**  
 	 * api: method[addLayer]
      */
-	addLayer: function(msLayerTitle, msLayerName, wmsURL, gnUrl, enableViewTab, msLayerUUID, gnLangStr){		
+	addLayer: function(options){		
 		var mask = new Ext.LoadMask(Ext.getBody(), {msg: this.waitMsg});
 		
-		if(!msLayerName || !wmsURL){
-			Ext.Msg.show({
-				 title: 'Add Layer Plugin',
-				 msg: "The mandatory layer properties are undefined !",
-				 width: 300,
-				 icon: Ext.MessageBox.ERROR
-			}); 
-			
-			return;
-		}
+		this.msLayerTitle = options.msLayerTitle;
+		this.msLayerName = options.msLayerName;
+		this.wmsURL = options.wmsURL;
+		this.gnUrl = options.gnUrl;
+		this.enableViewTab = options.enableViewTab;
+		this.msLayerUUID = options.msLayerUUID;
+		this.gnLangStr = options.gnLangStr;
+		this.customParams = options.customParams;
+				
+		this.source = this.checkLayerSource(this.wmsURL);
+
+		if(this.source){
 		
-		this.msLayerTitle = msLayerTitle;
-		this.msLayerName = msLayerName;
-		
-		var map = this.target.mapPanel.map;
-		if(map.getLayersByName(this.msLayerName).length < 1){
-			this.wmsURL = wmsURL;
-			this.gnUrl = gnUrl;
-			this.enableViewTab = enableViewTab;
-			this.msLayerUUID = msLayerUUID;
-			this.gnLangStr = gnLangStr;
-					
-			this.checkLayerSource(this.wmsURL);
-
-			if(this.source){
-			
-				if(!this.source.loaded){
-					this.source.on('ready', function(){
-						mask.hide();
-						this.target.layerSources[this.source.id].loaded = true; 
-						this.addLayerRecord();
-						
-						if(this.useEvents)
-							this.fireEvents('ready');
-					}, this);
-				}
-				
-				var index = this.source.store.findExact("name", this.msLayerName);
-				
-				if (index < 0) {
-					// ///////////////////////////////////////////////////////////////
-					// In this case is necessary reload the local store to refresh 
-					// the getCapabilities records 
-					// ///////////////////////////////////////////////////////////////
-					var baseParams = this.source.store.baseParams;
-
-					Ext.apply(baseParams, {
-						datetime: new Date().getTime() // for IE
-					});
-
-					mask.show();
-					this.source.store.reload(baseParams);
-				}else{
-					this.addLayerRecord();
-				}
-			}else{
-				mask.show();
-
-				var sourceOpt = {
-					config: {
-					  url: this.wmsURL
-					}
-				};
-			  
-				this.source = this.target.addLayerSource(sourceOpt);
-				
-				//
-				// Waiting GetCapabilities response from the server.
-				//			
-				this.source.on('ready', function(){ 
+			if(!this.source.loaded){
+				this.source.on('ready', function(){
 					mask.hide();
-					
-					this.target.layerSources[this.source.id].loaded = true;
+					this.target.layerSources[this.source.id].loaded = true; 
 					this.addLayerRecord();
 					
 					if(this.useEvents)
-						this.fireEvents('ready');
+						this.fireEvent('ready');
 				}, this);
-			  
+			}
+			
+		    var index = this.source.store.findExact("name", this.msLayerName);
+			
+			if (index < 0) {
+				// ///////////////////////////////////////////////////////////////
+				// In this case is necessary reload the local store to refresh 
+				// the getCapabilities records 
+				// ///////////////////////////////////////////////////////////////
+				this.source.store.reload();
+			}else{
+				this.addLayerRecord();
+			}
+		}else{
+			mask.show();
+			this.addSource(this.wmsURL, true);
+		}
+	},
+
+	/**  
+	 * api: method[addSource]
+     */
+	addSource: function(wmsURL, showLayer){			
+		this.wmsURL = wmsURL;
+		
+		this.source = this.checkLayerSource(this.wmsURL);
+
+		if(!this.source){
+			var mask = new Ext.LoadMask(Ext.getBody(), {msg: this.waitMsg});
+			mask.show();
+		  
+			this.source = this.target.addLayerSource({
+				config: {url: this.wmsURL}, // assumes default of gx_wmssource
+				//
+				// Waiting GetCapabilities response from the server.
+				//	
+				callback: function(id) {
+					var addLayerAction = this.target.tools["addlayers"];
+					var combo = addLayerAction.getSourceComboBox();	
+
+					// ////////////////////////////////////////////////////////////
+					// At the first time the CapGrid is not initialized so:
+					// - the source is present but the combo store is 
+					//   undefined.
+					// - when the showCapabilitiesGrid is called by the user, 
+					//   if the showCapabilitiesGrid == false, or automatically 
+					//   if == true the CapGrid is initialized and the all the 
+					//   layerSources loaded inside the combo array store.
+					// 
+					// For all the following steps the CapGrid is already 
+					// initialized so:
+					// - the new layerSource is loaded but we have to put manually.
+					//   the new record inside the combo store.
+					// /////////////////////////////////////////////////////////////
+					if(combo){
+						var store = combo.getStore();
+						
+						//
+						// Add to combo and select
+						//
+						var record = new store.recordType({
+							id: id,
+							title: this.target.layerSources[id].title || this.untitledText
+						});
+						
+						store.insert(0, [record]);
+						combo.onSelect(record, 0);
+					}
+					
+					// 
+					// Show the capabilities grid
+					//
+					if(this.showCapabilitiesGrid === true && !showLayer){
+						addLayerAction.showCapabilitiesGrid();
+						
+						//
+						// Select the newly created source
+						//
+						combo = addLayerAction.getSourceComboBox();
+						
+						var store = combo.getStore();
+						
+						var index = store.find('id', this.source.id);
+						var record = store.getAt(index);
+						
+						combo.onSelect(record, 0);
+					}				
+					
+					mask.hide();
+					
+					this.target.layerSources[this.source.id].loaded = true;
+					if(showLayer){						
+						this.addLayerRecord();
+					}
+					
+					if(this.useEvents)
+						this.fireEvent('ready');
+					
+				},
 				//
 				// To manage failure in GetCapabilities request (invalid request url in 
 				// GeoNetwork configuration or server error).
 				//
-				this.source.on('failure', function(src, msg){		          
+				fallback: function(source, msg) {
 					mask.hide();
-					
+			  
 					if(!this.useEvents){
 						Ext.Msg.show({
 							 title: 'GetCapabilities',
@@ -251,68 +332,31 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
 							 icon: Ext.MessageBox.ERROR
 						});  
 					}else{
-						this.fireEvents('failure', msg);
+						this.fireEvent('failure', msg);
 					}
-				}, this);
-			}
+				},
+				scope: this
+			});
 		}else{
-			Ext.Msg.show({
-				 title: 'Add Layer Plugin',
-				 msg: "The layer is already present in the map ! You must remove it to be able to re-add",
-				 width: 300,
-				 icon: Ext.MessageBox.ERROR
-			}); 
-		}
-	},
-
-	/**  
-	 * api: method[addSource]
-     */
-	addSource: function(wmsURL){			
-		this.wmsURL = wmsURL;
-		
-		this.checkLayerSource(this.wmsURL);
-
-		if(!this.source){
-			  var mask = new Ext.LoadMask(Ext.getBody(), {msg: this.waitMsg});
-			  mask.show();
-
-			  var sourceOpt = {
-				  config: {
-					  url: this.wmsURL
-				  }
-			  };
-			  
-			  this.source = this.target.addLayerSource(sourceOpt);
-			  
-			  //
-			  // Waiting GetCapabilities response from the server.
-			  //
-			  this.source.on('ready', function(){ 
-				mask.hide();
+			// 
+			// Show the capabilities grid
+			//
+			if(this.showCapabilitiesGrid === true){
+				var addLayerAction = this.target.tools["addlayers"];
+				addLayerAction.showCapabilitiesGrid();
 				
-				if(this.useEvents)
-					this.fireEvents('ready');
-			  }, this);
-			  
-			  //
-			  // To manage failure in GetCapabilities request (invalid request url in 
-			  // GeoNetwork configuration or server error).
-			  //
-			  this.source.on('failure', function(src, msg){		          
-				mask.hide();
-				  
-				if(!this.useEvents){
-					Ext.Msg.show({
-						 title: 'GetCapabilities',
-						 msg: msg + this.capabilitiesFailureMsg,
-						 width: 300,
-						 icon: Ext.MessageBox.ERROR
-					});  
-				}else{
-					this.fireEvents('failure', msg);
-				}
-			  }, this);
+				//
+				// Select requested source
+				//
+				var combo = addLayerAction.getSourceComboBox();
+				
+				var store = combo.getStore();
+				
+				var index = store.find('id', this.source.id);
+				var record = store.getAt(index);
+				
+				combo.onSelect(record, 0);
+			}	
 		}
 	}
 });
