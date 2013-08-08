@@ -198,42 +198,54 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
 		
 		this.msLayerTitle = options.msLayerTitle;
 		this.msLayerName = options.msLayerName;
-		this.wmsURL = options.wmsURL;
-		this.gnUrl = options.gnUrl;
-		this.enableViewTab = options.enableViewTab;
-		this.msLayerUUID = options.msLayerUUID;
-		this.gnLangStr = options.gnLangStr;
-		this.customParams = options.customParams;
-				
-		this.source = this.checkLayerSource(this.wmsURL);
 
-		if(this.source){
-		
-			if(!this.source.loaded){
-				this.source.on('ready', function(){
-					mask.hide();
-					this.target.layerSources[this.source.id].loaded = true; 
-					this.addLayerRecord();
-					
-					if(this.useEvents)
-						this.fireEvent('ready');
-				}, this);
-			}
-			
-		    var index = this.source.store.findExact("name", this.msLayerName);
-			
-			if (index < 0) {
-				// ///////////////////////////////////////////////////////////////
-				// In this case is necessary reload the local store to refresh 
-				// the getCapabilities records 
-				// ///////////////////////////////////////////////////////////////
-				this.source.store.reload();
-			}else{
-				this.addLayerRecord();
-			}
+        var map = this.target.mapPanel.map;
+        if(map.getLayersByName(this.msLayerTitle || this.msLayerName).length < 1){
+
+    		this.wmsURL = options.wmsURL;
+    		this.gnUrl = options.gnUrl;
+    		this.enableViewTab = options.enableViewTab;
+    		this.msLayerUUID = options.msLayerUUID;
+    		this.gnLangStr = options.gnLangStr;
+    		this.customParams = options.customParams;
+    				
+    		this.source = this.checkLayerSource(this.wmsURL);
+    
+    		if(this.source){
+    		
+    			if(!this.source.loaded){
+    				this.source.on('ready', function(){
+    					mask.hide();
+    					this.target.layerSources[this.source.id].loaded = true; 
+    					this.addLayerRecord();
+    					
+    					if(this.useEvents)
+    						this.fireEvent('ready');
+    				}, this);
+    			}
+    			
+    		    var index = this.source.store.findExact("name", this.msLayerName);
+    			
+    			if (index < 0) {
+    				// ///////////////////////////////////////////////////////////////
+    				// In this case is necessary reload the local store to refresh 
+    				// the getCapabilities records 
+    				// ///////////////////////////////////////////////////////////////
+    				this.source.store.reload();
+    			}else{
+    				this.addLayerRecord();
+    			}
+    		}else{
+    			mask.show();
+    			this.addSource(this.wmsURL, true);
+    		}
 		}else{
-			mask.show();
-			this.addSource(this.wmsURL, true);
+            Ext.Msg.show({
+                 title: 'Add Layer Plugin',
+                 msg: "The layer is already present in the map ! You must remove it to be able to re-add",
+                 width: 300,
+                 icon: Ext.MessageBox.ERROR
+            }); 
 		}
 	},
 
