@@ -67,7 +67,8 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 	svpFileImportErrorMsg: "SVP file is not correctly loaded.",
 	xmlRunListImportWinTitle: "Import Runs from XML",
 	importRunButton: "Import Runs",
-	errorLayerNameMsg: "The model name can not begin with a digit </br>, can not contain blank space and can not contain characters '*' ,'%', '-'",
+    errorDoubleLayerNameMsg: "A model with this name already exists",
+    errorLayerNameMsg: "The model name can not begin with a digit </br>, can not contain blank spaces </br> and can not contain characters '*' ,'%', '-'",
 	composerOperationLabelText: "Operation",
 	
 	advancedTitle: "Advanced Mode",
@@ -760,7 +761,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 										// TODO: check for same-name executions (look into wfsgrid)
 										wps.execute("gs:IDASoundPropagationModel", me.runList[0],
 											function(response){
-
+                                                wfsGrid.setPage(1);
 												var fc = OpenLayers.Format.XML.prototype.read.apply(this, [response]);
 												var fid = fc.getElementsByTagName("gml:ftUUID")[0];  
 												//me.composerList.push(fid);
@@ -1138,96 +1139,126 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 		var formValues = this.spmCreateForm.getForm().getFieldValues(true);
 		if(this.spmCreateForm.getForm().isValid()){
 		  if(!(layerPat.test(formValues["modelname"]))){
-		  if((this.seasonCombo.getValue() == this.userInput && this.svpFile)
-				|| this.seasonCombo.getValue() != this.userInput){
-				
-				var infoRun= {};
-				infoRun.inputs={};
-					
-				var lat = this.latitudeField.getValue();
-				var lon = this.longitudeField.getValue();
-				
-				var vplat = this.vplatitudeField.getValue();
-				var vplon = this.vplongitudeField.getValue();
-				
-				var advValues="";
-				   
-				infoRun.inputs["soundVelocityProfile"]={};
-				infoRun.inputs["soundVelocityProfile"].value = this.svpFile; 
-				
-				if(vplat != ""){
-				  infoRun.inputs["soundVelocityProfile_lat"]={}; 
-				  infoRun.inputs["soundVelocityProfile_lat"].value = vplat;
-				}
-				
-				if(vplon != ""){
-				  infoRun.inputs["soundVelocityProfile_lon"]={}; 
-				  infoRun.inputs["soundVelocityProfile_lon"].value = vplon;
-				}
-				
-				infoRun.inputs.season={};
-				infoRun.inputs.season.value=this.seasonCombo.getValue();
-				
-				if(formValues["sourcepressurelevel"]){
-					infoRun.inputs["sourcePressureLevel"]={};
-					infoRun.inputs["sourcePressureLevel"].value=formValues["sourcepressurelevel"];   
-				}
-				
-				if(formValues["sourcedepth"]){
-					infoRun.inputs["sourceDepth"]={};
-					infoRun.inputs["sourceDepth"].value=formValues["sourcedepth"];   
-				}
-							   
-				if(formValues["sourcefrequency"]){
-				  infoRun.inputs["sourceFrequency"]={};    
-				  infoRun.inputs["sourceFrequency"].value=formValues["sourcefrequency"];
-				}
-				   
-				infoRun.inputs.tlmodel={};
-				infoRun.inputs.tlmodel.value=this.tlModelCombo.getValue();
-				
-				infoRun.inputs.bottomtype={};
-				infoRun.inputs.bottomtype.value=this.bottomTypeCombo.getValue();
-				
-				infoRun.inputs.quality={};
-				infoRun.inputs.quality.value=this.qualityCombo.getValue();
-				
-				if(formValues["maxrange"]){
-				  infoRun.inputs["maxrange"]={};   
-				  infoRun.inputs["maxrange"].value=formValues["maxrange"];
-				}
-				
-				if(formValues["modelname"]){
-				  infoRun.inputs["modelName"]={};   
-				  infoRun.inputs["modelName"].value=formValues["modelname"];
-				}
-			   
-				if(lat!=""){
-				  infoRun.inputs["soundSourcePoint_lat"]={}; 
-				  infoRun.inputs["soundSourcePoint_lat"].value=lat;
-				}
-				   
-				if(lon!=""){
-				  infoRun.inputs["soundSourcePoint_lon"]={};
-				  infoRun.inputs["soundSourcePoint_lon"].value=lon; 
-				}
-				
-				/* Set adv Values*/
-				var i=0;
-				while(i<formValues["adv_input_"+i]){
-					advValues+=formValues["adv_input_"+i];
-					i++;
-				}
-
-				if(advValues!=""){
-				  infoRun.inputs["advParams"]={};
-				  infoRun.inputs["advParams"].value=advValues.substr(0, advValues.length-1); 
-				}
-
-				this.addRun(infoRun);
-
-				return formValues["modelname"];		   
-			}
+		      
+		      var wfsGridPanel= Ext.getCmp("wfsGridPanel");
+		      var all_records = wfsGridPanel.store.getRange();
+		      var tot = all_records.length, found = false;
+		      for (var i=0; i<tot && !found; i++){
+		          if(all_records[i].get('modelName') == formValues["modelname"]){
+		              Ext.getCmp("modelName_Cmp").markInvalid(this.errorDoubleLayerNameMsg); 
+                      Ext.Msg.show({
+                          title:"SPM: " + this.missingParameterTitle,
+                          msg:  this.errorDoubleLayerNameMsg,
+                          buttons: Ext.Msg.OK,
+                          icon: Ext.MessageBox.ERROR
+                      }); 
+                      return null;
+		          }
+              }
+		                   
+		      
+		      if(!formValues["modelname"]){
+                  Ext.getCmp("modelName_Cmp").markInvalid(this.errorDoubleLayerNameMsg); 
+                  Ext.Msg.show({
+                      title:"SPM: " + this.missingParameterTitle,
+                      msg:  this.errorDoubleLayerNameMsg,
+                      buttons: Ext.Msg.OK,
+                      icon: Ext.MessageBox.ERROR
+                  }); 
+		      }
+		      
+		      
+		      
+    		  if((this.seasonCombo.getValue() == this.userInput && this.svpFile)
+    				|| this.seasonCombo.getValue() != this.userInput){
+    				
+    				var infoRun= {};
+    				infoRun.inputs={};
+    					
+    				var lat = this.latitudeField.getValue();
+    				var lon = this.longitudeField.getValue();
+    				
+    				var vplat = this.vplatitudeField.getValue();
+    				var vplon = this.vplongitudeField.getValue();
+    				
+    				var advValues="";
+    				   
+    				infoRun.inputs["soundVelocityProfile"]={};
+    				infoRun.inputs["soundVelocityProfile"].value = this.svpFile; 
+    				
+    				if(vplat != ""){
+    				  infoRun.inputs["soundVelocityProfile_lat"]={}; 
+    				  infoRun.inputs["soundVelocityProfile_lat"].value = vplat;
+    				}
+    				
+    				if(vplon != ""){
+    				  infoRun.inputs["soundVelocityProfile_lon"]={}; 
+    				  infoRun.inputs["soundVelocityProfile_lon"].value = vplon;
+    				}
+    				
+    				infoRun.inputs.season={};
+    				infoRun.inputs.season.value=this.seasonCombo.getValue();
+    				
+    				if(formValues["sourcepressurelevel"]){
+    					infoRun.inputs["sourcePressureLevel"]={};
+    					infoRun.inputs["sourcePressureLevel"].value=formValues["sourcepressurelevel"];   
+    				}
+    				
+    				if(formValues["sourcedepth"]){
+    					infoRun.inputs["sourceDepth"]={};
+    					infoRun.inputs["sourceDepth"].value=formValues["sourcedepth"];   
+    				}
+    							   
+    				if(formValues["sourcefrequency"]){
+    				  infoRun.inputs["sourceFrequency"]={};    
+    				  infoRun.inputs["sourceFrequency"].value=formValues["sourcefrequency"];
+    				}
+    				   
+    				infoRun.inputs.tlmodel={};
+    				infoRun.inputs.tlmodel.value=this.tlModelCombo.getValue();
+    				
+    				infoRun.inputs.bottomtype={};
+    				infoRun.inputs.bottomtype.value=this.bottomTypeCombo.getValue();
+    				
+    				infoRun.inputs.quality={};
+    				infoRun.inputs.quality.value=this.qualityCombo.getValue();
+    				
+    				if(formValues["maxrange"]){
+    				  infoRun.inputs["maxrange"]={};   
+    				  infoRun.inputs["maxrange"].value=formValues["maxrange"];
+    				}
+    				
+    				if(formValues["modelname"]){
+    				  infoRun.inputs["modelName"]={};   
+    				  infoRun.inputs["modelName"].value=formValues["modelname"];
+    				}
+    			   
+    				if(lat!=""){
+    				  infoRun.inputs["soundSourcePoint_lat"]={}; 
+    				  infoRun.inputs["soundSourcePoint_lat"].value=lat;
+    				}
+    				   
+    				if(lon!=""){
+    				  infoRun.inputs["soundSourcePoint_lon"]={};
+    				  infoRun.inputs["soundSourcePoint_lon"].value=lon; 
+    				}
+    				
+    				/* Set adv Values*/
+    				var i=0;
+    				while(i<formValues["adv_input_"+i]){
+    					advValues+=formValues["adv_input_"+i];
+    					i++;
+    				}
+    
+    				if(advValues!=""){
+    				  infoRun.inputs["advParams"]={};
+    				  infoRun.inputs["advParams"].value=advValues.substr(0, advValues.length-1); 
+    				}
+    
+    				this.addRun(infoRun);
+    
+    				return formValues["modelname"];		   
+    			}
 		  }else{
 			  Ext.getCmp("modelName_Cmp").markInvalid(this.errorLayerNameMsg); 
 			  Ext.Msg.show({
