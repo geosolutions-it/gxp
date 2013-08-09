@@ -1383,8 +1383,8 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 				break;
 			} 
 		}
-        if(me.runList.length <= 1)
-            Ext.getCmp("executeSPM").setText(me.applyText);
+        if(this.runList.length <= 1)
+            Ext.getCmp("executeSPM").setText(this.applyText);
 
 		// remove name from GUI
 		if(recordIndex !=  -1)
