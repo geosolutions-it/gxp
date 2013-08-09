@@ -757,17 +757,10 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 								if(!composer){
 								   if(me.addFormRun()){
 										Ext.getCmp("modelName_Cmp").setValue("");
+										// TODO: check for same-name executions (look into wfsgrid)
 										wps.execute("gs:IDASoundPropagationModel", me.runList[0],
 											function(response){
-												var recordIndex=me.runStore.find("name", me.runList[spmExecIndex].inputs.modelName.value);
-												
-												if(recordIndex !=  -1)
-													me.runStore.remove(me.runStore.getAt( recordIndex )); 
-													
-												me.runList= null;
-												delete me.runList;
-												me.runList= new Array();   
-												wfsGrid.setPage(1);
+
 												var fc = OpenLayers.Format.XML.prototype.read.apply(this, [response]);
 												var fid = fc.getElementsByTagName("gml:ftUUID")[0];  
 												//me.composerList.push(fid);
@@ -786,7 +779,19 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 												}												 
 											}
 										);  
-									
+										
+									    // Do not wait, remove the running instance from the pending list
+                                        var recordIndex=me.runStore.find("name", me.runList[spmExecIndex].inputs.modelName.value);
+                                        
+                                        if(recordIndex !=  -1)
+                                            me.runStore.remove(me.runStore.getAt( recordIndex )); 
+                                            
+                                        me.runList= null;
+                                        delete me.runList;
+                                        me.runList= new Array();   
+                                        wfsGrid.setPage(1);
+                                                									    
+									    ////
 										me.activateSPMList(true);
 									}else
 										return; 
@@ -930,8 +935,20 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 						collapsed: true,
 						autoWidth:true,
 						listeners: {
-							"expand": function (){
-							}
+							"expand": {
+							    fn: function (){
+							        if(me.runList.length > 1)
+							             Ext.getCmp("executeSPM").setText(this.applyMultiText);
+    							},
+    							scope: this
+							},
+							"collapse": {
+                                fn: function (){
+    							    // TODO: cancellare la lista dei batch inseriti
+    							    Ext.getCmp("executeSPM").setText(this.applyText);
+                                },
+                                scope: this
+                            }
 						},
 						checkboxToggle: true,
 						items: [
