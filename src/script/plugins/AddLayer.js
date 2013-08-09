@@ -67,6 +67,12 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
      */
 	useEvents: false,
 	
+    /** api: property[zoomAfterAdd]
+     *  ``Boolean``
+     *  Specify if the tool should zoom the map to the newly added layer extent
+     */
+    zoomAfterAdd: true,
+
 	/** api: property[showCapabilitiesGrid]
      *  ``Boolean``
      *  
@@ -144,28 +150,30 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
 					portalContainer.setActiveTab(1);
 				}				
 			}*/					
-						
-			// //////////////////////////
-			// Zoom To Layer extent
-			// //////////////////////////
-			var layer = record.get('layer');
-			var extent = layer.restrictedExtent || layer.maxExtent || this.target.mapPanel.map.maxExtent;
-			var map = this.target.mapPanel.map;
-
-			// ///////////////////////////
-			// Respect map properties
-			// ///////////////////////////
-			var restricted = map.restrictedExtent || map.maxExtent;
-			if (restricted) {
-				extent = new OpenLayers.Bounds(
-					Math.max(extent.left, restricted.left),
-					Math.max(extent.bottom, restricted.bottom),
-					Math.min(extent.right, restricted.right),
-					Math.min(extent.top, restricted.top)
-				);
+			
+			if(this.zoomAfterAdd){
+    			// //////////////////////////
+    			// Zoom To Layer extent
+    			// //////////////////////////
+    			var layer = record.get('layer');
+    			var extent = layer.restrictedExtent || layer.maxExtent || this.target.mapPanel.map.maxExtent;
+    			var map = this.target.mapPanel.map;
+    
+    			// ///////////////////////////
+    			// Respect map properties
+    			// ///////////////////////////
+    			var restricted = map.restrictedExtent || map.maxExtent;
+    			if (restricted) {
+    				extent = new OpenLayers.Bounds(
+    					Math.max(extent.left, restricted.left),
+    					Math.max(extent.bottom, restricted.bottom),
+    					Math.min(extent.right, restricted.right),
+    					Math.min(extent.top, restricted.top)
+    				);
+    			}
+    
+    			map.zoomToExtent(extent, true);
 			}
-
-			map.zoomToExtent(extent, true);
 		}
 	},
 
@@ -208,7 +216,11 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
     		this.msLayerUUID = options.msLayerUUID;
     		this.gnLangStr = options.gnLangStr;
     		this.customParams = options.customParams;
-    				
+    		
+    		if(options.zoomAfterAdd !== undefined){
+                this.zoomAfterAdd = options.zoomAfterAdd ;
+    		}
+            		
     		this.source = this.checkLayerSource(this.wmsURL);
     
     		if(this.source){
