@@ -112,13 +112,13 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
 	 * api: method[addLayerRecord]
      */
 	addLayerRecord: function(){
-		  
+		
 		var props = {
 			name: this.msLayerName,
 			title: this.msLayerTitle,
 			source: this.source.id
 		};
-		
+
 		if(this.customParams){
 			props = Ext.applyIf(
 				props,
@@ -132,8 +132,8 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
 		if(this.gnUrl && this.gnLangStr)
 			props.gnURL = this.gnUrl + "srv/" + this.gnLangStr + "/";
 		  
-		var record = this.source.createLayerRecord(props);   
-				  
+ 		var record = this.source.createLayerRecord(props);   
+       
 		if (record) {
 			var layerStore = this.target.mapPanel.layers;  
 			layerStore.add([record]);
@@ -174,6 +174,8 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
     
     			map.zoomToExtent(extent, true);
 			}
+
+			return record;
 		}
 	},
 
@@ -201,7 +203,7 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
 	/**  
 	 * api: method[addLayer]
      */
-	addLayer: function(options){		
+	addLayer: function(options, callback){		
 		var mask = new Ext.LoadMask(Ext.getBody(), {msg: this.waitMsg});
 		
 		this.msLayerTitle = options.msLayerTitle;
@@ -224,15 +226,19 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
     		this.source = this.checkLayerSource(this.wmsURL);
     
     		if(this.source){
-    		
+    		    
     			if(!this.source.loaded){
     				this.source.on('ready', function(){
     					mask.hide();
     					this.target.layerSources[this.source.id].loaded = true; 
-    					this.addLayerRecord();
+    					var record = this.addLayerRecord();
     					
     					if(this.useEvents)
-    						this.fireEvent('ready');
+    						this.fireEvent('ready', record);
+						
+						if(callback){
+							callback.call(this, record);
+						}						
     				}, this);
     			}
     			
@@ -245,7 +251,14 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
     				// ///////////////////////////////////////////////////////////////
     				this.source.store.reload();
     			}else{
-    				this.addLayerRecord();
+					var record = this.addLayerRecord();
+					
+					if(this.useEvents)
+						this.fireEvent('ready', record);
+						
+					if(callback){
+						callback.call(this, record);
+					}	
     			}
     		}else{
     			mask.show();
@@ -264,7 +277,7 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
 	/**  
 	 * api: method[addSource]
      */
-	addSource: function(wmsURL, showLayer){			
+	addSource: function(wmsURL, showLayer, fcallback){			
 		this.wmsURL = wmsURL;
 		
 		this.source = this.checkLayerSource(this.wmsURL);
@@ -333,13 +346,17 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
 					mask.hide();
 					
 					this.target.layerSources[this.source.id].loaded = true;
+
 					if(showLayer){						
-						this.addLayerRecord();
+						var record = this.addLayerRecord();
+						if(this.useEvents){
+							this.fireEvent('ready', record);
 					}
 					
-					if(this.useEvents)
-						this.fireEvent('ready');
-					
+						if(fcallback){
+							fcallback.call(this, record);
+						}	
+					}			
 				},
 				//
 				// To manage failure in GetCapabilities request (invalid request url in 

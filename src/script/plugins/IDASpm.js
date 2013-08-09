@@ -758,7 +758,6 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 								if(!composer){
 								   if(me.addFormRun()){
 										Ext.getCmp("modelName_Cmp").setValue("");
-										// TODO: check for same-name executions (look into wfsgrid)
 										wps.execute("gs:IDASoundPropagationModel", me.runList[0],
 											function(response){
                                                 wfsGrid.setPage(1);
