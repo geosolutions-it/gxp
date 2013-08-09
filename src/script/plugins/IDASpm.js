@@ -136,8 +136,15 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
             latMax: 90,
             latMin: -90
         },
-        
+    
+    /*
+     * Object list of queued runs
+     */
 	runList: [],
+	
+	/*
+	 * Arraystore to display queued runs names 
+	 */
 	runStore: null,
 	
 	composerList: [],
@@ -620,30 +627,31 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 					id: "saveSPM",
 					tooltip: this.spmSaveTooltip,
 					handler: function(){
-					  var modelName = this.addFormRun();
-					  Ext.getCmp("modelName_Cmp").setValue("");
-					  Ext.getCmp("batchMode_fieldSet").expand(false);
-					  if(me.runList.length > 1)
-					  Ext.getCmp("executeSPM").setText(me.applyMultiText);
-					  if(modelName){
-						  //this.spmCreateForm.getForm().reset();
-						  var layer = map.getLayersByName("spm_source")[0];	
-						  if(layer){
-						    map.removeLayer(layer);
-						  }
-						  
-						  layer = map.getLayersByName("spm_vp_source")[0];	
-						  if(layer){
-						    map.removeLayer(layer);
-						  }
-						  
-						  var template = new Ext.XTemplate(
-								this.spmSaveMessage
-						  );
-						  this.showMsgTooltip(template.apply({
-								modelName : modelName
-						  }));
-					  }         
+                        var modelName = this.addFormRun();
+                        Ext.getCmp("modelName_Cmp").setValue("");
+                        Ext.getCmp("batchMode_fieldSet").expand(false);
+                        // change button text if there 2 or more batch in queue (runList)
+                        if(me.runList.length > 1)
+                            Ext.getCmp("executeSPM").setText(me.applyMultiText);
+                        if(modelName){
+                            //this.spmCreateForm.getForm().reset();
+                            var layer = map.getLayersByName("spm_source")[0];	
+                            if(layer){
+                                map.removeLayer(layer);
+                            }
+                            
+                            layer = map.getLayersByName("spm_vp_source")[0];	
+                            if(layer){
+                                map.removeLayer(layer);
+                            }
+                            	  
+                            var template = new Ext.XTemplate(
+                                this.spmSaveMessage
+                            );
+                            this.showMsgTooltip(template.apply({
+                                modelName : modelName
+                            }));
+                        }         
 					},
 					scope: this
 			    },{
@@ -1366,16 +1374,21 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 	},	
          
 	removeRun: function (name){
-		 var recordIndex=this.runStore.find("name", name);
-		 for (var u = 0; u < this.runList.length; u++) {
-			 if(this.runList[u].inputs.modelName.value == name){
-				 this.runList.splice(u,1); 
-				 break;
-			 } 
-		 }
-		 
-		 if(recordIndex !=  -1)
-		   this.runStore.remove(this.runStore.getAt( recordIndex ));  
+		var recordIndex=this.runStore.find("name", name);
+		
+		// remove run from list
+		for (var u = 0; u < this.runList.length; u++) {
+			if(this.runList[u].inputs.modelName.value == name){
+				this.runList.splice(u,1); 
+				break;
+			} 
+		}
+        if(me.runList.length <= 1)
+            Ext.getCmp("executeSPM").setText(me.applyText);
+
+		// remove name from GUI
+		if(recordIndex !=  -1)
+            this.runStore.remove(this.runStore.getAt( recordIndex ));  
 	}
 });
 
