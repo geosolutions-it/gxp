@@ -1289,7 +1289,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 	addRun: function(infoRun){
 		var inputs = infoRun.inputs;
 		var today = new Date();
-		var currentDate = today.format("Y-m-d\\TH:i:s")+"Z";
+		var currentDate = today.toISOString();;
 		 
 		var requestObj = {
 		type: "raw",
