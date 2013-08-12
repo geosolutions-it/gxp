@@ -40,6 +40,12 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
      */
     source: null,
     
+    /** api: config[wps]
+     * @TODO
+     */
+    wps: null,
+    map: null,
+    
     /** api: config[sameOriginStyling]
      *  ``Boolean``
      *  Only allow editing of styles for layers whose sources have a URL that
@@ -92,9 +98,10 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
     cacheText: "Cache",
     cacheFieldText: "Use cached version",
     stylesText: "Styles",
+    idaRasterRiskSummaryText: "Risk Summary Stats",
+    idaRasterRiskSummaryInfoText: "Current Viewport Raster Statistics",
     
     initComponent: function() {
-        
         this.addEvents(
             /** api: event[change]
              *  Fires when the ``layerRecord`` is changed using this dialog.
@@ -125,7 +132,21 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
             }
             this.items.push(this.createStylesPanel(url));
         }
-
+        
+        // add statistics Tab only for raster layers
+        var containsRasterKwrds = false;
+        for(var i=0; i<this.layerRecord.get("keywords").length; i++) {
+        	if (this.layerRecord.get("keywords")[i].toUpperCase() === "WCS"    || 
+        	    this.layerRecord.get("keywords")[i].toUpperCase() === "RASTER" || 
+        	    this.layerRecord.get("keywords")[i].toUpperCase() === "TIF"    || 
+        	    this.layerRecord.get("keywords")[i].toUpperCase() === "TIFF"   || 
+        	    this.layerRecord.get("keywords")[i].toUpperCase() === "GEOTIFF") {
+        		containsRasterKwrds = true;
+        	}
+        }
+        if (!this.layerRecord.get("queryable") || containsRasterKwrds) {
+        	this.items.push(this.createRasterRiskSummaryPanel());
+        }
         gxp.WMSLayerPanel.superclass.initComponent.call(this);
     },
 
@@ -335,7 +356,181 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
                 }
             }]
         };
-    }    
+    },    
+
+	loadMaskMsg: "Prova",
+    showMask: function(cmp) {
+        if(!this.loadMask) this.loadMask = new Ext.LoadMask(cmp.getEl(), {msg: this.loadMaskMsg});
+        this.loadMask.show();
+    },
+    
+    hideMask: function() {
+	  if(this.loadMask){
+	   this.loadMask.hide();
+	  }
+    },
+    
+    /** private: createRasterRiskSummaryPanel
+     *  Creates the Raster WPS Risk Summary panel.
+     */
+	count: 	null,
+	min: 	null,
+	max: 	null,
+	sum: 	null,
+	avg: 	null,
+	stddev: null,
+    createRasterRiskSummaryPanel: function() {
+        var record 	= this.layerRecord;
+        var layer  	= record.getLayer();
+
+    	var extent 	= this.map.getExtent().toGeometry();
+    	var crs    	= this.map.getProjection();
+
+		this.count		= " - ";
+		this.min		= " - ";
+		this.max		= " - ";
+		this.sum		= " - ";
+		this.avg		= " - ";
+		this.stddev		= " - ";
+    	
+    	return {
+            title: this.idaRasterRiskSummaryText,
+            layout: "form",
+            style: "padding: 10px",
+            items: [{
+                xtype: "label",
+            	text: this.idaRasterRiskSummaryInfoText,
+            	cls: "riskSummaryInfoText"
+            },
+            {
+                xtype: "textfield",
+                // ref: "../count",
+                id: "countStatsTextField",
+                fieldLabel: "count",
+                anchor: "99%",
+                value: this.count,
+                readOnly: true
+            },
+            {
+                xtype: "textfield",
+                // ref: "../min",
+                id: "minStatsTextField",
+                fieldLabel: "min",
+                anchor: "99%",
+                value: this.min,
+                readOnly: true
+            },
+            {
+                xtype: "textfield",
+                // ref: "../max",
+                id: "maxStatsTextField",
+                fieldLabel: "max",
+                anchor: "99%",
+                value: this.max,
+                readOnly: true
+            },
+            {
+                xtype: "textfield",
+                // ref: "../sum",
+                id: "sumStatsTextField",
+                fieldLabel: "sum",
+                anchor: "99%",
+                value: this.sum,
+                readOnly: true
+            },
+            {
+                xtype: "textfield",
+                // ref: "../avg",
+                id: "avgStatsTextField",
+                fieldLabel: "avg",
+                anchor: "99%",
+                value: this.avg,
+                readOnly: true
+            },
+            {
+                xtype: "textfield",
+                // ref: "../stddev",
+                id: "stddevStatsTextField",
+                fieldLabel: "stddev",
+                anchor: "99%",
+                value: this.stddev,
+                readOnly: true
+            }],
+            listeners: {
+            	scope: this,
+            	render: function() {
+
+					var requestObject={
+			       		/* storeExecuteResponse: false,
+			        	   lineage:  false,
+			        	   status: false,*/
+			        	type: "raw",
+			        	inputs:{
+			        		layerName: new OpenLayers.WPSProcess.LiteralData({
+			                	value: this.layerRecord.get("name")
+			            	}),
+			            	areaOfInterest: new OpenLayers.WPSProcess.ComplexData({
+				                value: extent.toString(),/*"POLYGON((-10.723 35.523, -10.723 50.884, 30.938 50.884, 30.938 35.523, -10.723 35.523))"*/
+				                mimeType: "application/wkt"
+				            }),
+				            aoiCRS: new OpenLayers.WPSProcess.LiteralData({
+			                	value: crs/*"EPSG:4326"*/
+			            	})
+			           		/* geom: new OpenLayers.WPSProcess.ReferenceData({
+			                		 href: "http://localhost:8089/geoserver/wfs?request=GetFeature&version=1.1.0&typeName=topp:states&propertyName=STATE_NAME,PERSONS&BBOX=-75.102613,40.212597,-72.361859,41.512517,EPSG:4326",
+			                		 mimeType: "text/xml; subtype=gml/3.1.1",
+			                		 method: "GET"
+			            	}),*/
+				            /*geom: new OpenLayers.WPSProcess.ComplexData({
+				                value: "POINT(6 40)",
+				                mimeType: "text/xml; subtype=gml/3.1.1"
+				            })*/
+			        	},
+			        	outputs: [{
+			            	identifier: "result",
+			            	mimeType: "text/xml"
+			            	//asReference: true,
+			            	//type: "raw"
+			        	}]
+			    	};
+			    	
+			    	var loadMask = new Ext.LoadMask(this.getEl(), {msg: "this.loadMaskMsg"});
+			    	loadMask.show();
+			    	this.wps.execute("gs:IDARiskSummary",requestObject,
+						function(response){
+							var fc = OpenLayers.Format.XML.prototype.read.apply(this, [response]);
+							var fid = fc.documentElement.getElementsByTagName("IDARiskSummaryProcess")[0];
+							
+							//me.composerList.push(fid);
+							if(!fid){
+								var wpsError=new OpenLayers.Format.WPSExecute().read(response);
+								if(wpsError && wpsError.executeResponse.status){
+										var ex = wpsError.executeResponse.status.exception.exceptionReport.exceptions[0];
+										if(ex)
+										Ext.Msg.show({
+											title:"SPM: " + ex.code,
+											msg: ex.texts[0] ,
+											buttons: Ext.Msg.OK,
+											icon: Ext.MessageBox.ERROR
+										});
+								}
+							} else {
+								Ext.getCmp("countStatsTextField").setValue(fc.documentElement.getElementsByTagName("count")[0].textContent);
+								Ext.getCmp("minStatsTextField").setValue(fc.documentElement.getElementsByTagName("min")[0].textContent);
+								Ext.getCmp("maxStatsTextField").setValue(fc.documentElement.getElementsByTagName("max")[0].textContent);
+								Ext.getCmp("sumStatsTextField").setValue(fc.documentElement.getElementsByTagName("sum")[0].textContent);
+								Ext.getCmp("avgStatsTextField").setValue(fc.documentElement.getElementsByTagName("avg")[0].textContent);
+								Ext.getCmp("stddevStatsTextField").setValue(fc.documentElement.getElementsByTagName("stddev")[0].textContent);								
+							}
+							
+							loadMask.hide();
+						},
+						this
+					);
+		       	}
+            }
+        }
+    }
 
 });
 

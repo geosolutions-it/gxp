@@ -766,7 +766,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 												//me.composerList.push(fid);
 												if(!fid){
 													var wpsError=new OpenLayers.Format.WPSExecute().read(response);
-													if(wpsError){
+													if(wpsError && wpsError.executeResponse.status){
 															var ex = wpsError.executeResponse.status.exception.exceptionReport.exceptions[0];
 															if(ex)
 															Ext.Msg.show({

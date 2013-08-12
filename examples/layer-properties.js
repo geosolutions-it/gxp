@@ -117,7 +117,7 @@ function showProp(record) {
     }
     prop = new Ext.Window({
         title: "Properties: " + record.get("title"),
-        width: 280,
+        width: 380,
         height: 350,
         layout: "fit",
         items: [{

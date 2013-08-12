@@ -27,15 +27,15 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
     title: "Layer Attribute",
 	
 	settingsTitle: "Base Settings",
-        rasterAlgebraExecuteMessage: "Raster Algebra run request sent.",
+    rasterAlgebraExecuteMessage: "Raster Algebra run request sent.",
 	settingNameTitle: "Name",
 	settingColorTitle: "Color",
 	settingClassificationTitle: "Classification",
-        filterApplyTitle: "Filter Apply",
+    filterApplyTitle: "Filter Apply",
 	filterApplyMsg: "Your filter is empty or not properly formatted!",
-        filterTitle: "Filter",
-        reloadLayerText: "Reload Layers",
-        applyFilterText: "Run",
+    filterTitle: "Filter",
+    reloadLayerText: "Reload Layers",
+    applyFilterText: "Run",
 	resetText: "Reset",
         
 	settingColor: '000000',
@@ -110,8 +110,8 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 			}
 		});*/
         
-               var now = new Date();
-               this.attributeField= new Ext.form.TextField({
+             var now = new Date();
+             this.attributeField= new Ext.form.TextField({
 			 xtype: 'textfield',
 			 fieldLabel: this.settingNameTitle,
                          readOnly: true,
