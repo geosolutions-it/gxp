@@ -358,7 +358,7 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
         };
     },    
 
-	loadMaskMsg: "Prova",
+	loadMaskMsg: "Fetching data..",
     showMask: function(cmp) {
         if(!this.loadMask) this.loadMask = new Ext.LoadMask(cmp.getEl(), {msg: this.loadMaskMsg});
         this.loadMask.show();
@@ -494,12 +494,12 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
 			        	}]
 			    	};
 			    	
-			    	var loadMask = new Ext.LoadMask(this.getEl(), {msg: "this.loadMaskMsg"});
+			    	var loadMask = new Ext.LoadMask(this.getEl(), {msg: this.loadMaskMsg});
 			    	loadMask.show();
 			    	this.wps.execute("gs:IDARiskSummary",requestObject,
 						function(response){
 							var fc = OpenLayers.Format.XML.prototype.read.apply(this, [response]);
-							var fid = fc.documentElement.getElementsByTagName("IDARiskSummaryProcess")[0];
+							var fid = OpenLayers.Ajax.getElementsByTagNameNS(fc, "http://www.opengis.net/gml","gml", "IDARiskSummaryProcess")[0];
 							
 							//me.composerList.push(fid);
 							if(!fid){
@@ -507,20 +507,23 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
 								if(wpsError && wpsError.executeResponse.status){
 										var ex = wpsError.executeResponse.status.exception.exceptionReport.exceptions[0];
 										if(ex)
-										Ext.Msg.show({
-											title:"SPM: " + ex.code,
-											msg: ex.texts[0] ,
-											buttons: Ext.Msg.OK,
-											icon: Ext.MessageBox.ERROR
-										});
+										{
+    										Ext.Msg.show({
+    											title:"SPM: " + ex.code,
+    											msg: ex.texts[0] ,
+    											buttons: Ext.Msg.OK,
+    											icon: Ext.MessageBox.ERROR
+    										});
+										}
 								}
 							} else {
-								Ext.getCmp("countStatsTextField").setValue(fc.documentElement.getElementsByTagName("count")[0].textContent);
-								Ext.getCmp("minStatsTextField").setValue(fc.documentElement.getElementsByTagName("min")[0].textContent);
-								Ext.getCmp("maxStatsTextField").setValue(fc.documentElement.getElementsByTagName("max")[0].textContent);
-								Ext.getCmp("sumStatsTextField").setValue(fc.documentElement.getElementsByTagName("sum")[0].textContent);
-								Ext.getCmp("avgStatsTextField").setValue(fc.documentElement.getElementsByTagName("avg")[0].textContent);
-								Ext.getCmp("stddevStatsTextField").setValue(fc.documentElement.getElementsByTagName("stddev")[0].textContent);								
+							    // TODO: is there a better way to get these data?
+								Ext.getCmp("countStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "count")[0].childNodes[0].data);
+								Ext.getCmp("minStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "min")[0].childNodes[0].data);
+								Ext.getCmp("maxStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "max")[0].childNodes[0].data);
+								Ext.getCmp("sumStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "sum")[0].childNodes[0].data);
+								Ext.getCmp("avgStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "avg")[0].childNodes[0].data);
+								Ext.getCmp("stddevStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "stddev")[0].childNodes[0].data);								
 							}
 							
 							loadMask.hide();
