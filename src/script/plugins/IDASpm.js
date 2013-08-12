@@ -664,15 +664,15 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 					  handler: function(){
 							me=this;
 							var composer=this.spmCreateForm.getForm().getFieldValues(true)["batch_mode_composer"];
-							var wfsGrid= this.target.tools[this.wfsGrid];
-							wfsGrid.resetFilter();
+							var wfsgrid= this.target.tools[this.wfsGrid];
+							wfsgrid.resetFilter();
 							var wps = this.target.tools[this.wpsManager];
 							
 							var spmExecIndex=0;
 							var spmExecNum=me.runList.length;
 							if(spmExecNum > 0){
 							   var callbackSPM= function(response){
-									wfsGrid.setPage(1);
+									wfsgrid.setPage(1);
 									var recordIndex=me.runStore.find("name", me.runList[spmExecIndex].inputs.modelName.value);
 									if(recordIndex !=  -1)
 										me.runStore.remove(me.runStore.getAt( recordIndex )); 
@@ -760,7 +760,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 										Ext.getCmp("modelName_Cmp").setValue("");
 										wps.execute("gs:IDASoundPropagationModel", me.runList[0],
 											function(response){
-                                                wfsGrid.setPage(1);
+                                                wfsgrid.setPage(1);
 												var fc = OpenLayers.Format.XML.prototype.read.apply(this, [response]);
 												var fid = fc.getElementsByTagName("gml:ftUUID")[0];  
 												//me.composerList.push(fid);
@@ -789,12 +789,19 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
                                         me.runList= null;
                                         delete me.runList;
                                         me.runList= new Array();   
-                                        wfsGrid.setPage(1);
-                                                									    
+							    
 									    ////
+									    
+
 										me.activateSPMList(true);
-									}else
-										return; 
+									    // I have to wait a little time for geostore to have data
+									    setTimeout(function() {
+									        wfsgrid.setPage(1);
+									        wfsgrid.refresh();
+									        }
+									        ,1000
+									    );
+									}
 								}else{
 									Ext.Msg.show({
 										title:this.composerErrorTitle,
