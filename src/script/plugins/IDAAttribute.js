@@ -117,7 +117,7 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
                          readOnly: true,
 			 width: 200,
 			 name: this.settingNameTitle,
-			 value: this.layerNamePrefix + "_" +now.format("Y_m_d_H_i")
+			 value: this.layerNamePrefix + "_" +now.format("Y_m_d_H_i_s")
 	       });
 	
 		var settings = new Ext.form.FieldSet({
@@ -225,42 +225,43 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 						var f = filterBuilder.getFilter();
 						
 						if(f){
-                                                        var infoRun= {};
-                                                        var now= new Date();
-                                                        me.attributeField.setValue(me.layerNamePrefix + "_" + now.format("Y_m_d_H_i"));
-                                                        var wfsGrid= me.target.tools[this.wfsGrid];
-                                                        infoRun.inputs={};
-                                                        infoRun.inputs=settings.getMetadata();
+                            var infoRun= {};
+                            var now= new Date();
+                            me.attributeField.setValue(me.layerNamePrefix + "_" + now.format("Y_m_d_H_i_s"));
+                            var wfsGrid= me.target.tools[this.wfsGrid];
+                            infoRun.inputs={};
+                            infoRun.inputs=settings.getMetadata();
 							var filterFormat = new OpenLayers.Format.CQL();
 							var filterCQL = filterFormat.write(f);  
                                                         
-                                                        infoRun.inputs.attributeFilter= filterCQL;
+                            infoRun.inputs.attributeFilter= filterCQL;
 
-                                                        var wps = me.target.tools[me.wpsManager];
+                            var wps = me.target.tools[me.wpsManager];
                                                         
-                                                        var runProcess= me.getRARun(infoRun);
-                                                        now= new Date();
-                                                        me.attributeField.setValue(me.layerNamePrefix + "_" + now.format("Y_m_d_H_i"));
+                            var runProcess= me.getRARun(infoRun);
+                            now= new Date();
+                            me.attributeField.setValue(me.layerNamePrefix + "_" + now.format("Y_m_d_H_i_s"));
                                                         
-                                                        wps.execute(me.wpsProcess,runProcess,function(response){
-                                                               wfsGrid.refresh();
-                                                                var fc = OpenLayers.Format.XML.prototype.read.apply(this, [response]);
-                                                                       var fid = fc.getElementsByTagName("gml:ftUUID")[0];  
-                                                                       if(!fid){
-                                                                          var wpsError=new OpenLayers.Format.WPSExecute().read(response);
-                                                                               if(wpsError){
-                                                                                    var ex=wpsError.executeResponse.status.exception.exceptionReport.exceptions[0];
-                                                                                    if(ex)
-                                                                                    Ext.Msg.show({
-                                                                                        title:"Layer Attribute: " + ex.code,
-                                                                                        msg: ex.texts[0] ,
-                                                                                        buttons: Ext.Msg.OK,
-                                                                                        icon: Ext.MessageBox.ERROR
-                                                                                    });
-                                                                               }
-                                                                       }    
-                                                               wfsGrid.refresh();         
-                                                         });
+                            wps.execute(me.wpsProcess,runProcess,function(response){
+                                wfsGrid.refresh();
+                                var fc = OpenLayers.Format.XML.prototype.read.apply(this, [response]);
+                                var fid = fc.getElementsByTagName("gml:ftUUID")[0];  
+                                if(!fid){
+                                    var wpsError=new OpenLayers.Format.WPSExecute().read(response);
+                                    if(wpsError && wpsError.executeResponse && wpsError.executeResponse.status){
+                                          var ex=wpsError.executeResponse.status.exception.exceptionReport.exceptions[0];
+                                          if(ex)
+                                               Ext.Msg.show({
+                                                   title:"Layer Attribute: " + ex.code,
+                                                   msg: ex.texts[0] ,
+                                                   buttons: Ext.Msg.OK,
+                                                   icon: Ext.MessageBox.ERROR
+                                               });
+                                     }
+                                 }    
+                                 wfsGrid.refresh();         
+                            });
+							wfsGrid.refresh();
 							
 							me.activateRasterAlgebraList(true);
                                                         
