@@ -393,7 +393,7 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
 		this.avg		= " - ";
 		this.stddev		= " - ";
     	
-    	return {
+     	return {
             title: this.idaRasterRiskSummaryText,
             layout: "form",
             style: "padding: 10px",
