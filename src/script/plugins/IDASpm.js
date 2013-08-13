@@ -687,7 +687,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 									
 								    if(!layerName){
 									  var wpsError = new OpenLayers.Format.WPSExecute().read(response);
-										if(wpsError){
+										if(wpsError && wpsError.executeResponse){
 											var ex=wpsError.executeResponse.status.exception.exceptionReport.exceptions[0];
 											if(ex)
 											Ext.Msg.show({
@@ -1289,7 +1289,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 	addRun: function(infoRun){
 		var inputs = infoRun.inputs;
 		var today = new Date();
-		var currentDate = today.toISOString();;
+		var currentDate = today.toISOString();
 		 
 		var requestObj = {
 		type: "raw",
