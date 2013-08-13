@@ -359,6 +359,7 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
     },    
 
 	loadMaskMsg: "Fetching data..",
+	noDataMsg: "No data available in current view",
     showMask: function(cmp) {
         if(!this.loadMask) this.loadMask = new Ext.LoadMask(cmp.getEl(), {msg: this.loadMaskMsg});
         this.loadMask.show();
@@ -395,6 +396,7 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
     	
      	return {
             title: this.idaRasterRiskSummaryText,
+            id: "riskSummaryTab",
             layout: "form",
             style: "padding: 10px",
             items: [{
@@ -494,8 +496,9 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
 			        	}]
 			    	};
 			    	
-			    	var loadMask = new Ext.LoadMask(this.getEl(), {msg: this.loadMaskMsg});
-			    	loadMask.show();
+			    	this.showMask(Ext.getCmp("riskSummaryTab"));
+			    	
+			    	var me = this;
 			    	this.wps.execute("gs:IDARiskSummary",requestObject,
 						function(response){
 							var fc = OpenLayers.Format.XML.prototype.read.apply(this, [response]);
@@ -518,15 +521,26 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
 								}
 							} else {
 							    // TODO: is there a better way to get these data?
+							    var count_tag = OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "count");
+							    if(count_tag.length > 0){
 								Ext.getCmp("countStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "count")[0].childNodes[0].data);
 								Ext.getCmp("minStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "min")[0].childNodes[0].data);
 								Ext.getCmp("maxStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "max")[0].childNodes[0].data);
 								Ext.getCmp("sumStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "sum")[0].childNodes[0].data);
 								Ext.getCmp("avgStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "avg")[0].childNodes[0].data);
-								Ext.getCmp("stddevStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "stddev")[0].childNodes[0].data);								
+								Ext.getCmp("stddevStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "stddev")[0].childNodes[0].data);
+								}else{
+                                    Ext.getCmp("countStatsTextField").setValue(me.noDataMsg);
+                                    Ext.getCmp("minStatsTextField").setValue(me.noDataMsg);
+                                    Ext.getCmp("maxStatsTextField").setValue(me.noDataMsg);
+                                    Ext.getCmp("sumStatsTextField").setValue(me.noDataMsg);
+                                    Ext.getCmp("avgStatsTextField").setValue(me.noDataMsg);
+                                    Ext.getCmp("stddevStatsTextField").setValue(me.noDataMsg);
+
+								}			
 							}
 							
-							loadMask.hide();
+							me.hideMask();
 						},
 						this
 					);
