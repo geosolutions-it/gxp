@@ -112,7 +112,7 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
 	 * api: method[addLayerRecord]
      */
 	addLayerRecord: function(){
-		
+	    
 		var props = {
 			name: this.msLayerName,
 			title: this.msLayerTitle,
@@ -226,22 +226,7 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
     		this.source = this.checkLayerSource(this.wmsURL);
     
     		if(this.source){
-    		    
-    			if(!this.source.loaded){
-    				this.source.on('ready', function(){
-    					mask.hide();
-    					this.target.layerSources[this.source.id].loaded = true; 
-    					var record = this.addLayerRecord();
-    					
-    					if(this.useEvents)
-    						this.fireEvent('ready', record);
-						
-						if(callback){
-							callback.call(this, record);
-						}						
-    				}, this);
-    			}
-    			
+    			    			
     		    var index = this.source.store.findExact("name", this.msLayerName);
     			
     			if (index < 0) {
@@ -249,6 +234,28 @@ gxp.plugins.AddLayer = Ext.extend(gxp.plugins.Tool, {
     				// In this case is necessary reload the local store to refresh 
     				// the getCapabilities records 
     				// ///////////////////////////////////////////////////////////////
+    				this.source.on(
+    				    'ready',
+    				    function(){
+                            mask.hide();
+                            // adding a new property
+                            this.target.layerSources[this.source.id].loaded = true; 
+                            
+                            var record = this.addLayerRecord();
+                            
+                            if(this.useEvents)
+                                this.fireEvent('ready', record);
+                            
+                            if(callback){
+                                callback.call(this, record);
+                            }
+                        },
+                        this,
+                        {
+                            single : true
+                        }
+                   );
+    			
     				this.source.store.reload();
     			}else{
 					var record = this.addLayerRecord();
