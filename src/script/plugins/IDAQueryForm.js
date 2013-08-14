@@ -136,26 +136,26 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
     searchType: "Base Settings",
     typeLabel: "Type",
     featureLabel: "Max Features",
-	spatialLabelText: "Without setting a ROI you query the entire set of data in the current Map extent.",
-	featureLabelText: "With an high number of features the server can take a long time to respond. Limit your search!",
-	spmText:"SPM",
-	sourcedepthLabel : "Source Depth (m)",
-	sourcefrequencyLabel : 'Source Frequency (kHz)',
-	sourcepressurelevelLabel : 'Source Pressure Level (dB)',
-	modelnameLabel : 'Model Name',
-	seasonLabelText: 'Season',
-	securityLevelLabelText : 'Security Level',
-	allText: 'All',
-	springText : "Spring",
-	winterText : "Winter",
-	fallText : "Fall",
-	summerText : "Summer",
-	modelRunDateText:'Model Run Date',
-	modelEndDateText:'Model End Date',
-	
-	qualityLabel: "Quality",
-	bottomTypeLabel: "Bottom Type",
-	tlModelLabel: "TL Model",
+    spatialLabelText: "Without setting a ROI you query the entire set of data in the current Map extent.",
+    featureLabelText: "With an high number of features the server can take a long time to respond. Limit your search!",
+    spmText:"SPM",
+    sourcedepthLabel : "Source Depth (m)",
+    sourcefrequencyLabel : 'Source Frequency (kHz)',
+    sourcepressurelevelLabel : 'Source Pressure Level (dB)',
+    modelnameLabel : 'Model Name',
+    seasonLabelText: 'Season',
+    securityLevelLabelText : 'Security Level',
+    allText: 'All',
+    springText : "Spring",
+    winterText : "Winter",
+    fallText : "Fall",
+    summerText : "Summer",
+    modelRunDateText:'Model Run Date',
+    modelEndDateText:'Model End Date',
+    
+    qualityLabel: "Quality",
+    bottomTypeLabel: "Bottom Type",
+    tlModelLabel: "TL Model",
     // End i18n.
     
     spatialFilterOptions: {
@@ -164,15 +164,15 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
             latMax: 180,
             latMin: -180
     },
-	
-	securityLevels: [
-		this.allText,
-		'NATO UNCLASSIFIED',
-		'NATO RESTRICTED',
-		'NATO CONFIDENTIAL',
-		'NATO SECRET',
-		'NATO TOP SECRET',
-	],
+    
+    securityLevels: [
+        this.allText,
+        'NATO UNCLASSIFIED',
+        'NATO RESTRICTED',
+        'NATO CONFIDENTIAL',
+        'NATO SECRET',
+        'NATO TOP SECRET',
+    ],
     
     maxFeatures: 20,
         
@@ -190,11 +190,11 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
         map.enebaleMapEvent = true;
         
         config = Ext.apply({
-		    title: this.title,
+            title: this.title,
             border: false,
             bodyStyle: "padding: 5px",
             layout: "form",
-	    xtype: "form",
+            xtype: "form",
             autoScroll: true,
             items: [{
                 xtype: "fieldset",
@@ -226,10 +226,10 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                                 queryForm.attributeFieldset.setDisabled(true);
                                 queryForm.attributeFieldset.collapse(true);
                             }
-			     // panel visiblity
-			     var featureSelected=(combo.getValue() == 'Feature');
-			     queryForm.attributeFieldset.setVisible(featureSelected);
-			     queryForm.spmFieldSet.setVisible(!featureSelected);
+                            // panel visiblity
+                            var featureSelected=(combo.getValue() == 'Feature');
+                            queryForm.attributeFieldset.setVisible(featureSelected);
+                            queryForm.spmFieldSet.setVisible(!featureSelected);
                         }
                     }
                 }, {
@@ -238,16 +238,16 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                     width:210,
                     fieldLabel: this.featureLabel,
                     value: this.maxFeatures,
-					allowBlank: false,
+                    allowBlank: false,
                     minValue: 5,
                     maxValue: 100,
                     allowDecimals: false
                 }, {
-				    xtype: "label",
-					style:"color:red; font-size:10px",
-					ref: "../baseLabel",
-					text: ""
-				}]
+                    xtype: "label",
+                    style:"color:red; font-size:10px",
+                    ref: "../baseLabel",
+                    text: ""
+                }]
             },{
                 xtype: "fieldset",
                 ref: "spatialFieldset",
@@ -255,33 +255,33 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                 autoHeight: true,
                 checkboxToggle: true,
                 items: [
-					{
-						xtype: "label",
-						style:"color:orange; font-size:10px",
-						ref: "../spatialLabel",
-						id: "spatialLabel",
-						text: this.spatialLabelText
-					}, {
-						xtype: "panel",
-						border: false,
-						header: false,
-						ref: "../aoiFieldset",
-						id: 'bboxAOI-set',
-						autoHeight: true,
-						layout: 'table',
-						layoutConfig: {
-							columns: 3
-						},
-						defaults: {
-							// applied to each contained panel
-							bodyStyle:'padding:5px;'
-						},
-						bodyCssClass: 'aoi-fields',
-						checkboxToggle: true,
-						items: [
-							this.populateSpatialForm(map)
-						]
-					}
+                    {
+                        xtype: "label",
+                        style:"color:orange; font-size:10px",
+                        ref: "../spatialLabel",
+                        id: "spatialLabel",
+                        text: this.spatialLabelText
+                    }, {
+                        xtype: "panel",
+                        border: false,
+                        header: false,
+                        ref: "../aoiFieldset",
+                        id: 'bboxAOI-set',
+                        autoHeight: true,
+                        layout: 'table',
+                        layoutConfig: {
+                            columns: 3
+                        },
+                        defaults: {
+                            // applied to each contained panel
+                            bodyStyle:'padding:5px;'
+                        },
+                        bodyCssClass: 'aoi-fields',
+                        checkboxToggle: true,
+                        items: [
+                            this.populateSpatialForm(map)
+                        ]
+                    }
                 ]
             }, {
                 xtype: "fieldset",
@@ -292,186 +292,191 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                 collapsed: true,
                 checkboxToggle: true
             },{
-				xtype: "fieldset",
-				ref: "spmFieldSet",
-				hidden:false,
-				layout:'form',
-				title:this.spmText,
-				collapsed: false,
-				
-				items: [
-					new Ext.form.ComboBox({
-						width:210,
-						allowBlank: false,
-						forceSelection: true,
-						editable: false,
+                xtype: "fieldset",
+                ref: "spmFieldSet",
+                hidden:false,
+                layout:'form',
+                title:this.spmText,
+                collapsed: false,
+                
+                items: [
+                    new Ext.form.ComboBox({
+                        width:210,
+                        allowBlank: false,
+                        forceSelection: true,
+                        editable: false,
                         name:"season",
-						triggerAction: 'all',
-						lazyRender:true,
-						fieldLabel:this.seasonLabelText,
-						mode: 'local',
-						store: [
-								this.allText,
-								this.springText,
-								this.summerText,
-								this.fallText,
-								this.winterText
-						],
-						valueField: 'myId',
-						displayField: 'displayText',
-						value:  this.allText
-					})/*,
-					new Ext.form.ComboBox({
-						width:210,
-						allowBlank: false,
-						forceSelection: true,
-						editable: false,
+                        triggerAction: 'all',
+                        lazyRender:true,
+                        fieldLabel:this.seasonLabelText,
+                        mode: 'local',
+                        store: [
+                                this.allText,
+                                this.springText,
+                                this.summerText,
+                                this.fallText,
+                                this.winterText
+                        ],
+                        valueField: 'myId',
+                        displayField: 'displayText',
+                        value:  this.allText
+                    })/*,
+                    new Ext.form.ComboBox({
+                        width:210,
+                        allowBlank: false,
+                        forceSelection: true,
+                        editable: false,
                                                 id:"securityLevel",
-						triggerAction: 'all',
-						lazyRender:true,
+                        triggerAction: 'all',
+                        lazyRender:true,
                                                 disabled: this.disableAdvSearch,
-						fieldLabel: this.securityLevelLabelText,
-						mode: 'local',
-						store:  this.securityLevels,
-						valueField: 'myId',
-						value: this.allText,
-						displayField: 'displayText'
-					})*/,
-					{
-						fieldLabel: this.sourcedepthLabel,
-						name: 'sourcedepth',
-                                                disabled: this.disableAdvSearch,
-						xtype: 'numberfield',
-						width:210
+                        fieldLabel: this.securityLevelLabelText,
+                        mode: 'local',
+                        store:  this.securityLevels,
+                        valueField: 'myId',
+                        value: this.allText,
+                        displayField: 'displayText'
+                    })*/,
+                    {
+                        fieldLabel: this.sourcedepthLabel,
+                        name: 'sourcedepth',
+                        disabled: this.disableAdvSearch,
+                        xtype: 'numberfield',
+                        width:210
 
-					},{
-						fieldLabel: this.sourcefrequencyLabel,
-						name: 'sourcefrequency',
-						xtype: 'numberfield',
-						width:210
+                    },{
+                        fieldLabel: this.sourcefrequencyLabel,
+                        name: 'sourcefrequency',
+                        xtype: 'numberfield',
+                        width:210
 
-					},{
-						fieldLabel: this.sourcepressurelevelLabel,
-						name: 'sourcepressurelevel',
-						xtype: 'numberfield',
-						width:210
+                    },{
+                        fieldLabel: this.sourcepressurelevelLabel,
+                        name: 'sourcepressurelevel',
+                        xtype: 'numberfield',
+                        width:210
 
-					}, {
-						fieldLabel: this.tlModelLabel,
-						name: 'tlmodel',
-						xtype: 'textfield',
-						width:210
-					}, {
-						fieldLabel: this.bottomTypeLabel,
-						name: 'bottomtype',
-						xtype: 'textfield',
-						width:210
-					}, {
-						fieldLabel: this.qualityLabel,
-						name: 'quality',
-						xtype: 'textfield',
-						width:210
-					}, {
-						fieldLabel: this.modelnameLabel,
-						name: 'modelname',
-						xtype: 'textfield',
-						width:210
-					}, {
-						xtype: 'compositefield',
-						fieldLabel: this.modelRunDateText,
-						defaults:{
-							
-						},
-						items:[
-							{
-								name: 'modelrundate',
-								xtype: 'datefield',
-                                                                id:'runDate',
-								width:110
-							},{
-                                                                name:'modelrunhour',
-                                                                xtype: "timefield",
-								editable:false,
-								forceSelection:true,
-								triggerAction: "all",
-                                                                minValue: '00',  
-                                                                maxValue: '23',  
-                                                                increment: 1,  
-                                                                format:'i',
-								width:40,
-								value: '00'
-							},{xtype: 'displayfield', value: ':'},{
-								name:'modelrunmin',
-                                                                xtype: "timefield",
-								editable:false,
-								forceSelection:true,
-								triggerAction: "all",
-                                                                minValue: '00',  
-                                                                maxValue: '59',  
-                                                                increment: 1,  
-                                                                format:'i',
-								width:40,
-								value: '00'
-							},{
-								xtype:'button',
-								iconCls:'icon-attribute-reset',
-								handler:function(){
-									queryForm.getForm().findField("modelrundate").setValue("");
-									queryForm.getForm().findField("modelrunhour").setValue("");
-									queryForm.getForm().findField("modelrunmin").setValue("");
-								}
-							}
-						]
-					},
-					{
-						fieldLabel: this.modelEndDateText,
-						xtype: 'compositefield',
-						items:[
-							{
-								name: 'modelenddate',
-								xtype: 'datefield',
-								width:110
+                    }, {
+                        fieldLabel: this.tlModelLabel,
+                        name: 'tlmodel',
+                        xtype: 'textfield',
+                        width:210
+                    }, {
+                        fieldLabel: this.bottomTypeLabel,
+                        name: 'bottomtype',
+                        xtype: 'textfield',
+                        width:210
+                    }, {
+                        fieldLabel: this.qualityLabel,
+                        name: 'quality',
+                        xtype: 'textfield',
+                        width:210
+                    }, {
+                        fieldLabel: this.modelnameLabel,
+                        name: 'modelname',
+                        xtype: 'textfield',
+                        width:210
+                    }, {
+                        xtype: 'compositefield',
+                        fieldLabel: this.modelRunDateText,
+                        defaults:{
+                            
+                        },
+                        items:[
+                            {
+                                name: 'modelrundate',
+                                xtype: 'datefield',
+                                id:'runDate',
+                                width:110
+                            },{
+                                name:'modelrunhour',
+                                xtype: "timefield",
+                                editable:false,
+                                forceSelection:true,
+                                triggerAction: "all",
+                                minValue: '00',  
+                                maxValue: '23',  
+                                increment: 1,  
+                                format:'i',
+                                width:40,
+                                value: '00'
+                            },{
+                                xtype: 'displayfield',
+                                value: ':'
+                            },{
+                                name:'modelrunmin',
+                                xtype: "timefield",
+                                editable:false,
+                                forceSelection:true,
+                                triggerAction: "all",
+                                minValue: '00',  
+                                maxValue: '59',  
+                                increment: 1,  
+                                format:'i',
+                                width:40,
+                                value: '00'
+                            },{
+                                xtype:'button',
+                                iconCls:'icon-attribute-reset',
+                                handler:function(){
+                                    queryForm.getForm().findField("modelrundate").setValue("");
+                                    queryForm.getForm().findField("modelrunhour").setValue("");
+                                    queryForm.getForm().findField("modelrunmin").setValue("");
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        fieldLabel: this.modelEndDateText,
+                        xtype: 'compositefield',
+                        items:[
+                            {
+                                name: 'modelenddate',
+                                xtype: 'datefield',
+                                width:110
+                            },{
+                                name:'modelendhour',
+                                xtype: "timefield",
+                                editable:false,
+                                forceSelection:true,
+                                triggerAction: "all",
+                                minValue: '00',  
+                                maxValue: '23',  
+                                increment: 1,  
+                                format:'i',
+                                width:40,
+                                value: '00'
+                            },{
+                                xtype: 'displayfield',
+                                value: ':'
+                            },{
+                                name:'modelendmin',
+                                xtype: "timefield",
+                                editable:false,
+                                forceSelection:true,
+                                triggerAction: "all",
+                                minValue: '00',  
+                                maxValue: '59',  
+                                increment: 1,  
+                                format:'i',
+                                width:40,
+                                value: '00'
+                            },{
+                                xtype:'button',
+                                iconCls:'icon-attribute-reset',
+                                handler:function(){
+                                    queryForm.getForm().findField("modelenddate").setValue("");
+                                    queryForm.getForm().findField("modelendhour").setValue("");
+                                    queryForm.getForm().findField("modelendmin").setValue("");
+                                }
+                            }
+                        ]
+                    }
 
-							},{
-                                                                name:'modelendhour',
-                                                                xtype: "timefield",
-								editable:false,
-								forceSelection:true,
-								triggerAction: "all",
-                                                                minValue: '00',  
-                                                                maxValue: '23',  
-                                                                increment: 1,  
-                                                                format:'i',
-								width:40,
-								value: '00'
-							},{xtype: 'displayfield', value: ':'},{
-                                                                name:'modelendmin',
-                                                                xtype: "timefield",
-								editable:false,
-								forceSelection:true,
-								triggerAction: "all",
-                                                                minValue: '00',  
-                                                                maxValue: '59',  
-                                                                increment: 1,  
-                                                                format:'i',
-								width:40,
-								value: '00'
-							},{
-								xtype:'button',
-								iconCls:'icon-attribute-reset',
-								handler:function(){
-									queryForm.getForm().findField("modelenddate").setValue("");
-									queryForm.getForm().findField("modelendhour").setValue("");
-									queryForm.getForm().findField("modelendmin").setValue("");
-								}
-							}
-						]
-					}
-
-				]
-			}
-				
-			],
+                ]
+            }
+                
+            ],
             bbar: ["->", {
                 text: this.cancelButtonText,
                 ref: "cancel",
@@ -499,7 +504,7 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                     queryForm.type.reset();
                     queryForm.maxfeature.reset();
                     queryForm.baseLabel.setText("");
-					queryForm.spatialLabel.setText("");
+                    queryForm.spatialLabel.setText("");
 
                     //
                     // Removing the ROI 
@@ -509,25 +514,23 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                     //
                     // Cleaning the Feature grid
                     //
-					if(featureManager && featureManager.featureStore){
-						featureManager.featureStore.removeAll();
+                    if(featureManager && featureManager.featureStore){
+                        featureManager.featureStore.removeAll();
                     }
                     if(queryForm.type.getValue() != 'Feature' || !featureManager.schema){
                         queryForm.attributeFieldset.setDisabled(true);
                         queryForm.attributeFieldset.collapse(true);
                     }
-		    queryForm.getForm().reset();
-					// panel visiblity
-					
-		    var featureSelected=(queryForm.type.getValue() == 'Feature');
-		    queryForm.attributeFieldset.setVisible(featureSelected);
-		    queryForm.spmFieldSet.setVisible(!featureSelected);
+                    queryForm.getForm().reset();
+                    // panel visiblity
+                    var featureSelected=(queryForm.type.getValue() == 'Feature');
+                    queryForm.attributeFieldset.setVisible(featureSelected);
+                    queryForm.spmFieldSet.setVisible(!featureSelected);
                     
                     if(queryForm.type.getValue() != 'Feature'){
                        var wfsGrid=this.target.tools[this.wfsGrid];
                        wfsGrid.resetFilter();
                     }
-                      
                     
                 }
             }, {
@@ -537,8 +540,8 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                 disabled: false,
                 scope: this,
                 handler: function() {                
-                    if(queryForm.type.getValue() == 'Feature'){                         
-                         if(featureManager.schema){
+                    if(queryForm.type.getValue() == 'Feature'){
+                        if(featureManager.schema){
                             var filters = [];
                             
                             if (queryForm.spatialFieldset.collapsed !== true) {
@@ -566,35 +569,36 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                             }
                             
                             var mf = null;
-                            if(queryForm.maxfeature.isValid()){ 
-							    var south = Ext.getCmp('south'); 
-								
-								if(south.collapsed){
-									south.expand();
-									south.syncSize();
-								}
-								 
+                            if(queryForm.maxfeature.isValid()){
+                                var south = Ext.getCmp('south'); 
+                                
+                                if(south.collapsed){
+                                    south.expand();
+                                    south.syncSize();
+                                }
+                                 
                                 mf = queryForm.maxfeature.getValue();
-								
-								if(mf > 50)
-									queryForm.baseLabel.setText(this.featureLabelText);
-								else
-									queryForm.baseLabel.setText("");
-									
-								featureManager.loadFeatures(mf, filters.length > 1 ?
-									new OpenLayers.Filter.Logical({
-										type: OpenLayers.Filter.Logical.AND,
-										filters: filters
-									}) :
-									filters[0]
-								);
-                            }else
-				Ext.Msg.show({
-					title: "Max Features",
-					msg: "MaxFeature value is null or incorrect !",
-					buttons: Ext.Msg.OK,
-					icon: Ext.Msg.INFO
-				});
+                                
+                                if(mf > 50)
+                                    queryForm.baseLabel.setText(this.featureLabelText);
+                                else
+                                    queryForm.baseLabel.setText("");
+                                
+                                featureManager.loadFeatures(mf, filters.length > 1 ?
+                                    new OpenLayers.Filter.Logical({
+                                        type: OpenLayers.Filter.Logical.AND,
+                                        filters: filters
+                                    }) :
+                                    filters[0]
+                                );
+                            }else{
+                                Ext.Msg.show({
+                                    title: "Max Features",
+                                    msg: "MaxFeature value is null or incorrect !",
+                                    buttons: Ext.Msg.OK,
+                                    icon: Ext.Msg.INFO
+                                });
+                            }
                         }else{
                             Ext.Msg.show({
                                 title: "Features Search",
@@ -607,12 +611,11 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                          Ext.getCmp('idalaylist').setActiveTab(Ext.getCmp('featuregrid'));
                     }else{
                         var formValues=queryForm.getForm().getFieldValues(true);
-
+                        
                         var SPMFilter = new OpenLayers.Filter.Logical({
                             type: OpenLayers.Filter.Logical.AND,
                             filters: []
                         });
-                        
                         
                         if(formValues.NorthBBOX && formValues.WestBBOX
                            && formValues.EastBBOX && formValues.SouthBBOX)
@@ -646,7 +649,6 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                             );
                         }
                         
-                        
                         if(formValues.sourcepressurelevel){
                             SPMFilter.filters.push(
                                 new OpenLayers.Filter.Comparison({
@@ -656,8 +658,8 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                                 })
                             );
                         }
-												
-						if(formValues.tlmodel){
+                        
+                        if(formValues.tlmodel){
                             SPMFilter.filters.push(
                                 new OpenLayers.Filter.Comparison({
                                     type: OpenLayers.Filter.Comparison.LIKE,
@@ -666,9 +668,9 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                                     value: "*"+formValues.tlmodel+"*"
                                 })
                             );
-                        }    
-
-						if(formValues.bottomtype){
+                        }
+                        
+                        if(formValues.bottomtype){
                             SPMFilter.filters.push(
                                 new OpenLayers.Filter.Comparison({
                                     type: OpenLayers.Filter.Comparison.LIKE,
@@ -677,9 +679,9 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                                     value: "*"+formValues.bottomtype+"*"
                                 })
                             );
-                        } 		
-
-						if(formValues.quality){
+                        }
+                        
+                        if(formValues.quality){
                             SPMFilter.filters.push(
                                 new OpenLayers.Filter.Comparison({
                                     type: OpenLayers.Filter.Comparison.LIKE,
@@ -688,7 +690,7 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                                     value: "*"+formValues.quality+"*"
                                 })
                             );
-                        } 							
+                        }
                         
                         if(formValues.season){
                             SPMFilter.filters.push(
@@ -714,15 +716,15 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                         var endDate=queryForm.getForm().findField("modelenddate").getValue();
                         var endDateHour=queryForm.getForm().findField("modelendhour").getValue();
                         var endDateMin=queryForm.getForm().findField("modelendmin").getValue();
-									
+                        
                         if(endDate){
-                            if(endDateHour)
-                                endDate.setHours(endDateHour); 
+                            if(endDateHour){
+                                endDate.setHours(endDateHour);
+                            }
                             if(endDateMin){
                                 endDate.setMinutes(endDateMin); 
                             }
-                                
-                       
+                            
                             SPMFilter.filters.push(
                                 new OpenLayers.Filter.Comparison({
                                     type: OpenLayers.Filter.Comparison.LESS_THAN_OR_EQUAL_TO,
@@ -736,7 +738,7 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                         var runDate=queryForm.getForm().findField("modelrundate").getValue();
                         var runDateHour=queryForm.getForm().findField("modelrunhour").getValue();
                         var runDateMin=queryForm.getForm().findField("modelrunmin").getValue();
-									
+                        
                         if(runDate){
                             if(runDateHour)
                                 runDate.setHours(runDateHour); 
@@ -928,8 +930,8 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                      
                      if(pressed){
                           Ext.getCmp("spatialLabel").setText("");
-						  
-						  if(this.northField.isDirty() && this.southField.isDirty() && 
+                          
+                          if(this.northField.isDirty() && this.southField.isDirty() && 
                               this.eastField.isDirty() && this.westField.isDirty()){
                               this.northField.reset();
                               this.southField.reset();
@@ -942,7 +944,7 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
                           //                          
                           selectAOI.activate();
                       }else{
-					      Ext.getCmp("spatialLabel").setText(this.spatialLabelText);
+                          Ext.getCmp("spatialLabel").setText(this.spatialLabelText);
                           selectAOI.deactivate();
 
                           var extentArray = this.target.mapPanel.map.getExtent().toArray();
