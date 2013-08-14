@@ -25,26 +25,26 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
     id: null,
 
     title: "Layer Attribute",
-	
-	settingsTitle: "Base Settings",
+    
+    settingsTitle: "Base Settings",
     rasterAlgebraExecuteMessage: "Raster Algebra run request sent.",
-	settingNameTitle: "Name",
-	settingColorTitle: "Color",
-	settingClassificationTitle: "Classification",
+    settingNameTitle: "Name",
+    settingColorTitle: "Color",
+    settingClassificationTitle: "Classification",
     filterApplyTitle: "Filter Apply",
-	filterApplyMsg: "Your filter is empty or not properly formatted!",
+    filterApplyMsg: "Your filter is empty or not properly formatted!",
     filterTitle: "Filter",
     reloadLayerText: "Reload Layers",
     applyFilterText: "Run",
-	resetText: "Reset",
+    resetText: "Reset",
         
-	settingColor: '000000',
-
-        wpsManager: null,
-        
-        wfsGrid: null,
-        
-        wpsProcess: "gs:IDARasterAlgebra",
+    settingColor: '000000',
+    
+    wpsManager: null,
+    
+    wfsGrid: null,
+    
+    wpsProcess: "gs:IDARasterAlgebra",
 	
 	store:[
 		'ALL',
@@ -54,25 +54,48 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 		'SECRET',
 		'TOPSECRET'						
 	],
-        
-        layerNamePrefix: "AttributeMatch",
-        
-        /** api: config[colorStyles]
-        *  ``Array String``
-        *  
-        */
-        colorStyles: null,
-	
-	defaultBuilder: {
-		// The attributes conrespont to the IDA raste layers (SPM + Habitat)
-		// TODO - If/When  possible make it as remote (store/reader) 
-		baseURL: "http://localhost:8080/",
-		//proxy: "/proxy/?url=",
-		allowBlank: true,
-		allowGroups: true
-	},
-        
-        attributeField: null,
+    
+    layerNamePrefix: "AttributeMatch",
+    
+    /** api: config[colorStyles]
+    *  ``Array String``
+    *  
+    */
+    colorStyles: null,
+    
+    defaultBuilder: {
+        // The attributes conrespont to the IDA raste layers (SPM + Habitat)
+        // TODO - If/When  possible make it as remote (store/reader) 
+        baseURL: "http://localhost:8080/",
+        //proxy: "/proxy/?url=",
+        allowBlank: true,
+        allowGroups: true
+    },
+    
+    attributeField: null,
+    
+    /**
+     *  Spatial filter boundaries, in decimal values 
+     */
+    spatialFilterOptions: {
+            lonMax: 90,
+            lonMin: -90,
+            latMax: 180,
+            latMin: -180
+    },
+    
+    /**
+     * i18n for the Spatial filter
+     */
+    northLabel:"North",
+    westLabel:"West",
+    eastLabel:"East",
+    southLabel:"South",
+    setAoiText: "SetROI",
+    setAoiTooltip: "Enable the SetBox control to draw a ROI (BBOX) on the map",
+    queryByLocationText: "Region Of Interest",
+
+
     
     /** private: method[constructor]
      *  :arg config: ``Object``
@@ -84,70 +107,73 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
     /** private: method[addOutput]
      *  :arg config: ``Object``
      */
-    addOutput: function(config) {		
-		Ext.form.Field.prototype.msgTarget = 'side';
-		Ext.ux.form.FieldPanel.prototype.msgTarget = 'side';
-		
-		//
-		// Fix for ExtJs 3 version
-		//
-		/*Ext.override(Ext.Element, {
-			getColor: function(attr, defaultValue, prefix){
-				var v = this.getStyle(attr), color = typeof prefix == "undefined" ? "#" : prefix, h;
-				if (!v || /transparent|inherit/.test(v)) {
-					return defaultValue;
-				}
-				if (/^r/.test(v)) {
-					Ext.each(v.slice(4, v.length - 1).split(','), function(s){
-						h = parseInt(s, 10);
-						color += (h < 16 ? '0' : '') + h.toString(16);
-					});
-				} else {
-					v = v.replace('#', '');
-					color += v.length == 3 ? v.replace(/^(\w)(\w)(\w)$/, '$1$1$2$2$3$3') : v;
-				}
-				return (color.length > 5 ? color.toLowerCase() : defaultValue);
-			}
-		});*/
+    addOutput: function(config) {
+        Ext.form.Field.prototype.msgTarget = 'side';
+        Ext.ux.form.FieldPanel.prototype.msgTarget = 'side';
         
-             var now = new Date();
-             this.attributeField= new Ext.form.TextField({
-			 xtype: 'textfield',
-			 fieldLabel: this.settingNameTitle,
-                         readOnly: true,
-			 width: 200,
-			 name: this.settingNameTitle,
-			 value: this.layerNamePrefix + "_" +now.format("Y_m_d_H_i_s")
-	       });
-	
-		var settings = new Ext.form.FieldSet({
+        //
+        // Fix for ExtJs 3 version
+        //
+        /*Ext.override(Ext.Element, {
+        	getColor: function(attr, defaultValue, prefix){
+        		var v = this.getStyle(attr), color = typeof prefix == "undefined" ? "#" : prefix, h;
+        		if (!v || /transparent|inherit/.test(v)) {
+        			return defaultValue;
+        		}
+        		if (/^r/.test(v)) {
+        			Ext.each(v.slice(4, v.length - 1).split(','), function(s){
+        				h = parseInt(s, 10);
+        				color += (h < 16 ? '0' : '') + h.toString(16);
+        			});
+        		} else {
+        			v = v.replace('#', '');
+        			color += v.length == 3 ? v.replace(/^(\w)(\w)(\w)$/, '$1$1$2$2$3$3') : v;
+        		}
+        		return (color.length > 5 ? color.toLowerCase() : defaultValue);
+        	}
+        });*/
+        
+        var now = new Date();
+        this.attributeField= new Ext.form.TextField({
+            xtype: 'textfield',
+            fieldLabel: this.settingNameTitle,
+            readOnly: true,
+            width: 200,
+            name: this.settingNameTitle,
+            value: this.layerNamePrefix + "_" +now.format("Y_m_d_H_i_s")
+        });
+        
+        var settings = new Ext.form.FieldSet({
                 title: this.settingsTitle,
                 autoHeight: true,
-				labelWidth: 80,
-                items: [this.attributeField, {
-				xtype: 'combo',
-				allowBlank: false,
-				editable: false,
-				triggerAction: "all",
-				resizable: true,
-				fieldLabel: this.settingColorTitle,
-				width: 200,
-				name: this.settingColorTitle,
-				store: this.colorStyles,
-				value: this.colorStyles[0]
-			}, {
-				xtype: 'combo',
-				allowBlank: false,
-				editable: false,
-				triggerAction: "all",
-				resizable: true,
-				fieldLabel: this.settingClassificationTitle,
-				width: 200,
-				name: this.settingClassificationTitle,
-				store: this.store,
-				value: 'ALL'
-			}]
-		});
+                labelWidth: 80,
+                items: [
+                    this.attributeField,
+                    {
+                        xtype: 'combo',
+                        allowBlank: false,
+                        editable: false,
+                        triggerAction: "all",
+                        resizable: true,
+                        fieldLabel: this.settingColorTitle,
+                        width: 200,
+                        name: this.settingColorTitle,
+                        store: this.colorStyles,
+                        value: this.colorStyles[0]
+                    }, {
+                        xtype: 'combo',
+                        allowBlank: false,
+                        editable: false,
+                        triggerAction: "all",
+                        resizable: true,
+                        fieldLabel: this.settingClassificationTitle,
+                        width: 200,
+                        name: this.settingClassificationTitle,
+                        store: this.store,
+                        value: 'ALL'
+                    }
+                ]
+        });
 		settings.getMetadata = function(){
 			var meta = {};
 			meta.name = this.items.get(0).getValue();
@@ -155,6 +181,41 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 			meta.classify = this.items.get(2).getValue();
 			return meta;
 		};
+		
+		// Spatial Filter
+		
+		var spatialFilterFieldset= {
+                xtype: "fieldset",
+                ref: "spatialFieldset",
+                title: this.queryByLocationText,
+                autoHeight: true,
+                checkboxToggle: false,
+                items: [
+                    {
+                        xtype: "panel",
+                        border: false,
+                        header: false,
+                        ref: "../aoiFieldset",
+                        id: 'bboxAOI-set2',
+                        autoHeight: true,
+                        layout: 'table',
+                        layoutConfig: {
+                            columns: 3
+                        },
+                        defaults: {
+                            // applied to each contained panel
+                            bodyStyle:'padding:5px;'
+                        },
+                        bodyCssClass: 'aoi-fields',
+                        checkboxToggle: true,
+                        items: [
+                            this.populateSpatialForm(this.target.mapPanel.map)
+                        ]
+                    }
+                ]
+            }
+		
+		////
 		
 		var params = this.defaultBuilder;
 		params.proxy = this.target.proxy;
@@ -180,9 +241,9 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 			title: this.filterTitle,
 			autoHeight: true,
 			maxNumberOfGroups: 2,
-			
 			layout:'fit',
 			autoScroll:true,
+			checkboxToggle: true,
 			items: [
 				filterBuilder
 			]
@@ -190,12 +251,13 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 		
 		var form = new Ext.form.FormPanel({
 			border: false,
-			width: 510,
+			width: 460,
 			autoScroll:true,
 			labelAlign: 'left',
-			items: [settings, filter]
-		});		
-	var me=this;
+			items: [settings, spatialFilterFieldset, filter]
+		});
+        
+        var me=this;
         var cpanel = new Ext.Panel({
             border: false,
 			autoScroll: true,
@@ -222,20 +284,36 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 					iconCls: "icon-attribute-apply",
 					scope: this,
 					handler: function(){
-						var f = filterBuilder.getFilter();
-						
-						if(f){
+					    
+                        // This is the Basic filter
+                        var f = filterBuilder.getFilter();
+                        
+                        // TODO add the Advanced filter (script) and check for it
+                        
+                        var validROI = (this.northField.isDirty() && this.southField.isDirty() && 
+                              this.eastField.isDirty() && this.westField.isDirty());
+                              
+                        console.log(this.target.mapPanel.map.getExtent());
+                        
+                        if(f && validROI){
                             var infoRun= {};
                             var now= new Date();
                             me.attributeField.setValue(me.layerNamePrefix + "_" + now.format("Y_m_d_H_i_s"));
                             var wfsGrid= me.target.tools[this.wfsGrid];
                             infoRun.inputs={};
                             infoRun.inputs=settings.getMetadata();
-							var filterFormat = new OpenLayers.Format.CQL();
-							var filterCQL = filterFormat.write(f);  
+                            var filterFormat = new OpenLayers.Format.CQL();
+                            var filterCQL = filterFormat.write(f);  
                                                         
                             infoRun.inputs.attributeFilter= filterCQL;
-
+                            
+                            infoRun.inputs.AOI = new OpenLayers.Bounds(
+                                                                this.westField.getValue(), 
+                                                                this.southField.getValue(), 
+                                                                this.eastField.getValue(), 
+                                                                this.northField.getValue()
+                                                             );
+                            
                             var wps = me.target.tools[me.wpsManager];
                                                         
                             var runProcess= me.getRARun(infoRun);
@@ -304,82 +382,254 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
         
         return attributePanel;
     },
-    
+    /*
+     * Get RasterAlgebra Run
+     * sets the input/outputs of the Wps process to be called
+     */
     getRARun: function(infoRun){
-             var inputs= infoRun.inputs;
-             var today = new Date();
-             var currentDate = today.format("Y-m-d\\TH:i:s")+"Z";
-             var requestObj = {
-			type: "raw",
-			inputs:{
-                                areaOfInterest: new OpenLayers.WPSProcess.ComplexData({
-                                        value: this.target.mapPanel.map.getExtent().toGeometry().toString(),
-					mimeType: "application/wkt"
-                                }),
-				attributeName: new OpenLayers.WPSProcess.LiteralData({
-					value:inputs['name']
-				}),
-				runBegin: new OpenLayers.WPSProcess.LiteralData({
-					value:currentDate
-				}),
-				wsName: new OpenLayers.WPSProcess.LiteralData({
-					value:inputs.wsName || rasterAlgebra.wsName
-				}),
-                                storeName: new OpenLayers.WPSProcess.LiteralData({
-				    value:rasterAlgebra.storeName
-				}),
-                                outputUrl: new OpenLayers.WPSProcess.LiteralData({
-					value:rasterAlgebra.outputUrl
-				}),
-				classification: new OpenLayers.WPSProcess.LiteralData({
-					value:inputs['classify']
-				}),
-                                styleName: new OpenLayers.WPSProcess.LiteralData({
-					value: inputs.styleName || "layerattribute_"+inputs['color'].toLowerCase()
-				}),
-                                /*attributeFilter: new OpenLayers.WPSProcess.ComplexData({
-                                        value: inputs['attributeFilter'],
-                                        mimeType: "text/plain; subtype=cql"
-                                })*/
-                                attributeFilter: new OpenLayers.WPSProcess.LiteralData({
-                                        value: inputs['attributeFilter']
-                                })
-				},
-			outputs: [{
-					identifier: "result",                                 
-					mimeType: "text/xml; subtype=wfs-collection/1.0"
-                                        
-			}]
-		};
-          
+            var inputs= infoRun.inputs;
+            //var today = new Date();
+            // TODO: use the toISOformat() ? or remove?
+            //var currentDate = today.format("Y-m-d\\TH:i:s")+"Z";
+            var requestObj = {
+                type: "raw",
+                inputs:{
+                    areaOfInterest: new OpenLayers.WPSProcess.ComplexData({
+                        value: inputs.AOI.toGeometry().toString(),
+                        mimeType: "application/wkt"
+                    }),
+                    attributeName: new OpenLayers.WPSProcess.LiteralData({
+                        value:inputs['name']
+                    }),
+                    // TODO check if really used by the WPS process (maybe it shouldn't be mandatory)
+                    /*
+                    runBegin: new OpenLayers.WPSProcess.LiteralData({
+                        value:currentDate
+                    }),
+                    */
+                    wsName: new OpenLayers.WPSProcess.LiteralData({
+                        value:inputs.wsName || rasterAlgebra.wsName
+                    }),
+                    storeName: new OpenLayers.WPSProcess.LiteralData({
+                        value:rasterAlgebra.storeName
+                    }),
+                    outputUrl: new OpenLayers.WPSProcess.LiteralData({
+                        value:rasterAlgebra.outputUrl
+                    }),
+                    classification: new OpenLayers.WPSProcess.LiteralData({
+                        value:inputs['classify']
+                    }),
+                    styleName: new OpenLayers.WPSProcess.LiteralData({
+                        value: inputs.styleName || "layerattribute_"+inputs['color'].toLowerCase()
+                    }),
+                    /*attributeFilter: new OpenLayers.WPSProcess.ComplexData({
+                            value: inputs['attributeFilter'],
+                            mimeType: "text/plain; subtype=cql"
+                    })*/
+                    attributeFilter: new OpenLayers.WPSProcess.LiteralData({
+                        value: inputs['attributeFilter']
+                    })
+                },
+                outputs: [{
+                    identifier: "result",
+                    mimeType: "text/xml; subtype=wfs-collection/1.0"
+                }]
+            };
             return requestObj;
-         },
-         
-   activateRasterAlgebraList: function(tooltip){
-	var wfsgrid = Ext.getCmp(this.wfsGrid);
-	Ext.getCmp('south').expand(false);
-	Ext.getCmp('idalaylist').setActiveTab(wfsgrid);
-                
-       if(tooltip)         
-         this.showMsgTooltip(this.rasterAlgebraExecuteMessage);
     },
     
-     showMsgTooltip: function(msg){
-          var title="Layer Attribute";
-          var elTooltop= Ext.getCmp("east").getEl();  
-          var t = new Ext.ToolTip({
-               floating: {
-                          shadow: false
-               },
-               width: elTooltop.getWidth()-10,
-               title: title,
-               html: msg,
-               hideDelay: 190000,
-               closable: true
-         });
-         t.showAt([elTooltop.getX()+5, elTooltop.getBottom()-100]);
-         t.el.slideIn('b');  
-    }
+    activateRasterAlgebraList: function(tooltip){
+            var wfsgrid = Ext.getCmp(this.wfsGrid);
+            Ext.getCmp('south').expand(false);
+            Ext.getCmp('idalaylist').setActiveTab(wfsgrid);
+            
+            if(tooltip)
+                this.showMsgTooltip(this.rasterAlgebraExecuteMessage);
+    },
+    
+    showMsgTooltip: function(msg){
+            var title="Layer Attribute";
+            var elTooltop= Ext.getCmp("east").getEl();  
+            var t = new Ext.ToolTip({
+                floating: {
+                            shadow: false
+                          },
+                width: elTooltop.getWidth()-10,
+                title: title,
+                html: msg,
+                hideDelay: 190000,
+                closable: true
+            });
+            t.showAt([elTooltop.getX()+5, elTooltop.getBottom()-100]);
+            t.el.slideIn('b');  
+    },
+    
+    //// Here starts the Spatial filter code
+    /** private: method[populateSpatialForm]
+     *  :arg map: ``Object``
+     *  Spatial filter
+     */
+    populateSpatialForm: function(map){
+        this.northField = new Ext.form.NumberField({
+              fieldLabel: this.northLabel,
+              id: "NorthBBOX2",
+              width: 100,
+              minValue: this.spatialFilterOptions.lonMin,
+              maxValue: this.spatialFilterOptions.lonMax,
+              decimalPrecision: 5,
+              allowDecimals: true,
+              hideLabel : false                    
+        });
+        
+        this.westField = new Ext.form.NumberField({
+              fieldLabel: this.westLabel,
+              id: "WestBBOX2",
+              width: 100,
+              minValue: this.spatialFilterOptions.latMin,
+              maxValue: this.spatialFilterOptions.latMax,
+              decimalPrecision: 5,
+              allowDecimals: true,
+              hideLabel : false                    
+        });
+        
+        this.eastField = new Ext.form.NumberField({
+              fieldLabel: this.eastLabel,
+              id: "EastBBOX2",
+              width: 100,
+              minValue: this.spatialFilterOptions.latMin,
+              maxValue: this.spatialFilterOptions.latMax,
+              decimalPrecision: 5,
+              allowDecimals: true,
+              hideLabel : false                    
+        });
+              
+        this.southField = new Ext.form.NumberField({
+              fieldLabel: this.southLabel,
+              id: "SouthBBOX2",
+              width: 100,
+              minValue: this.spatialFilterOptions.lonMin,
+              maxValue: this.spatialFilterOptions.lonMax,
+              decimalPrecision: 5,
+              allowDecimals: true,
+              hideLabel : false                    
+        });
+                  
+        //
+        // Geographical Filter Field Set
+        //        
+        var selectAOI = new OpenLayers.Control.SetBox({      
+            map: map,    
+            onChangeAOI: function(){
+                var aoiArray = this.currentAOI.split(',');
+                
+                document.getElementById('WestBBOX2').value = OpenLayers.Util.toFloat(aoiArray[0],8);
+                document.getElementById('SouthBBOX2').value = OpenLayers.Util.toFloat(aoiArray[1],8);
+                document.getElementById('EastBBOX2').value = OpenLayers.Util.toFloat(aoiArray[2],8);
+                document.getElementById('NorthBBOX2').value = OpenLayers.Util.toFloat(aoiArray[3],8);
+            } 
+        }); 
+        
+        map.addControl(selectAOI);
+        
+        this.aoiButton = new Ext.Button({
+              text: this.setAoiText,
+              tooltip: this.setAoiTooltip,
+              enableToggle: true,
+              toggleGroup: this.toggleGroup,
+              iconCls: 'aoi-button',
+              height: 50,
+              width: 50,
+              listeners: {
+                  scope: this, 
+                  toggle: function(button, pressed) {
+                     //
+                     // Reset the previous control
+                     //
+                     var aoiLayer = map.getLayersByName("AOI")[0];
+                    
+                     if(aoiLayer)
+                         map.removeLayer(aoiLayer);
+                     
+                     if(pressed){
+                          
+                          // Check if the fields are all rendered and modified
+                          if(this.northField.isDirty() && this.southField.isDirty() && 
+                              this.eastField.isDirty() && this.westField.isDirty()){
+                              this.northField.reset();
+                              this.southField.reset();
+                              this.eastField.reset();
+                              this.westField.reset();
+                          }
+
+                          //
+                          // Activating the new control
+                          //                          
+                          selectAOI.activate();
+                      }else{
+                          selectAOI.deactivate();
+                            /*
+                          var extentArray = this.target.mapPanel.map.getExtent().toArray();
+                          
+                          this.westField.setValue(extentArray[0]);
+                          this.southField.setValue(extentArray[1]);
+                          this.eastField.setValue(extentArray[2]);
+                          this.northField.setValue(extentArray[3]); 
+                          */
+                      }
+                  }
+              }
+        });
+              
+        var items = [
+            {
+                layout: "form",
+                cellCls: 'spatial-cell',
+                labelAlign: "top",
+                border: false,
+                colspan: 3,
+                items: [
+                    this.northField
+                ]
+            },{
+                layout: "form",
+                cellCls: 'spatial-cell',
+                labelAlign: "top",
+                border: false,
+                items: [
+                    this.westField
+                ]
+            },{
+                layout: "form",
+                cellCls: 'spatial-cell',
+                border: false,
+                items: [
+                    this.aoiButton
+                ]                
+            },{
+                layout: "form",
+                cellCls: 'spatial-cell',
+                labelAlign: "top",
+                border: false,
+                items: [
+                   this.eastField
+                ]
+            },{
+                layout: "form",
+                cellCls: 'spatial-cell',
+                labelAlign: "top",
+                border: false,
+                colspan: 3,
+                items: [
+                    this.southField
+                ]
+            }
+        ]
+        
+        return items;
+    }        
+    
+    /////////// End of Spatial filter code
+    
 });
 
 Ext.preg(gxp.plugins.IDAAttribute.prototype.ptype, gxp.plugins.IDAAttribute);
