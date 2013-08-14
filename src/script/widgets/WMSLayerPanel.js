@@ -100,6 +100,7 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
     stylesText: "Styles",
     idaRasterRiskSummaryText: "Risk Summary Stats",
     idaRasterRiskSummaryInfoText: "Current Viewport Raster Statistics",
+    refreshText: "Refresh",
     
     initComponent: function() {
         this.addEvents(
@@ -381,11 +382,11 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
 	avg: 	null,
 	stddev: null,
     createRasterRiskSummaryPanel: function() {
-        var record 	= this.layerRecord;
-        var layer  	= record.getLayer();
+        //var record 	= this.layerRecord;
+        //var layer  	= record.getLayer();
 
-    	var extent 	= this.map.getExtent().toGeometry();
-    	var crs    	= this.map.getProjection();
+    	//var extent 	= this.map.getExtent().toGeometry();
+    	//var crs    	= this.map.getProjection();
 
 		this.count		= " - ";
 		this.min		= " - ";
@@ -393,6 +394,95 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
 		this.sum		= " - ";
 		this.avg		= " - ";
 		this.stddev		= " - ";
+    	
+    	
+    	var onRefreshButtonClicked = function() {
+                    
+                    var extent  = this.map.getExtent().toGeometry();
+                    var crs     = this.map.getProjection();
+                    var requestObject={
+                        /* storeExecuteResponse: false,
+                           lineage:  false,
+                           status: false,*/
+                        type: "raw",
+                        inputs:{
+                            layerName: new OpenLayers.WPSProcess.LiteralData({
+                                value: this.layerRecord.get("name")
+                            }),
+                            areaOfInterest: new OpenLayers.WPSProcess.ComplexData({
+                                value: extent.toString(),/*"POLYGON((-10.723 35.523, -10.723 50.884, 30.938 50.884, 30.938 35.523, -10.723 35.523))"*/
+                                mimeType: "application/wkt"
+                            }),
+                            aoiCRS: new OpenLayers.WPSProcess.LiteralData({
+                                value: crs/*"EPSG:4326"*/
+                            })
+                            /* geom: new OpenLayers.WPSProcess.ReferenceData({
+                                     href: "http://localhost:8089/geoserver/wfs?request=GetFeature&version=1.1.0&typeName=topp:states&propertyName=STATE_NAME,PERSONS&BBOX=-75.102613,40.212597,-72.361859,41.512517,EPSG:4326",
+                                     mimeType: "text/xml; subtype=gml/3.1.1",
+                                     method: "GET"
+                            }),*/
+                            /*geom: new OpenLayers.WPSProcess.ComplexData({
+                                value: "POINT(6 40)",
+                                mimeType: "text/xml; subtype=gml/3.1.1"
+                            })*/
+                        },
+                        outputs: [{
+                            identifier: "result",
+                            mimeType: "text/xml"
+                            //asReference: true,
+                            //type: "raw"
+                        }]
+                    };
+                    
+                    this.showMask(Ext.getCmp("riskSummaryTab"));
+                    
+                    var me = this;
+                    this.wps.execute("gs:IDARiskSummary",requestObject,
+                        function(response){
+                            var fc = OpenLayers.Format.XML.prototype.read.apply(this, [response]);
+                            var fid = OpenLayers.Ajax.getElementsByTagNameNS(fc, "http://www.opengis.net/gml","gml", "IDARiskSummaryProcess")[0];
+                            
+                            //me.composerList.push(fid);
+                            if(!fid){
+                                var wpsError=new OpenLayers.Format.WPSExecute().read(response);
+                                if(wpsError && wpsError.executeResponse.status){
+                                        var ex = wpsError.executeResponse.status.exception.exceptionReport.exceptions[0];
+                                        if(ex)
+                                        {
+                                            Ext.Msg.show({
+                                                title:"SPM: " + ex.code,
+                                                msg: ex.texts[0] ,
+                                                buttons: Ext.Msg.OK,
+                                                icon: Ext.MessageBox.ERROR
+                                            });
+                                        }
+                                }
+                            } else {
+                                // TODO: is there a better way to get these data?
+                                var count_tag = OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "count");
+                                if(count_tag.length > 0){
+                                Ext.getCmp("countStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "count")[0].childNodes[0].data);
+                                Ext.getCmp("minStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "min")[0].childNodes[0].data);
+                                Ext.getCmp("maxStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "max")[0].childNodes[0].data);
+                                Ext.getCmp("sumStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "sum")[0].childNodes[0].data);
+                                Ext.getCmp("avgStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "avg")[0].childNodes[0].data);
+                                Ext.getCmp("stddevStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "stddev")[0].childNodes[0].data);
+                                }else{
+                                    Ext.getCmp("countStatsTextField").setValue(me.noDataMsg);
+                                    Ext.getCmp("minStatsTextField").setValue(me.noDataMsg);
+                                    Ext.getCmp("maxStatsTextField").setValue(me.noDataMsg);
+                                    Ext.getCmp("sumStatsTextField").setValue(me.noDataMsg);
+                                    Ext.getCmp("avgStatsTextField").setValue(me.noDataMsg);
+                                    Ext.getCmp("stddevStatsTextField").setValue(me.noDataMsg);
+
+                                }           
+                            }
+                            
+                            me.hideMask();
+                        },
+                        this
+                    );
+                }
     	
      	return {
             title: this.idaRasterRiskSummaryText,
@@ -458,93 +548,16 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
                 value: this.stddev,
                 readOnly: true
             }],
+            bbar:[{
+                tooltip: this.refreshText,
+                overflowText: this.refreshText,
+                iconCls: 'x-tbar-loading',
+                handler: onRefreshButtonClicked,
+                scope: this
+            }],
             listeners: {
             	scope: this,
-            	render: function() {
-
-					var requestObject={
-			       		/* storeExecuteResponse: false,
-			        	   lineage:  false,
-			        	   status: false,*/
-			        	type: "raw",
-			        	inputs:{
-			        		layerName: new OpenLayers.WPSProcess.LiteralData({
-			                	value: this.layerRecord.get("name")
-			            	}),
-			            	areaOfInterest: new OpenLayers.WPSProcess.ComplexData({
-				                value: extent.toString(),/*"POLYGON((-10.723 35.523, -10.723 50.884, 30.938 50.884, 30.938 35.523, -10.723 35.523))"*/
-				                mimeType: "application/wkt"
-				            }),
-				            aoiCRS: new OpenLayers.WPSProcess.LiteralData({
-			                	value: crs/*"EPSG:4326"*/
-			            	})
-			           		/* geom: new OpenLayers.WPSProcess.ReferenceData({
-			                		 href: "http://localhost:8089/geoserver/wfs?request=GetFeature&version=1.1.0&typeName=topp:states&propertyName=STATE_NAME,PERSONS&BBOX=-75.102613,40.212597,-72.361859,41.512517,EPSG:4326",
-			                		 mimeType: "text/xml; subtype=gml/3.1.1",
-			                		 method: "GET"
-			            	}),*/
-				            /*geom: new OpenLayers.WPSProcess.ComplexData({
-				                value: "POINT(6 40)",
-				                mimeType: "text/xml; subtype=gml/3.1.1"
-				            })*/
-			        	},
-			        	outputs: [{
-			            	identifier: "result",
-			            	mimeType: "text/xml"
-			            	//asReference: true,
-			            	//type: "raw"
-			        	}]
-			    	};
-			    	
-			    	this.showMask(Ext.getCmp("riskSummaryTab"));
-			    	
-			    	var me = this;
-			    	this.wps.execute("gs:IDARiskSummary",requestObject,
-						function(response){
-							var fc = OpenLayers.Format.XML.prototype.read.apply(this, [response]);
-							var fid = OpenLayers.Ajax.getElementsByTagNameNS(fc, "http://www.opengis.net/gml","gml", "IDARiskSummaryProcess")[0];
-							
-							//me.composerList.push(fid);
-							if(!fid){
-								var wpsError=new OpenLayers.Format.WPSExecute().read(response);
-								if(wpsError && wpsError.executeResponse.status){
-										var ex = wpsError.executeResponse.status.exception.exceptionReport.exceptions[0];
-										if(ex)
-										{
-    										Ext.Msg.show({
-    											title:"SPM: " + ex.code,
-    											msg: ex.texts[0] ,
-    											buttons: Ext.Msg.OK,
-    											icon: Ext.MessageBox.ERROR
-    										});
-										}
-								}
-							} else {
-							    // TODO: is there a better way to get these data?
-							    var count_tag = OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "count");
-							    if(count_tag.length > 0){
-								Ext.getCmp("countStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "count")[0].childNodes[0].data);
-								Ext.getCmp("minStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "min")[0].childNodes[0].data);
-								Ext.getCmp("maxStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "max")[0].childNodes[0].data);
-								Ext.getCmp("sumStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "sum")[0].childNodes[0].data);
-								Ext.getCmp("avgStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "avg")[0].childNodes[0].data);
-								Ext.getCmp("stddevStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "stddev")[0].childNodes[0].data);
-								}else{
-                                    Ext.getCmp("countStatsTextField").setValue(me.noDataMsg);
-                                    Ext.getCmp("minStatsTextField").setValue(me.noDataMsg);
-                                    Ext.getCmp("maxStatsTextField").setValue(me.noDataMsg);
-                                    Ext.getCmp("sumStatsTextField").setValue(me.noDataMsg);
-                                    Ext.getCmp("avgStatsTextField").setValue(me.noDataMsg);
-                                    Ext.getCmp("stddevStatsTextField").setValue(me.noDataMsg);
-
-								}			
-							}
-							
-							me.hideMask();
-						},
-						this
-					);
-		       	}
+            	render: onRefreshButtonClicked
             }
         }
     }
