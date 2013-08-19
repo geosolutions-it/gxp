@@ -34,6 +34,7 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
     filterApplyTitle: "Filter Apply",
     filterApplyMsg: "Your filter is empty or not properly formatted!",
     filterTitle: "Filter",
+    advancedFilterTitle: "Advanced Filter",
     reloadLayerText: "Reload Layers",
     applyFilterText: "Run",
     resetText: "Reset",
@@ -213,7 +214,7 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
                         ]
                     }
                 ]
-            }
+        };
 		
 		////
 		
@@ -235,7 +236,9 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
                if(this.target.riskData.layerAttributeCoverageSetting)
 			params.layerAttributeCoverageSetting = this.target.riskData.layerAttributeCoverageSetting;
 		
-		var filterBuilder = new gxp.IDAFilterBuilder(params);
+        var filterBuilder = new gxp.IDAFilterBuilder(params);
+        var advancedFilterBuilder = new gxp.IDAAdvancedFilterBuilder(params);
+		
 		
 		var filter = new Ext.form.FieldSet({
 			title: this.filterTitle,
@@ -246,15 +249,52 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 			checkboxToggle: true,
 			items: [
 				filterBuilder
-			]
+			],
+            listeners:{
+                "beforeexpand":function(){
+                    advancedFilter.collapse();
+                }
+            }
 		});
+
+        var advancedFilter = new Ext.form.FieldSet({
+            title: this.advancedFilterTitle,
+            autoHeight: true,
+            layout:'fit',
+            autoScroll:true,
+            checkboxToggle: true,
+            items: [
+                advancedFilterBuilder
+            ]
+            // TODO: aggiungere gli eventi o un altro modo per iniziare con il tab advanced chiuso
+            /*
+            ,
+            listeners:{
+                "beforeexpand":function(){
+                    console.log("fired beforeexpand");
+                },
+                "afterlayout":function(){
+                    console.log("fired afterlayout");
+                },
+                "render":function(){
+                    console.log("fired render");
+                }
+            }
+            */
+        });
+
 		
 		var form = new Ext.form.FormPanel({
 			border: false,
 			width: 460,
 			autoScroll:true,
 			labelAlign: 'left',
-			items: [settings, spatialFilterFieldset, filter]
+			items: [
+                settings,
+                spatialFilterFieldset,
+                filter,
+                advancedFilter
+            ]
 		});
         
         var me=this;
@@ -284,28 +324,49 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 					iconCls: "icon-attribute-apply",
 					scope: this,
 					handler: function(){
+
+                        var validROI = (this.northField.isDirty() && this.southField.isDirty() && 
+                              this.eastField.isDirty() && this.westField.isDirty());
 					    
                         // This is the Basic filter
                         var f = filterBuilder.getFilter();
-                        
-                        // TODO add the Advanced filter (script) and check for it
-                        
-                        var validROI = (this.northField.isDirty() && this.southField.isDirty() && 
-                              this.eastField.isDirty() && this.westField.isDirty());
-                              
-                        console.log(this.target.mapPanel.map.getExtent());
-                        
-                        if(f && validROI){
+
+                        // This is the Advanced filter
+                        // cannot access to advancedFilter from inside the getFilter() funtion
+					    var af = (advancedFilter.collapsed) ? false : advancedFilterBuilder.getFilter();
+					    
+					                             
+                        if((af || f) && validROI){
                             var infoRun= {};
                             var now= new Date();
                             me.attributeField.setValue(me.layerNamePrefix + "_" + now.format("Y_m_d_H_i_s"));
                             var wfsGrid= me.target.tools[this.wfsGrid];
                             infoRun.inputs={};
                             infoRun.inputs=settings.getMetadata();
-                            var filterFormat = new OpenLayers.Format.CQL();
-                            var filterCQL = filterFormat.write(f);  
-                                                        
-                            infoRun.inputs.attributeFilter= filterCQL;
+                            if(af){
+
+    					        //var inputArray = advancedFilterBuilder.getFilter();
+    					        
+    					        // at this point af should be an array
+    					        
+    					        //console.log(af);  // debug
+    					        // set infoRun.inputs.inputs
+    					        infoRun.inputs.inputs = af;
+
+                                //console.log(advancedFilterBuilder.items.get(0).getComponent('script').getValue());  // debug
+                                // set infoRun.inputs.script
+                                infoRun.inputs.script = advancedFilterBuilder.items.get(0).getComponent('script').getValue();
+
+    					        
+    					    }else{
+    					        
+                                var filterFormat = new OpenLayers.Format.CQL();
+                                var filterCQL = filterFormat.write(f);  
+                                                            
+                                infoRun.inputs.attributeFilter= filterCQL;
+    					        
+    					    }
+    					    
                             
                             infoRun.inputs.AOI = new OpenLayers.Bounds(
                                                                 this.westField.getValue(), 
@@ -388,9 +449,7 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
      */
     getRARun: function(infoRun){
             var inputs= infoRun.inputs;
-            //var today = new Date();
-            // TODO: use the toISOformat() ? or remove?
-            //var currentDate = today.format("Y-m-d\\TH:i:s")+"Z";
+
             var requestObj = {
                 type: "raw",
                 inputs:{
@@ -401,12 +460,6 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
                     attributeName: new OpenLayers.WPSProcess.LiteralData({
                         value:inputs['name']
                     }),
-                    // TODO check if really used by the WPS process (maybe it shouldn't be mandatory)
-                    /*
-                    runBegin: new OpenLayers.WPSProcess.LiteralData({
-                        value:currentDate
-                    }),
-                    */
                     wsName: new OpenLayers.WPSProcess.LiteralData({
                         value:inputs.wsName || rasterAlgebra.wsName
                     }),
@@ -421,20 +474,43 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
                     }),
                     styleName: new OpenLayers.WPSProcess.LiteralData({
                         value: inputs.styleName || "layerattribute_"+inputs['color'].toLowerCase()
-                    }),
+                    })
                     /*attributeFilter: new OpenLayers.WPSProcess.ComplexData({
                             value: inputs['attributeFilter'],
                             mimeType: "text/plain; subtype=cql"
-                    })*/
+                    })
                     attributeFilter: new OpenLayers.WPSProcess.LiteralData({
                         value: inputs['attributeFilter']
-                    })
+                    })*/
                 },
                 outputs: [{
                     identifier: "result",
                     mimeType: "text/xml; subtype=wfs-collection/1.0"
                 }]
             };
+            
+            // Dumb assignment, TODO check on parameters exclusiveness
+            if(inputs['attributeFilter']){
+                requestObj.inputs.attributeFilter = new OpenLayers.WPSProcess.LiteralData({
+                        value: inputs['attributeFilter']
+                });
+            }
+            
+            if(inputs['script']){
+                requestObj.inputs.script = new OpenLayers.WPSProcess.LiteralData({
+                        value: inputs['script']
+                });
+                // TODO: optimize
+                requestObj.inputs.inputs = new Array();
+                var n = inputs['inputs'].length;
+                for(var i = 0; i<n; i++)
+                   requestObj.inputs.inputs.push(
+                       new OpenLayers.WPSProcess.LiteralData({
+                           value: inputs['inputs'][i]
+                           })
+                   );
+            }
+            
             return requestObj;
     },
     
@@ -623,7 +699,7 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
                     this.southField
                 ]
             }
-        ]
+        ];
         
         return items;
     }        
