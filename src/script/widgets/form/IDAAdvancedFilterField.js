@@ -53,9 +53,7 @@ gxp.form.IDAAdvancedFilterField = Ext.extend(Ext.form.CompositeField, {
 
     defualtCoverageSetting : null,
 
-    spmCoverageSetting : null,
-
-    layerAttributeCoverageSetting : null,
+    labelIndex : 0,
 
     initComponent : function() {
 
@@ -167,7 +165,13 @@ gxp.form.IDAAdvancedFilterField = Ext.extend(Ext.form.CompositeField, {
      * Creates a panel config containing filter parts.
      */
     createFilterItems : function() {
-        return [this.coveragesComboConfig];
+        return [
+                {
+                    xtype: "label",
+                    style: "padding-top: 0.3em; padding-right: 8px; padding-left: 4px; font-size: 12px",
+                    text: "image"+this.labelIndex+ " = "  // TODO: make configurable?
+                },
+                this.coveragesComboConfig];
     }
 });
 

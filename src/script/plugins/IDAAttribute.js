@@ -332,7 +332,7 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
                         var f = filterBuilder.getFilter();
 
                         // This is the Advanced filter
-                        // cannot access to advancedFilter from inside the getFilter() funtion
+                        // cannot access to advancedFilter from inside the getFilter() function
 					    var af = (advancedFilter.collapsed) ? false : advancedFilterBuilder.getFilter();
 					    
 					                             
@@ -344,19 +344,13 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
                             infoRun.inputs={};
                             infoRun.inputs=settings.getMetadata();
                             if(af){
-
-    					        //var inputArray = advancedFilterBuilder.getFilter();
-    					        
     					        // at this point af should be an array
-    					        
-    					        //console.log(af);  // debug
+
     					        // set infoRun.inputs.inputs
     					        infoRun.inputs.inputs = af;
 
-                                //console.log(advancedFilterBuilder.items.get(0).getComponent('script').getValue());  // debug
                                 // set infoRun.inputs.script
-                                infoRun.inputs.script = advancedFilterBuilder.items.get(0).getComponent('script').getValue();
-
+                                infoRun.inputs.script = advancedFilterBuilder.getComponent('script').getValue();
     					        
     					    }else{
     					        
@@ -366,7 +360,6 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
                                 infoRun.inputs.attributeFilter= filterCQL;
     					        
     					    }
-    					    
                             
                             infoRun.inputs.AOI = new OpenLayers.Bounds(
                                                                 this.westField.getValue(), 
@@ -450,9 +443,7 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
     getRARun: function(infoRun){
             var inputs= infoRun.inputs;
 
-            var requestObj = {
-                type: "raw",
-                inputs:{
+            var reqInputs = {
                     areaOfInterest: new OpenLayers.WPSProcess.ComplexData({
                         value: inputs.AOI.toGeometry().toString(),
                         mimeType: "application/wkt"
@@ -482,34 +473,41 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
                     attributeFilter: new OpenLayers.WPSProcess.LiteralData({
                         value: inputs['attributeFilter']
                     })*/
-                },
+            };
+                
+            // 'attributeFilter' and 'script' exclusiveness has been checked before calling this method
+            if(inputs['attributeFilter']){
+                reqInputs.attributeFilter = new OpenLayers.WPSProcess.LiteralData({
+                        value: inputs['attributeFilter']
+                });
+            }
+            
+            // A script can have multiple inputs with the same name and different values
+            if(inputs['script']){
+                
+                reqInputs.script = new OpenLayers.WPSProcess.LiteralData({
+                        value: inputs['script']
+                });
+                
+                reqInputs.inputs = new Array();
+                var n = inputs['inputs'].length;
+                for(var i = 0; i<n; i++)
+                   reqInputs.inputs.push(
+                       new OpenLayers.WPSProcess.LiteralData({
+                            value: inputs['inputs'][i]
+                           })
+                   );
+            }
+
+            // Build the actual request object
+            var requestObj = {
+                type: "raw",
+                inputs: reqInputs ,
                 outputs: [{
                     identifier: "result",
                     mimeType: "text/xml; subtype=wfs-collection/1.0"
                 }]
             };
-            
-            // Dumb assignment, TODO check on parameters exclusiveness
-            if(inputs['attributeFilter']){
-                requestObj.inputs.attributeFilter = new OpenLayers.WPSProcess.LiteralData({
-                        value: inputs['attributeFilter']
-                });
-            }
-            
-            if(inputs['script']){
-                requestObj.inputs.script = new OpenLayers.WPSProcess.LiteralData({
-                        value: inputs['script']
-                });
-                // TODO: optimize
-                requestObj.inputs.inputs = new Array();
-                var n = inputs['inputs'].length;
-                for(var i = 0; i<n; i++)
-                   requestObj.inputs.inputs.push(
-                       new OpenLayers.WPSProcess.LiteralData({
-                           value: inputs['inputs'][i]
-                           })
-                   );
-            }
             
             return requestObj;
     },

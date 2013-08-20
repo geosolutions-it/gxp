@@ -25,20 +25,7 @@ Ext.namespace("gxp");
 gxp.IDAAdvancedFilterBuilder = Ext.extend(Ext.Container, {
 
     autoWidth : false,
-    /** api: config[builderTypeNames]
-     *  ``Array``
-     *  A list of labels for that correspond to builder type constants.
-     *  These will be the option names available in the builder type combo.
-     *  Default is ``["any", "all", "none", "not all"]``.
-     */
-    builderTypeNames : ["any", "all", "none", "not all"],
 
-    /** api: config[allowedBuilderTypes]
-     *  ``Array``
-     *  List of builder type constants.  Default is
-     *  ``[ANY_OF, ALL_OF, NONE_OF]``.
-     */
-    allowedBuilderTypes : null,
 
     /** api: config[allowBlank]
      *  ``Boolean`` Do we allow blank FilterFields? It is safe to say true
@@ -54,9 +41,6 @@ gxp.IDAAdvancedFilterBuilder = Ext.extend(Ext.Container, {
      */
     cls : "gxp-filterbuilder",
 
-    /** private: property[builderType]
-     */
-    builderType : null,
 
     /** private: property[childFilterContainer]
      */
@@ -64,21 +48,18 @@ gxp.IDAAdvancedFilterBuilder = Ext.extend(Ext.Container, {
 
     layout : 'form',
     /** Start i18n */
-    addConditionText : "add condition",
-    removeConditionText : "remove condition",
+    addImageText : "add input image",
+    removeImageText : "remove input image",
+    emptyScriptText: "Write your script here",
     /** End i18n */
 
     initComponent : function() {
 
-        this.items = [{
-            xtype : "container",
-            //autoScroll: true,
-            layout : "form",
-            defaults : {
+            this.defaults = {
                 anchor : "100%"
             },
-            hideLabels : true,
-            items : [
+            this.hideLabels = true,
+            this.items = [
                 this.createChildFiltersPanel(), {
                     xtype : "toolbar",
                     items : this.createToolBar()
@@ -86,12 +67,13 @@ gxp.IDAAdvancedFilterBuilder = Ext.extend(Ext.Container, {
                 {
                     xtype : "textarea",
                     itemId : "script",
-                    //width: "100%"
-                    emptyText: "Write your script here"  // TODO: make this i18n
+                    width : 420,  // IE width fix
+                    height : 200,
+                    emptyText: this.emptyScriptText
                 }
             ]
 
-        }];
+        ;
 
         this.addEvents(
         /**
@@ -111,14 +93,14 @@ gxp.IDAAdvancedFilterBuilder = Ext.extend(Ext.Container, {
      */
     createToolBar : function() {
         var bar = [{
-            text : this.addConditionText,
+            text : this.addImageText,
             iconCls : "add",
             handler : function() {
                 this.addCondition();
             },
             scope : this
         },{
-            text : this.removeConditionText,
+            text : this.removeImageText,
             iconCls : "delete",
             handler : function() {
                 this.removeCondition();
@@ -146,6 +128,7 @@ gxp.IDAAdvancedFilterBuilder = Ext.extend(Ext.Container, {
             columnWidth : 1,
             attributes : this.attributes,
             coverages : this.coverages,
+            labelIndex : this.childFilterContainer.items.length + 1,
             listeners : {
                 change : function() {
                     this.fireEvent("change", this);
@@ -153,16 +136,8 @@ gxp.IDAAdvancedFilterBuilder = Ext.extend(Ext.Container, {
                 scope : this
             }
         };
-        var containerCfg = Ext.applyIf({
-            xtype : "container",
-            layout : "form",
-            hideLabels : true,
-            items : fieldCfg
-        }, fieldCfg);
-        
-        var newChild = this.newRow(containerCfg, this.childFilterContainer.items.length + 1 );
 
-        this.childFilterContainer.add(newChild);
+        this.childFilterContainer.add(fieldCfg);
         this.childFilterContainer.doLayout();
     },
 
@@ -189,16 +164,16 @@ gxp.IDAAdvancedFilterBuilder = Ext.extend(Ext.Container, {
         var items = this.childFilterContainer.items;
         var i = items.getCount()-1;
         var ret = [];
-        // TODO: improve this boxing
         while(i>=0){
             var item = items.get(i--);
-            if(item.items.get(1).items.get(0).items.get(0).value)
-                ret.push(item.items.get(1).items.get(0).items.get(0).value);
+            // item.items referes to Fields inside the CompositeField
+            // in this case there is only a ComboBox
+            if(item.items.get(0).value)
+                ret.push(item.items.get(0).value);
             else{
                 i=-1;
                 ret = null;
             }
-            //console.log(item.items.get(1).items.get(0).items.get(0).value);
         };
         return ret;
     },
@@ -212,7 +187,10 @@ gxp.IDAAdvancedFilterBuilder = Ext.extend(Ext.Container, {
      *  a logical filter.
      */
     createChildFiltersPanel : function() {
-        this.childFilterContainer = new Ext.Container();
+        this.childFilterContainer = new Ext.Container({
+            layout : "form",
+            hideLabels : true
+        });
         var fieldCfg = {
             xtype : "gxp_idaadvancedfilterfield",
             allowBlank : this.allowBlank,
@@ -224,6 +202,7 @@ gxp.IDAAdvancedFilterBuilder = Ext.extend(Ext.Container, {
             columnWidth : 1,
             attributes : this.attributes,
             coverages : this.coverages,
+            labelIndex : 1,
             listeners : {
                 change : function() {
                     this.fireEvent("change", this);
@@ -231,42 +210,12 @@ gxp.IDAAdvancedFilterBuilder = Ext.extend(Ext.Container, {
                 scope : this
             }
         };
-        var containerCfg = Ext.applyIf({
-            xtype : "container",
-            layout : "form",
-            hideLabels : true,
-            items : fieldCfg
-        }, fieldCfg);
-
-        this.childFilterContainer.add(this.newRow(containerCfg, 1 ));
+        
+        this.childFilterContainer.add(fieldCfg);
 
         return this.childFilterContainer;
-    },
-
-    /** private: method[newRow]
-     *  :return: ``Ext.Container`` A container that serves as a row in a child
-     *  filters panel.
-     *
-     *  Generate a "row" for the child filters panel.  This couples another
-     *  filter panel or filter builder with a component that allows for
-     *  condition removal.
-     */
-    newRow : function(filterContainer, index) {
-        if(!index)
-            index = "";
-        var ct = new Ext.Container({
-            layout : "column",
-            items : [
-                {
-                    xtype: "label",
-                    style: "padding-top: 0.3em; padding-right: 8px; padding-left: 4px; font-size: 12px",
-                    text: "image"+index+ " = "
-                },
-                filterContainer
-            ]
-        });
-        return ct;
     }
+
 });
 
 /** api: xtype = gxp_idaadvancedfilterbuilder */
