@@ -265,22 +265,32 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
             checkboxToggle: true,
             items: [
                 advancedFilterBuilder
-            ]
-            // TODO: aggiungere gli eventi o un altro modo per iniziare con il tab advanced chiuso
-            /*
+            ]            
             ,
             listeners:{
                 "beforeexpand":function(){
-                    console.log("fired beforeexpand");
+//                    console.log("fired beforeexpand");
+                    filter.collapse();
                 },
-                "afterlayout":function(){
-                    console.log("fired afterlayout");
+                "afterlayout":{
+                    fn: function(p){
+                        p.disable();
+                    },
+                    single: true // important, as many layouts can occur
                 },
-                "render":function(){
-                    console.log("fired render");
+                "render":function(cmp){
+//                    console.log("fired render");
+                    // mask while waiting
+                    var mask = new Ext.LoadMask(cmp.getEl());
+                    mask.show();
+                    setTimeout(function(){
+                        cmp.collapse();
+                        mask.hide();
+                        cmp.enable();
+                    }, 2000);  // 2 second to render
                 }
             }
-            */
+            
         });
 
 		
