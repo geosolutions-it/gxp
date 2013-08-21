@@ -240,39 +240,32 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
         var advancedFilterBuilder = new gxp.IDAAdvancedFilterBuilder(params);
 		
 		
-		var filter = new Ext.Panel({
+		var filter = new Ext.form.FieldSet({
 			title: this.filterTitle,
 			autoHeight: true,
 			maxNumberOfGroups: 2,
 			layout:'fit',
-			bodyStyle: "padding: 8px",
-            autoScroll:true,
-			//checkboxToggle: true,
+			autoScroll:true,
+			checkboxToggle: true,
 			items: [
 				filterBuilder
 			],
             listeners:{
-                "show":function(){
-                    this.doLayout();
-                }
-                /*
                 "beforeexpand":function(){
                     advancedFilter.collapse();
-                }*/
+                }
             }
 		});
 
-        var advancedFilter = new Ext.Panel({
+        var advancedFilter = new Ext.form.FieldSet({
             title: this.advancedFilterTitle,
             autoHeight: true,
             layout:'fit',
-            bodyStyle: "padding: 8px",
             autoScroll:true,
-            //checkboxToggle: true,
+            checkboxToggle: true,
             items: [
                 advancedFilterBuilder
             ]            
-            /*
             ,
             listeners:{
                 "beforeexpand":function(){
@@ -296,7 +289,7 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
                         cmp.enable();
                     }, 2000);  // 2 second to render
                 }
-            }*/
+            }
             
         });
 
@@ -309,17 +302,8 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 			items: [
                 settings,
                 spatialFilterFieldset,
-                {
-                    xtype: 'tabpanel', 
-                    autoScroll: false,
-                    enableTabScroll:true,
-                    plain : true,
-                    activeTab : 0,
-                    items:[
-                        filter,
-                        advancedFilter
-                    ]
-                }
+                filter,
+                advancedFilter
             ]
 		});
         
@@ -359,7 +343,7 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 
                         // This is the Advanced filter
                         // cannot access to advancedFilter from inside the getFilter() function
-					    var af = (advancedFilter.hidden) ?  false : advancedFilterBuilder.getFilter() ;
+					    var af = (advancedFilter.collapsed) ? false : advancedFilterBuilder.getFilter();
 					    
 					                             
                         if((af || f) && validROI){
@@ -443,17 +427,7 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 						filterBuilder = new gxp.IDAFilterBuilder(this.defaultBuilder);
 						
 						filter.add(filterBuilder);
-						if(filter.hidden){
-						    filter.on(  "show",
-                                        function(){
-                                            this.doLayout();
-			                            },
-			                            filter,
-			                            {single:true}
-			                            );
-						}else{
-						    filter.doLayout();
-						}
+						filter.doLayout();
 						
 						form.getForm().reset();
 						filter.maxNumberOfGroups=2;

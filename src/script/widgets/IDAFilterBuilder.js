@@ -90,8 +90,6 @@ gxp.IDAFilterBuilder = Ext.extend(Ext.Container, {
 	
 	maxNumberOfConditions: 2,
 	layout:'form',
-	
-	parent: null,
 	/** Start i18n */
     addConditionText: "add condition",
     addGroupText: "add group",
@@ -139,7 +137,7 @@ gxp.IDAFilterBuilder = Ext.extend(Ext.Container, {
             }]
         
         }];
-                
+        
         this.addEvents(
             /**
              * Event: change
@@ -370,9 +368,8 @@ gxp.IDAFilterBuilder = Ext.extend(Ext.Container, {
     addCondition: function(group) {
         var filter, type;
         if(group) {
-			//var parent = this.findParentByType("fieldset");
-			var parent = this.ownerCt;
-            
+			var parent = this.findParentByType("fieldset");
+			
 			if(parent.maxNumberOfGroups > 0){
 				type = "gxp_idafilterbuilder";
 				filter = this.wrapFilter(this.createDefaultFilter());
@@ -442,7 +439,7 @@ gxp.IDAFilterBuilder = Ext.extend(Ext.Container, {
 		
 		field = item.findByType("gxp_idafilterbuilder");
 		for(var j=0; j<field.length; j++){
-			var p = field[j].ownerCt;
+			var p = field[j].findParentByType("fieldset");
 			p.maxNumberOfGroups++;
 		}
 		
