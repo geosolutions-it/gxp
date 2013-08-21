@@ -431,20 +431,20 @@ gxp.IDAFilterBuilder = Ext.extend(Ext.Container, {
      *  or group of conditions.
      */
     removeCondition: function(item, filter) {
-		var field = item.findByType("gxp_idafilterfield");
-		for(var i=0; i<field.length; i++){
-			var p = field[i].findParentByType("gxp_idafilterbuilder");
-			p.maxNumberOfConditions++;
-		}
-		
-		field = item.findByType("gxp_idafilterbuilder");
-		for(var j=0; j<field.length; j++){
-			var p = field[j].findParentByType("fieldset");
-			p.maxNumberOfGroups++;
-		}
-		
         var parent = this.filter.filters[0].filters;
         if(parent.length > 1) {			
+    		var field = item.findByType("gxp_idafilterfield");
+    		for(var i=0; i<field.length; i++){
+    			var p = field[i].findParentByType("gxp_idafilterbuilder");
+    			p.maxNumberOfConditions++;
+    		}
+    		
+    		field = item.findByType("gxp_idafilterbuilder");
+    		for(var j=0; j<field.length; j++){
+    			var p = field[j].findParentByType("fieldset");
+    			p.maxNumberOfGroups++;
+    		}
+		
             parent.remove(filter);
             this.childFilterContainer.remove(item, true);
         }
