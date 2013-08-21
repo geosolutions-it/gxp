@@ -269,7 +269,6 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
             ,
             listeners:{
                 "beforeexpand":function(){
-//                    console.log("fired beforeexpand");
                     filter.collapse();
                 },
                 "afterlayout":{
@@ -279,7 +278,6 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
                     single: true // important, as many layouts can occur
                 },
                 "render":function(cmp){
-//                    console.log("fired render");
                     // mask while waiting
                     var mask = new Ext.LoadMask(cmp.getEl());
                     mask.show();
@@ -287,7 +285,7 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
                         cmp.collapse();
                         mask.hide();
                         cmp.enable();
-                    }, 2000);  // 2 second to render
+                    }, 1000);  // 1 second to render
                 }
             }
             
@@ -651,14 +649,6 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
                           selectAOI.activate();
                       }else{
                           selectAOI.deactivate();
-                            /*
-                          var extentArray = this.target.mapPanel.map.getExtent().toArray();
-                          
-                          this.westField.setValue(extentArray[0]);
-                          this.southField.setValue(extentArray[1]);
-                          this.eastField.setValue(extentArray[2]);
-                          this.northField.setValue(extentArray[3]); 
-                          */
                       }
                   }
               }
