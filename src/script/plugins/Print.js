@@ -186,6 +186,8 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                     } else {
                         if(layer.getVisibility()){
                             notSupported.push(layer.name);
+                        } else if(layer.name === "spm_source" || layer.name === "AOI") {
+                            notSupported.push(layer.name);
                         }
                     }
                 });
