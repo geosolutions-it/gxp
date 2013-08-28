@@ -98,7 +98,7 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
     cacheText: "Cache",
     cacheFieldText: "Use cached version",
     stylesText: "Styles",
-    idaRasterRiskSummaryText: "Risk Summary Stats",
+    idaRasterRiskSummaryText: "Statistics",
     idaRasterRiskSummaryInfoText: "Current Viewport Raster Statistics",
     refreshText: "Refresh",
     
@@ -375,6 +375,7 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
     /** private: createRasterRiskSummaryPanel
      *  Creates the Raster WPS Risk Summary panel.
      */
+    area:	null,
 	count: 	null,
 	min: 	null,
 	max: 	null,
@@ -388,6 +389,7 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
     	//var extent 	= this.map.getExtent().toGeometry();
     	//var crs    	= this.map.getProjection();
 
+		this.area		= " - ";
 		this.count		= " - ";
 		this.min		= " - ";
 		this.max		= " - ";
@@ -400,6 +402,19 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
                     
                     var extent  = this.map.getExtent().toGeometry();
                     var crs     = this.map.getProjection();
+                    var projection = this.map.getProjectionObject();
+                    
+					var poly = new OpenLayers.Geometry.MultiPolygon(extent);
+					var area = poly.getGeodesicArea( projection );
+					var inPerDisplayUnit = OpenLayers.INCHES_PER_UNIT["km"];
+			        if(inPerDisplayUnit) {
+			            var inPerMapUnit = OpenLayers.INCHES_PER_UNIT["m"];
+			            area *= Math.pow((inPerMapUnit / inPerDisplayUnit), 2);
+			        }
+			        
+			        	// nmi -> area = (area.toFixed(2) * 1000 * 0.000539956803);
+			        	area = Math.round(area*100)/100; 
+                    
                     var requestObject={
                         /* storeExecuteResponse: false,
                            lineage:  false,
@@ -461,13 +476,15 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
                                 // TODO: is there a better way to get these data?
                                 var count_tag = OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "count");
                                 if(count_tag.length > 0){
-                                Ext.getCmp("countStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "count")[0].childNodes[0].data);
-                                Ext.getCmp("minStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "min")[0].childNodes[0].data);
-                                Ext.getCmp("maxStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "max")[0].childNodes[0].data);
-                                Ext.getCmp("sumStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "sum")[0].childNodes[0].data);
-                                Ext.getCmp("avgStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "avg")[0].childNodes[0].data);
-                                Ext.getCmp("stddevStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "stddev")[0].childNodes[0].data);
+                                	Ext.getCmp("areaStatsTextField").setValue(area + " km2");
+                                	Ext.getCmp("countStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "count")[0].childNodes[0].data);
+                                	Ext.getCmp("minStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "min")[0].childNodes[0].data);
+                                	Ext.getCmp("maxStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "max")[0].childNodes[0].data);
+                                	Ext.getCmp("sumStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "sum")[0].childNodes[0].data);
+                                	Ext.getCmp("avgStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "avg")[0].childNodes[0].data);
+                                	Ext.getCmp("stddevStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "stddev")[0].childNodes[0].data);
                                 }else{
+                                	Ext.getCmp("areaStatsTextField").setValue(me.noDataMsg);
                                     Ext.getCmp("countStatsTextField").setValue(me.noDataMsg);
                                     Ext.getCmp("minStatsTextField").setValue(me.noDataMsg);
                                     Ext.getCmp("maxStatsTextField").setValue(me.noDataMsg);
@@ -493,6 +510,15 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
                 xtype: "label",
             	text: this.idaRasterRiskSummaryInfoText,
             	cls: "riskSummaryInfoText"
+            },
+            {
+                xtype: "textfield",
+                // ref: "../area",
+                id: "areaStatsTextField",
+                fieldLabel: "area",
+                anchor: "99%",
+                value: this.area,
+                readOnly: true
             },
             {
                 xtype: "textfield",

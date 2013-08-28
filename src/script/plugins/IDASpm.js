@@ -112,7 +112,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 	qualityMedium: "medium",
 	qualityHigh: "high",*/
 	
-	maxRangeText: "Max Range",
+	maxRangeText: "Max Range (km)",
 	maxRangeMin: 0,
 	maxRangeMax: 1000,	
 	
