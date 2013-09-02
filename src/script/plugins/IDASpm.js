@@ -78,23 +78,14 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 	
 	tlModelLabelText: "TL Model",
 	tlModelEmptyText: "TL Model Selection",
-	tlModelStore: [
-		"IsoVelocity",
-		"Bellhop",
-		"RAM"
-	],
+	tlModelStore: [],
 	/*tlModelIsoVelocity: "IsoVelocity",
 	tlModelBellhop: "Bellhop",
 	tlModelRAM: "RAM",*/
 	
 	bottomTypeEmptyText: "Bottom type Selection",
 	bottomTypeLabelText: "Bottom Type",
-	bottomTypeStore: [
-		"Silt",
-		"Gravel",
-		"Limestone",
-		"Basalt"
-	],
+	bottomTypeStore: [],
 	
 	/*bottomTypeSilt: "Silt",
 	bottomTypeGravel: "Gravel",
@@ -103,11 +94,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 	
 	qualityEmptyText: "Quality Selection",
 	qualityLabelText: "Quality",
-	qualityStore: [
-		"low",
-		"medium",
-		"high"
-	],	
+	qualityStore: [],	
 	/*qualityLow: "low",
 	qualityMedium: "medium",
 	qualityHigh: "high",*/
