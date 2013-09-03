@@ -205,22 +205,25 @@ gxp.ScaleOverlay = Ext.extend(Ext.Panel, {
                 div: this.scaleLinePanel.getEl().dom
             });*/
 
-            var scalebar = new OpenLayers.Control.ScaleBar({
-                geodesic: true,
-                displaySystem:     topOutUnits ? (topOutUnits == "mi" || topOutUnits == "nmi" ? "nautical" : "metric") : this.displaySystem,
-				divisions:         divisions ? divisions : this.divisions,
-				subdivisions:      subdivisions ? subdivisions : this.subdivisions,
-                showMinorMeasures: showMinorMeasures ? showMinorMeasures : this.showMinorMeasures,
-                singleLine:        singleLine ? singleLine : this.singleLine,
-                abbreviateLabel:   abbreviateLabel ? abbreviateLabel : this.abbreviateLabel
-                //div: this.scaleLinePanel.getEl().dom
-            });
+			if (topOutUnits != "hide") {
+	            var scalebar = new OpenLayers.Control.ScaleBar({
+	                geodesic: true,
+	                displaySystem:     topOutUnits ? (topOutUnits == "mi" || topOutUnits == "nmi" ? "nautical" : "metric") : this.displaySystem,
+					divisions:         divisions ? divisions : this.divisions,
+					subdivisions:      subdivisions ? subdivisions : this.subdivisions,
+	                showMinorMeasures: showMinorMeasures ? showMinorMeasures : this.showMinorMeasures,
+	                singleLine:        singleLine ? singleLine : this.singleLine,
+	                abbreviateLabel:   abbreviateLabel ? abbreviateLabel : this.abbreviateLabel
+	                //div: this.scaleLinePanel.getEl().dom
+	            });
+
+            	this.map.addControl(scalebar);
+            	scalebar.activate();
+            }
             this.map.addControl(mousePosition);
             //this.map.addControl(scaleLine);
-            this.map.addControl(scalebar);
             mousePosition.activate();
             //scaleLine.activate();
-            scalebar.activate();
         }, this);
 
         this.add(this.scaleLinePanel);
@@ -298,7 +301,7 @@ gxp.ScaleOverlay = Ext.extend(Ext.Panel, {
             valueField: 'unitsValue',           
             store: new Ext.data.SimpleStore({
                 fields: ['unitsValue', 'unitsName'],
-                data: [['km;m;ft;mi','Km'],['nmi;nmi;m;km','Nmi']]
+                data: [['km;m;ft;mi','Km'],['nmi;nmi;m;km','Nmi'],['hide;hide;hide;hide','Hide']]
             }),
             width: 90
         });
