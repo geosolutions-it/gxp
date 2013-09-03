@@ -337,3 +337,8 @@ div.map-overlay div.overlay-element {
 .x-btn .gxp-icon-maritim-link {
     background-image: url(img/silk/world_link.png);
 }
+
+/* gxp-icon-mouse-map */
+.x-btn .gxp-icon-mouse-map, .x-menu-item .gxp-icon-mouse-map, .x-tree-node .gxp-icon-mouse-map {
+    background-image: url(img/map_cursor.png) !important;
+}
