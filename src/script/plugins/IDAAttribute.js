@@ -51,7 +51,7 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
 		'ALL',
 		'UNCLASSIFIED',
 		'RESTRICTED',
-		'CONFIDENTAL',
+		'CONFIDENTIAL',
 		'SECRET',
 		'TOPSECRET'						
 	],
@@ -96,7 +96,19 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
     setAoiTooltip: "Enable the SetBox control to draw a ROI (BBOX) on the map",
     queryByLocationText: "Region Of Interest",
 
-
+	/**
+     * Property: selectStyle
+     * {Object} Configuration of OpenLayer.Style. 
+     *    used to highlight the BBOX
+     *     
+     */
+    selectStyle:{
+        fillColor: "#FF0000",
+        strokeColor: "#FF0000",
+        fillOpacity:0,
+        strokeWidth:2,
+        strokeOpacity:1
+    },
     
     /** private: method[constructor]
      *  :arg config: ``Object``
@@ -496,10 +508,9 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
                 reqInputs.script = new OpenLayers.WPSProcess.LiteralData({
                         value: inputs['script']
                 });
-                
                 reqInputs.inputs = new Array();
                 var n = inputs['inputs'].length;
-                for(var i = 0; i<n; i++)
+                for(var i = n-1; i>=0; i--)
                    reqInputs.inputs.push(
                        new OpenLayers.WPSProcess.LiteralData({
                             value: inputs['inputs'][i]
@@ -599,8 +610,9 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
         //
         // Geographical Filter Field Set
         //        
-        var selectAOI = new OpenLayers.Control.SetBox({      
-            map: map,    
+        var selectAOI = new OpenLayers.Control.SetBox({
+            map: map,
+            aoiStyle: new OpenLayers.StyleMap(this.selectStyle),
             onChangeAOI: function(){
                 var aoiArray = this.currentAOI.split(',');
                 

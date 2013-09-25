@@ -375,13 +375,14 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
     /** private: createRasterRiskSummaryPanel
      *  Creates the Raster WPS Risk Summary panel.
      */
-    area:	null,
-	count: 	null,
-	min: 	null,
-	max: 	null,
-	sum: 	null,
-	avg: 	null,
-	stddev: null,
+    area:	  null,
+	count: 	  null,
+	min: 	  null,
+	max: 	  null,
+	sum: 	  null,
+	avg: 	  null,
+	stddev:   null,
+	riskarea: null,
     createRasterRiskSummaryPanel: function() {
         //var record 	= this.layerRecord;
         //var layer  	= record.getLayer();
@@ -483,6 +484,7 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
                                 	Ext.getCmp("sumStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "sum")[0].childNodes[0].data);
                                 	Ext.getCmp("avgStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "avg")[0].childNodes[0].data);
                                 	Ext.getCmp("stddevStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "stddev")[0].childNodes[0].data);
+                                    Ext.getCmp("riskareaStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "riskarea")[0].childNodes[0].data);
                                 }else{
                                 	Ext.getCmp("areaStatsTextField").setValue(me.noDataMsg);
                                     Ext.getCmp("countStatsTextField").setValue(me.noDataMsg);
@@ -491,7 +493,7 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
                                     Ext.getCmp("sumStatsTextField").setValue(me.noDataMsg);
                                     Ext.getCmp("avgStatsTextField").setValue(me.noDataMsg);
                                     Ext.getCmp("stddevStatsTextField").setValue(me.noDataMsg);
-
+                                    Ext.getCmp("riskareaStatsTextField").setValue(me.noDataMsg);
                                 }           
                             }
                             
@@ -572,6 +574,15 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
                 fieldLabel: "stddev",
                 anchor: "99%",
                 value: this.stddev,
+                readOnly: true
+            },
+            {
+                xtype: "textfield",
+                // ref: "../riskarea",
+                id: "riskareaStatsTextField",
+                fieldLabel: "riskarea",
+                anchor: "99%",
+                value: this.riskarea,
                 readOnly: true
             }],
             bbar:[{

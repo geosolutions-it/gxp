@@ -66,7 +66,9 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 	svpFileImportErrorTitle: "SVP Upload Error.",
 	svpFileImportErrorMsg: "SVP file is not correctly loaded.",
 	xmlRunListImportWinTitle: "Import Runs from XML",
+	xmlRunListExportWinTitle: "Export Runs as XML",
 	importRunButton: "Import Runs",
+	exportRunButton: "Export Runs",
     errorDoubleLayerNameMsg: "A model with this name already exists",
     errorLayerNameMsg: "The model name can not begin with a digit </br>, can not contain blank spaces </br> and can not contain characters '*' ,'%', '-'",
 	composerOperationLabelText: "Operation",
@@ -685,7 +687,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 											});
 										}
 								    }
-									 
+
 									if(composer){
 									   me.composerList.push(wsName+":"+layerName);    
 									}
@@ -704,6 +706,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 										   var now = new Date();
 										   var idaComposerRun=idaAttribute.getRARun({
 											   inputs:{
+											   	   AOI: map.getExtent(),
 												   name: "batch_"+ now.format("Y_m_d_H_i"),
 												   classify: "NONE",
 												   wsName: spm.wsName,
@@ -712,13 +715,13 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 											   }
 										   });
 										    wpsRasterAlgebra.execute(idaAttribute.wpsProcess,idaComposerRun,function(response){
-											me.composerList= null;
-											delete me.composerList;
-											me.composerList= new Array();   
-											wfsRAGrid.refresh();
-											var fc = OpenLayers.Format.XML.prototype.read.apply(this, [response]);
-											var fid = fc.getElementsByTagName("gml:ftUUID")[0];  
-											if(!fid){
+											  me.composerList= null;
+											  delete me.composerList;
+											  me.composerList= new Array();   
+											  wfsRAGrid.refresh();
+											  var fc = OpenLayers.Format.XML.prototype.read.apply(this, [response]);
+											  var fid = fc.getElementsByTagName("gml:ftUUID")[0];  
+											  if(!fid){
 												var wpsError=new OpenLayers.Format.WPSExecute().read(response);
 													if(wpsError){
 														var ex=wpsError.executeResponse.status.exception.exceptionReport.exceptions[0];
@@ -974,7 +977,9 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 								 items: [
 								  this.runListView
 								 ]
-						    }, {
+						    }/*,this.target.tools[this.spmListUploader].getPanel({submitButton: false})*/
+						],
+						buttons: [{
 								xtype: 'button',
 								iconCls:'icon-attribute-add',
 								text: me.importRunButton,
@@ -987,8 +992,61 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 									});
 								},
 								scope:this
-							}/*,this.target.tools[this.spmListUploader].getPanel({submitButton: false})*/
-						]
+							  }, {
+								xtype: 'button',
+								iconCls:'icon-attribute-export',
+								text: me.exportRunButton,
+								tooltip: me.xmlRunListExportWinTitle,
+								handler: function(){
+									if(me.runList.length > 0) {
+									    var runListXML = new OpenLayers.Format.RunList().write(me.runList)
+										var pattern=/(.+:\/\/)?([^\/]+)(\/.*)*/i;
+								        var mHost=pattern.exec(app.xmlJsonTranslateService);
+
+								        var mUrl = app.xmlJsonTranslateService + "HTTPWebGISFileDownload";
+
+								        OpenLayers.Request.POST({
+								            url: mHost[2] == location.host ? mUrl : proxy + mUrl,
+								            params: {"filename": "runList.xml"}, 
+								            data: new OpenLayers.Format.XML().write(runListXML),
+								            callback: function(request) {
+								                if(request.status == 200){
+								                    //		
+								                    //delete other iframes appended
+								                    //
+								                    if(document.getElementById("downloadIFrame")) {
+								                      document.body.removeChild( document.getElementById("downloadIFrame") ); 
+								                    }
+								                    //
+								                    //Create an hidden iframe for forced download
+								                    //
+								                    var elemIF = document.createElement("iframe"); 
+								                    elemIF.setAttribute("id","downloadIFrame");
+								                    elemIF.src = /*proxy + encodeURIComponent(*/app.xmlJsonTranslateService + "HTTPWebGISFileDownload?file="+request.responseText/*)*/; 
+								                    elemIF.style.display = "none"; 
+								                    document.body.appendChild(elemIF); 
+								                }else{
+								                    Ext.Msg.show({
+								                       title:'Export Runs Error',
+								                       msg: request.statusText,
+								                       buttons: Ext.Msg.OK,
+								                       icon: Ext.MessageBox.ERROR
+								                    });
+								                }
+								            },
+								            scope: this
+								        });
+									} else {
+										Ext.Msg.show({
+											title: 'Export Runs Error',
+											msg: 'Empty Run List',
+											buttons: Ext.Msg.OK,
+											icon: Ext.MessageBox.ERROR
+									    });
+									}
+								},
+								scope:this
+							 }]
 					}                         
 			]
 		});
@@ -1005,30 +1063,32 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 		   
 			me.target.tools[me.spmListUploader].closeWindowPanel();
 			me.showMsgTooltip(me.spmXMLImportMsg);
-		});  
+		  }
+		);  
              
         this.target.tools[this.svpUploader].setSuccessCallback(
-             function(response){
-                 me.target.tools[me.svpUploader].closeWindowPanel();
-                 if(response.result.code){
-                    me.svpFile=response.result.code;
-                    me.showMsgTooltip(me.svpImportMsg);
-                    me.seasonCombo.setValue(me.userInput);
-					 
-					me.vplonLatFieldSet.enable();
-					me.vplonLatFieldSet.expand();
-                 }else{
-                    me.seasonCombo.setValue(me.springText);
-					me.vplonLatFieldSet.collapse();
-					me.vplonLatFieldSet.disable();
-                    Ext.Msg.show({
-                      title: this.svpFileImportErrorTitle,
-                      msg: this.svpFileImportErrorMsg + this.svpFileMissingMsg,
-                      buttons: Ext.Msg.OK,
-                      icon: Ext.MessageBox.ERROR
-                    }); 
-                 }
-	    });   
+         function(response){
+             me.target.tools[me.svpUploader].closeWindowPanel();
+             if(response.result.code){
+                me.svpFile=response.result.code;
+                me.showMsgTooltip(me.svpImportMsg);
+                me.seasonCombo.setValue(me.userInput);
+				 
+				me.vplonLatFieldSet.enable();
+				me.vplonLatFieldSet.expand();
+             }else{
+                me.seasonCombo.setValue(me.springText);
+				me.vplonLatFieldSet.collapse();
+				me.vplonLatFieldSet.disable();
+                Ext.Msg.show({
+                  title: this.svpFileImportErrorTitle,
+                  msg: this.svpFileImportErrorMsg + this.svpFileMissingMsg,
+                  buttons: Ext.Msg.OK,
+                  icon: Ext.MessageBox.ERROR
+                }); 
+             }
+	      }
+	    );   
              
         this.target.tools[this.svpUploader].setFailureCallback(
             function(error){
@@ -1049,7 +1109,7 @@ gxp.plugins.IDASpm = Ext.extend(gxp.plugins.Tool, {
 			autoScroll:false,
             title: this.title,
 			items: [
-				this.spmCreateForm
+			  this.spmCreateForm
 			]
         });
         

@@ -158,6 +158,20 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
     tlModelLabel: "TL Model",
     // End i18n.
     
+    /**
+     * Property: selectStyle
+     * {Object} Configuration of OpenLayer.Style. 
+     *    used to highlight the BBOX
+     *     
+     */
+    selectStyle:{
+        fillColor: "#FF0000",
+        strokeColor: "#FF0000",
+        fillOpacity:0,
+        strokeWidth:2,
+        strokeOpacity:1
+    },
+    
     spatialFilterOptions: {
             lonMax: 90,
             lonMin: -90,
@@ -891,12 +905,13 @@ gxp.plugins.IDAQueryForm = Ext.extend(gxp.plugins.Tool, {
               allowDecimals: true,
               hideLabel : false                    
         });
-                  
+
         //
         // Geographical Filter Field Set
         //        
         var selectAOI = new OpenLayers.Control.SetBox({      
-            map: map,    
+            map: map,
+            aoiStyle: new OpenLayers.StyleMap(this.selectStyle),
             onChangeAOI: function(){
                 var aoiArray = this.currentAOI.split(',');
                 

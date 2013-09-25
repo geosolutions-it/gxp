@@ -29,6 +29,10 @@
 	background-image: url(img/silk/add.png) !important;
 }
 
+.icon-attribute-export{
+	background-image: url(img/geosilk/disk.png) !important;
+}
+
 .spm-create-button {
 	background-image: url(img/geosilk/cursor.png) !important;
 }

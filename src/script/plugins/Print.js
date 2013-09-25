@@ -184,9 +184,14 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                     if (isSupported(layer)) {
                         supported.push(layer);
                     } else {
-                        if(layer.getVisibility()){
-                            notSupported.push(layer.name);
-                        } else if(layer.name === "spm_source" || layer.name === "AOI") {
+                        if(layer.getVisibility()) {
+                        	if (layer.name === "AOI") {
+                        		layer.setVisibility(true);
+                        		supported.push(layer);
+                        	} else {
+                        		notSupported.push(layer.name);
+                        	}
+                        } else if(layer.name === "spm_source" /*|| layer.name === "AOI"*/) {
                             notSupported.push(layer.name);
                         }
                     }
@@ -197,7 +202,8 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
             function isSupported(layer) {
                 return (
                     layer instanceof OpenLayers.Layer.WMS ||
-                    layer instanceof OpenLayers.Layer.OSM 
+                    layer instanceof OpenLayers.Layer.OSM ||
+                    layer instanceof OpenLayers.Layer.Vector
                     //|| layer instanceof OpenLayers.Layer.Google
                 );
             }
