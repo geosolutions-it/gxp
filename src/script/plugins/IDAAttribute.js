@@ -1,4 +1,3 @@
-
 /**
  * @requires plugins/Tool.js
  */
@@ -380,7 +379,6 @@ gxp.plugins.IDAAttribute = Ext.extend(gxp.plugins.Tool, {
                                 infoRun.inputs.attributeFilter= filterCQL;
     					        
     					    }
-                            
                             infoRun.inputs.AOI = new OpenLayers.Bounds(
                                                                 this.westField.getValue(), 
                                                                 this.southField.getValue(), 
