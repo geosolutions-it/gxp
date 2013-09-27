@@ -484,7 +484,8 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
                                 	Ext.getCmp("sumStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "sum")[0].childNodes[0].data);
                                 	Ext.getCmp("avgStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "avg")[0].childNodes[0].data);
                                 	Ext.getCmp("stddevStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "stddev")[0].childNodes[0].data);
-                                    Ext.getCmp("riskareaStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "riskarea")[0].childNodes[0].data);
+                                	if (OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "riskarea")[0])
+                                    	Ext.getCmp("riskareaStatsTextField").setValue(OpenLayers.Ajax.getElementsByTagNameNS(fid, "http://www.opengis.net/gml","gml", "riskarea")[0].childNodes[0].data);
                                 }else{
                                 	Ext.getCmp("areaStatsTextField").setValue(me.noDataMsg);
                                     Ext.getCmp("countStatsTextField").setValue(me.noDataMsg);
