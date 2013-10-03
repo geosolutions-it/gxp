@@ -182,7 +182,8 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                 mapPanel.layers.each(function(record) {
                     var layer = record.getLayer();
                     if (isSupported(layer)) {
-                        supported.push(layer);
+                    	if (!(layer.name === "Graticule"))
+                        	supported.push(layer);
                     } else {
                         if(layer.getVisibility()) {
                         	if (layer.name === "AOI") {
@@ -219,6 +220,33 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                             autoHeight: true,
                             mapTitle: this.target.about && this.target.about["title"],
                             comment: this.target.about && this.target.about["abstract"],
+                            listeners: {
+                            	scope: this,
+                            	"afterrender": function() {
+                            		/**
+                            		 * Add a custom Grid Control
+                            		 */
+                            		var printMapPanel = printWindow.items.get(0).printMapPanel;
+                
+					                var ctrl = printMapPanel.map.getControlsByClass("OpenLayers.Control.Graticule");
+									if(ctrl > 0) 
+										printMapPanel.map.removeControl(ctrl);
+										
+							        var graticule = new OpenLayers.Control.Graticule({ 
+										  //targetSize: 600,
+										  displayInLayerSwitcher: false,
+										  labelled: true, 
+										  visible: true                  
+									});
+									 
+									graticule.labelSymbolizer.fontColor =  '#000099';   
+									graticule.lineSymbolizer.strokeColor = '#000099'; 
+							
+							        printMapPanel.map.addControl(graticule);
+							        
+							        graticule.activate();
+                            	}
+                            },
                             printMapPanel: {
                                 map: Ext.applyIf({
                                     controls: [
@@ -226,7 +254,7 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                                         //new OpenLayers.Control.Navigation(),
                                         //new OpenLayers.Control.PanPanel(),
                                         //new OpenLayers.Control.ZoomPanel(),
-                                        new OpenLayers.Control.Attribution()
+                                        new OpenLayers.Control.Attribution(),
                                     ],
                                     eventListeners: {
                                         preaddlayer: function(evt) {
@@ -276,6 +304,7 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                 );                
                 
                 printWindow.center();
+                
             }
 
             return actions;
