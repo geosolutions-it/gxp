@@ -169,7 +169,7 @@ gxp.plugins.PrintSnapshot = Ext.extend(gxp.plugins.Tool, {
 	                            if (ajax.readyState==4 && ajax.status==200){
                                     var fname = "ida-snapshot.png";
                 					var mUrl = app.xmlJsonTranslateService + "UploadCanvas";
-                	    			    mUrl = mHost[2] == location.host ? mUrl : proxy + encodeURIComponent(mUrl+"?ID="+ajax.responseText+"&fn="+fname);
+                	    			    mUrl = mHost[2] == location.host ? mUrl+"?ID="+ajax.responseText+"&fn="+fname : proxy + encodeURIComponent(mUrl+"?ID="+ajax.responseText+"&fn="+fname);
                                     window.location.assign(mUrl);
 	                            }
 	                            enableSaving=true;
