@@ -81,6 +81,7 @@
         "plugins/LayerProperties.js",
         "plugins/Legend.js",
         "plugins/Print.js",
+        "plugins/PrintSnapshot.js",
         "locale/es.js",
         "locale/ca.js"
     );
