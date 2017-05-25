@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
- * 
+ *
  * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
@@ -54,10 +54,10 @@ Ext.namespace("gxp.plugins");
  *
  */
 gxp.plugins.OLSource = Ext.extend(gxp.plugins.LayerSource, {
-    
+
     /** api: ptype = gxp_olsource */
     ptype: "gxp_olsource",
-    
+
     /** api: method[createLayerRecord]
      *  :arg config:  ``Object``  The application config for this layer.
      *  :returns: ``GeoExt.data.LayerRecord``
@@ -67,7 +67,7 @@ gxp.plugins.OLSource = Ext.extend(gxp.plugins.LayerSource, {
     createLayerRecord: function(config) {
 
         var record;
-        
+
         // get class based on type in config
         var Class = window;
         var parts = config.type.split(".");
@@ -80,7 +80,7 @@ gxp.plugins.OLSource = Ext.extend(gxp.plugins.LayerSource, {
 
         // TODO: consider static method on OL classes to construct instance with args
         if (Class && Class.prototype && Class.prototype.initialize) {
-            
+
             // create a constructor for the given layer type
             var Constructor = function() {
                 // this only works for args that can be serialized as JSON
@@ -95,15 +95,20 @@ gxp.plugins.OLSource = Ext.extend(gxp.plugins.LayerSource, {
             if ("visibility" in config) {
                 layer.visibility = config.visibility;
             }
-            
+
+            if ("attribution" in config) {
+                layer.attribution = config.attribution;
+            }
+
             // create a layer record for this layer
             var Record = GeoExt.data.LayerRecord.create([
                 {name: "name", type: "string"},
-                {name: "source", type: "string"}, 
+                {name: "source", type: "string"},
                 {name: "group", type: "string"},
                 {name: "fixed", type: "boolean"},
                 {name: "selected", type: "boolean"},
                 {name: "type", type: "string"},
+                {name: "attribution", type: "string"},
                 {name: "args"}
             ]);
             var data = {
@@ -116,6 +121,7 @@ gxp.plugins.OLSource = Ext.extend(gxp.plugins.LayerSource, {
                 selected: ("selected" in config) ? config.selected : false,
                 type: config.type,
                 args: config.args,
+                attribution: ("attribution" in config) ? config.attribution : undefined,
                 properties: ("properties" in config) ? config.properties : undefined
             };
             record = new Record(data, layer.id);
@@ -139,7 +145,8 @@ gxp.plugins.OLSource = Ext.extend(gxp.plugins.LayerSource, {
         var layer = record.getLayer();
         return Ext.apply(config, {
             type: record.get("type"),
-            args: record.get("args")
+            args: record.get("args"),
+            attribution: record.get("attribution")
         });
     }
 
