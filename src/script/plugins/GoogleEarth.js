@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
- * 
+ *
  * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
@@ -23,11 +23,11 @@ Ext.namespace("gxp.plugins");
 /** api: constructor
  *  .. class:: GoogleEarth(config)
  *
- *    Provides an action for switching between normal map view and 
+ *    Provides an action for switching between normal map view and
  *    Google Earth view.
  */
 /** api: example
- *  This tool can only be used if ``portalItems`` of :class:`gxp.Viewer` is set up 
+ *  This tool can only be used if ``portalItems`` of :class:`gxp.Viewer` is set up
  *  in the following way (or similar, the requirement is to have a panel with a card
  *  layout which has 2 items: the map and the Google Earth panel):
  *
@@ -38,19 +38,19 @@ Ext.namespace("gxp.plugins");
  *          layout: "border",
  *          border: false,
  *           items: [{
- *               xtype: "panel", 
- *               id: "panel", 
- *               tbar: [], 
- *               layout: "card", 
- *               region: "center", 
- *               activeItem: 0, 
+ *               xtype: "panel",
+ *               id: "panel",
+ *               tbar: [],
+ *               layout: "card",
+ *               region: "center",
+ *               activeItem: 0,
  *               items: [
  *               "map", {
- *                   xtype: 'gxp_googleearthpanel', 
+ *                   xtype: 'gxp_googleearthpanel',
  *                   mapPanel: "map"
  *               }
  *           ]
- *      } 
+ *      }
  *
  * Then make sure the tools go into the tbar of the panel, instead of the
  * "map.tbar" which is the default, an example is:
@@ -62,10 +62,10 @@ Ext.namespace("gxp.plugins");
  *            actionTarget: "panel.tbar",
  *            ptype: "gxp_googleearth",
  *        }
- *    ] 
+ *    ]
  */
 gxp.plugins.GoogleEarth = Ext.extend(gxp.plugins.Tool, {
-    
+
     /** api: ptype = gxp_googleearth */
     ptype: "gxp_googleearth",
 
@@ -87,7 +87,7 @@ gxp.plugins.GoogleEarth = Ext.extend(gxp.plugins.Tool, {
     constructor: function(config) {
         gxp.plugins.GoogleEarth.superclass.constructor.apply(this, arguments);
     },
-    
+
     /** api: method[addActions]
      */
     addActions: function() {
@@ -147,7 +147,7 @@ gxp.plugins.GoogleEarth = Ext.extend(gxp.plugins.Tool, {
 
     /** private: method[getHost]
      *  :returns: ``String`` The current host name and port.
-     * 
+     *
      *  This method is here mainly for mocking in tests.
      */
     getHost: function() {
@@ -168,14 +168,14 @@ gxp.plugins.GoogleEarth.loader = new (Ext.extend(Ext.util.Observable, {
      *  ``Boolean``
      *  This plugin type is ready to use.
      */
-    ready: !!(window.google && window.google.earth),
+    ready: !!(window.google && window.google.maps),
 
     /** private: property[loading]
      *  ``Boolean``
      *  The resources for this plugin type are loading.
      */
     loading: false,
-    
+
     constructor: function() {
         this.addEvents(
             /** private: event[ready]
@@ -190,7 +190,7 @@ gxp.plugins.GoogleEarth.loader = new (Ext.extend(Ext.util.Observable, {
         );
         return Ext.util.Observable.prototype.constructor.apply(this, arguments);
     },
-    
+
     /** private: method[onScriptLoad]
      *  Called when all resources required by this plugin type have loaded.
      */
@@ -203,7 +203,7 @@ gxp.plugins.GoogleEarth.loader = new (Ext.extend(Ext.util.Observable, {
             monitor.fireEvent("ready");
         }
     },
-    
+
     /** api: method[gxp.plugins.GoogleEarth.loader.onLoad]
      *  :arg options: ``Object``
      *
@@ -236,7 +236,7 @@ gxp.plugins.GoogleEarth.loader = new (Ext.extend(Ext.util.Observable, {
      *  Called when all resources required by this plugin type have loaded.
      */
     loadScript: function(options) {
-        
+
         // remove any previous loader to ensure that the key is applied
         if (window.google) {
             delete google.loader;
@@ -244,14 +244,20 @@ gxp.plugins.GoogleEarth.loader = new (Ext.extend(Ext.util.Observable, {
 
         var params = {
             autoload: Ext.encode({
-                modules: [{
+                /* modules: [{
                     name: "earth",
                     version: "1",
+                    callback: "gxp.plugins.GoogleEarth.loader.onScriptLoad"
+                }] */
+                modules: [{
+                    name: "maps",
+                    version: 3,
+                    other_params: "sensor=false",
                     callback: "gxp.plugins.GoogleEarth.loader.onScriptLoad"
                 }]
             })
         };
-        
+
         var script = document.createElement("script");
         script.src = "//www.google.com/jsapi?" + Ext.urlEncode(params);
 
@@ -264,7 +270,7 @@ gxp.plugins.GoogleEarth.loader = new (Ext.extend(Ext.util.Observable, {
                 this.unload();
             }
         }).createDelegate(this), timeout);
-        
+
         // register callback for ready
         this.on({
             ready: options.callback,
@@ -273,7 +279,7 @@ gxp.plugins.GoogleEarth.loader = new (Ext.extend(Ext.util.Observable, {
         });
 
         this.loading = true;
-        
+
         // The google loader accesses document.body, so we don't add the loader
         // script before the document is ready.
         function append() {
@@ -284,11 +290,11 @@ gxp.plugins.GoogleEarth.loader = new (Ext.extend(Ext.util.Observable, {
         } else {
             Ext.onReady(append);
         }
-        
+
         this.script = script;
 
     },
-    
+
     /** api: method[unload]
      *  Clean up resources created by loading.
      */
@@ -301,7 +307,7 @@ gxp.plugins.GoogleEarth.loader = new (Ext.extend(Ext.util.Observable, {
         this.loading = false;
         this.ready = false;
         delete google.loader;
-        delete google.earth;
+        delete google.maps;
     }
 
 }))();
