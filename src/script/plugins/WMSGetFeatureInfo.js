@@ -8,8 +8,10 @@
 
 /**
  * @requires plugins/Tool.js
+ * @requires plugins/FeatureEditorGrid.js
  * @requires GeoExt/widgets/Popup.js
  * @requires OpenLayers/Control/WMSGetFeatureInfo.js
+ * @requires OpenLayers/Format/GeoJSON.js
  * @requires OpenLayers/Format/WMSGetFeatureInfo.js
  */
 
@@ -94,6 +96,13 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
      *      html: text, // responseText from server - only for "html" format
      */
 
+    /** private: method[constructor]
+     */
+    constructor: function(config) {
+        this.geoJSONFormat = new OpenLayers.Format.GeoJSON();
+        gxp.plugins.WMSGetFeatureInfo.superclass.constructor.apply(this, arguments);
+    },
+
     /** api: method[addActions]
      */
     addActions: function() {
@@ -165,7 +174,12 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
                             } else if (infoFormat == "text/plain") {
                                 this.displayPopup(evt, title, '<pre>' + evt.text + '</pre>');
                             } else if (evt.features && evt.features.length > 0) {
-                                this.displayPopup(evt, title);
+                                this.displayPopup(evt, title, null,  x.get("getFeatureInfo"));
+                            } else if (infoFormat === 'application/json' && evt.text) {
+                                evt.features = this.geoJSONFormat.read(evt.text);
+                                if (evt.features && evt.features.length > 0) {
+                                    this.displayPopup(evt, title, null,  x.get("getFeatureInfo"));
+                                }
                             }
                         },
                         scope: this
@@ -194,10 +208,10 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
      *     reporting the info to the user
      * :arg text: ``String`` Body text.
      */
-    displayPopup: function(evt, title, text) {
+    displayPopup: function(evt, title, text, featureinfo) {
         var popup;
         var popupKey = evt.xy.x + "." + evt.xy.y;
-
+        featureinfo = featureinfo || {};
         if (!(popupKey in this.popupCache)) {
             popup = this.addOutput({
                 xtype: "gx_popup",
@@ -215,15 +229,15 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
                     autoHeight: true,
                     autoWidth: true,
                     collapsible: true
-                },
-                listeners: {
-                    close: (function(key) {
-                        return function(panel){
-                            delete this.popupCache[key];
-                        };
-                    })(popupKey),
-                    scope: this
                 }
+            });
+            popup.on({                    
+                close: (function(key) {
+                    return function(panel){
+                        delete this.popupCache[key];
+                    };
+                })(popupKey),
+                scope: this
             });
             this.popupCache[popupKey] = popup;
         } else {
@@ -236,14 +250,17 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
             for (var i=0,ii=features.length; i<ii; ++i) {
                 feature = features[i];
                 config.push(Ext.apply({
-                    xtype: "propertygrid",
+                    xtype: "gxp_editorgrid",
+                    readOnly: true,
                     listeners: {
-                        'beforeedit': function (e) { 
-                            return false; 
-                        } 
+                        'beforeedit': function (e) {
+                            return false;
+                        }
                     },
                     title: feature.fid ? feature.fid : title,
-                    source: feature.attributes
+                    feature: feature,
+                    fields: featureinfo.fields,
+                    propertyNames: featureinfo.propertyNames
                 }, this.itemConfig));
             }
         } else if (text) {

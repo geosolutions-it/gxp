@@ -20,7 +20,9 @@ GeoExt.Lang.add("id", {
         panelTitleText: "Title",
         layerSelectionText: "View available data from:",
         doneText: "Selesai",
-        uploadText: "Unggah data"
+        uploadText: "Unggah data",
+        addFeedActionMenuText: "Add feeds",
+        searchText: "Search for layers"
     },
     
     "gxp.plugins.BingSource.prototype": {
@@ -35,7 +37,9 @@ GeoExt.Lang.add("id", {
         createFeatureActionText: "Create",
         editFeatureActionText: "Modify",
         createFeatureActionTip: "Membuat sebuah fitur",
-        editFeatureActionTip: "Edit fitur"
+        editFeatureActionTip: "Edit fitur",
+        commitTitle: "Commit message",
+        commitText: "Please enter a commit message for this edit:"
     },
     
     "gxp.plugins.FeatureGrid.prototype": {
@@ -309,6 +313,7 @@ GeoExt.Lang.add("id", {
     },
     
     "gxp.WMSLayerPanel.prototype": {
+        attributionText: "Attribution",
         aboutText: "Tentang Program",
         titleText: "Judul",
         nameText: "Nama",
@@ -319,9 +324,19 @@ GeoExt.Lang.add("id", {
         transparentText: "Transparent",
         cacheText: "Cache",
         cacheFieldText: "Menggunakan versi cached",
-        stylesText: "Styles",
+        stylesText: "Styles tersedia",
         infoFormatText: "Info format",
-        infoFormatEmptyText: "Select a format"
+        infoFormatEmptyText: "Select a format",
+        displayOptionsText: "Display options",
+        queryText: "Limit with filters",
+        scaleText: "Limit by scale",
+        minScaleText: "Min scale",
+        maxScaleText: "Max scale",
+        switchToFilterBuilderText: "Switch back to filter builder",
+        cqlPrefixText: "or ",
+        cqlText: "use CQL filter instead",
+        singleTileText: "Single tile",
+        singleTileFieldText: "Use a single tile"
     },
 
     "gxp.EmbedMapDialog.prototype": {
@@ -359,7 +374,9 @@ GeoExt.Lang.add("id", {
          styleWindowTitle: "User Style: {0}",
          ruleWindowTitle: "Style Rule: {0}",
          stylesFieldsetTitle: "Styles",
-         rulesFieldsetTitle: "Rules"
+         rulesFieldsetTitle: "Rules",
+         classifyStyleText: "Classify",
+         classifyStyleTip: "Classify the layer based on attributes"
     },
 
     "gxp.LayerUploadPanel.prototype": {
@@ -370,6 +387,8 @@ GeoExt.Lang.add("id", {
         fileLabel: "Data",
         fieldEmptyText: "Pencarian arsip data...",
         uploadText: "Pengisian",
+        uploadFailedText: "Upload failed",
+        processingUploadText: "Processing upload...",
         waitMsgText: "Mengisi Data anda...",
         invalidFileExtensionText: "Ekstensi file harus salah satu: ",
         optionsText: "Pilihan",
@@ -390,6 +409,52 @@ GeoExt.Lang.add("id", {
 
     "gxp.ScaleOverlay.prototype": { 
         zoomLevelText: "Zoom level"
+    },
+
+    "gxp.Viewer.prototype": {
+        saveErrorText: "Trouble saving: "
+    },
+
+    "gxp.FeedSourceDialog.prototype": {
+        feedTypeText: "Sumber",
+        addPicasaText: "Picasa Foto",
+        addYouTubeText: "YouTube Video",
+        addRSSText: "GeoRSS Pakan lain",
+        addFeedText: "Tambah ke Peta",
+        addTitleText: "Judul",
+        keywordText: "Kata Kunci",
+        doneText: "Selesai",
+        titleText: "Tambah Blog",
+        maxResultsText: "Produk Max"
+    },
+
+    "gxp.ClassificationPanel.prototype": {
+        classNumberText: 'Classes',
+        classifyText: "Classify",
+        rampBlueText: "Blue",
+        rampRedText: "Red",
+        rampOrangeText: "Orange",
+        rampJetText: "Blue-Red",
+        rampGrayText: "Gray",
+        rampRandomText: "Random",
+        rampCustomText: "Custom",
+        selectColorText: "Select colors",
+        colorStartText: "Start Color",
+        colorEndText: "End Color",
+        colorRampText: 'Color Ramp',
+        methodText: "Method",
+        methodUniqueText: "Unique Values",
+        methodQuantileText: "Quantile",
+        methodEqualText: "Equal Intervals",
+        methodJenksText: "Jenks Natural Breaks",
+        selectMethodText: "Select method",
+        standardDeviationText: "Standard Deviations",
+        attributeText: "Attribute",
+        selectAttributeText: "Select attribute",
+        startColor: "#FEE5D9",
+        endColor: "#A50F15",
+        generateRulesText: "Apply",
+        reverseColorsText: "Reverse colors"
     }
 
 });

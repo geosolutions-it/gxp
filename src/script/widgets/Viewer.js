@@ -219,7 +219,6 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
      *  ``String``
      */
     saveErrorText: "Trouble saving: ",
-
     /** private: method[constructor]
      *  Construct the viewer.
      */
@@ -236,7 +235,6 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
              *  Fires before the portal is created by the Ext ComponentManager.
              */
             "beforecreateportal",
-
             /** api: event[portalready]
              *  Fires after the portal is initialized.
              */
@@ -295,6 +293,19 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
              */
             "beforesave",
 
+            /** api: event[beforedelete]
+             *  Fires before application deletes a map. If the listener returns
+             *  false, the delete is cancelled.
+             *
+             *  Listeners arguments:
+             *
+             *  * requestConfig - ``Object`` configuration object for the request,
+             *    which has the following properties: method and url.
+             *  * callback - ``Function`` Optional callback function which was
+             *    passed on to the deleteMap function.
+             */
+            "beforedelete",
+
             /** api: event[save]
              *  Fires when the map has been saved.
              *
@@ -312,6 +323,14 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
              *    window.location.hash
              */
             "beforehashchange"
+
+            /** api: event[delete]
+             *  Fires when the map has been deleted.
+             *
+             *  Listener arguments:
+             *  * id - ``Integer`` The identifier of the deleted map
+             */
+            "delete"
         );
 
         Ext.apply(this, {
@@ -459,6 +478,8 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
         var mapConfig = {};
         var baseLayerConfig = {
             wrapDateLine: config.wrapDateLine !== undefined ? config.wrapDateLine : true,
+            minZoomLevel: config.minZoomLevel,
+            maxZoomLevel: config.maxZoomLevel,
             maxResolution: config.maxResolution,
             numZoomLevels: config.numZoomLevels,
             displayInLayerSwitcher: false
@@ -558,7 +579,6 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
         }
 
         this.fireEvent("beforecreateportal");
-
         this.portal = Ext.ComponentMgr.create(Ext.applyIf(config, {
             layout: "fit",
             hideBorders: true,
@@ -728,12 +748,17 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
                 var id = record.get("source");
                 var source = this.layerSources[id];
                 if (!source) {
-                    throw new Error("Could not find source for record '" + record.get("name") + " and layer " + layer.name + "'");
-                }
-                // add layer
-                state.map.layers.push(source.getConfigForRecord(record));
-                if (!sources[id]) {
-                    sources[id] = source.getState();
+                    // Either the layer has no source (id=null) or this layer has a layerSources which isnt defined 
+                    // Provide a plugin source if the layer should be included in getState()
+                    if (window.console) {
+                        console.warn("Could not find source type (e.g gxp_wmssource) for layer '" + layer.name  + "' and layer id '" + layer.id + "'.");
+                    }
+                } else {
+                    // add layer
+                    state.map.layers.push(source.getConfigForRecord(record));
+                    if (!sources[id]) {
+                        sources[id] = source.getState();
+                    }
                 }
             }
         }, this);
@@ -873,6 +898,90 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
                 this.doAuthorized(roles, callback, scope, true);
             };
             this.on("authorizationchange", this._authFn, this, {single: true});
+        }
+    },
+
+    /** private: method[save]
+     *
+     * Saves the map config and displays the URL in a window.
+     */
+    save: function(callback, scope) {
+        var configStr = Ext.util.JSON.encode(this.getState());
+        var method, url;
+        if (this.id) {
+            method = "PUT";
+            url = "../maps/" + this.id;
+        } else {
+            method = "POST";
+            url = "../maps/";
+        }
+        var requestConfig = {
+            method: method,
+            url: url,
+            data: configStr
+        };
+        if (this.fireEvent("beforesave", requestConfig, callback) !== false) {
+            OpenLayers.Request.issue(Ext.apply(requestConfig, {
+                callback: function(request) {
+                    this.handleSave(request);
+                    if (callback) {
+                        callback.call(scope || this, request);
+                    }
+                },
+                scope: this
+            }));
+        }
+    },
+
+    deleteMap: function(callback, scope) {
+        if (this.id) {
+            var method = "DELETE";
+            var url = "../maps/" + this.id;
+            var requestConfig = {
+                method: method,
+                url: url
+            };
+            if (this.fireEvent("beforedelete", requestConfig, callback) !== false) {
+                OpenLayers.Request.issue(Ext.apply(requestConfig, {
+                    callback: function(request) {
+                        this.handleSave(request, true);
+                        if (callback) {
+                            callback.call(scope || this, request);
+                        }
+                    },
+                    scope: this
+                }));
+            }
+        }
+    },
+
+    /** private: method[handleSave]
+     *  :arg: ``XMLHttpRequest``
+     */
+    handleSave: function(request, isDelete) {
+        if (request.status == 200) {
+            var config = Ext.util.JSON.decode(request.responseText);
+            var mapId = config.id;
+            if (mapId && !isDelete) {
+                this.id = mapId;
+                var hash = "#maps/" + mapId;
+                if (this.fireEvent("beforehashchange", hash) !== false) {
+                    window.location.hash = hash;
+                }
+                this.fireEvent("save", this.id);
+            }
+            if (isDelete) {
+                var id = this.id;
+                delete this.id;
+                if (this.fireEvent("beforehashchange", hash) !== false) {
+                    window.location.hash = '';
+                }
+                this.fireEvent("delete", id);
+            }
+        } else {
+            if (window.console) {
+                console.warn(this.saveErrorText + request.responseText);
+            }
         }
     },
 

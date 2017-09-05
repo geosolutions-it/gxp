@@ -20,7 +20,9 @@ GeoExt.Lang.add("pl", {
         panelTitleText: "Tytuł",
         layerSelectionText: "Pokaż dostępne warstwy z:",
         doneText: "Gotowe",
-        uploadText: "Wyślij dane"
+        uploadText: "Wyślij dane",
+        addFeedActionMenuText: "Add feeds",
+        searchText: "Search for layers"
     },
     
     "gxp.plugins.BingSource.prototype": {
@@ -35,7 +37,9 @@ GeoExt.Lang.add("pl", {
         createFeatureActionText: "Create",
         editFeatureActionText: "Modify",
         createFeatureActionTip: "Utwórz nowy obiekt",
-        editFeatureActionTip: "Edytuj istniejący obiekt"
+        editFeatureActionTip: "Edytuj istniejący obiekt",
+        commitTitle: "Commit message",
+        commitText: "Please enter a commit message for this edit:"
     },
     
     "gxp.plugins.FeatureGrid.prototype": {
@@ -287,6 +291,7 @@ GeoExt.Lang.add("pl", {
     },
     
     "gxp.WMSLayerPanel.prototype": {
+        attributionText: "Attribution",
         aboutText: "O",
         titleText: "Tytuł",
         nameText: "Nazwa",
@@ -297,9 +302,19 @@ GeoExt.Lang.add("pl", {
         transparentText: "Przeźr.",
         cacheText: "Cache",
         cacheFieldText: "Użyj wersji cache",
-        stylesText: "Style",
+        stylesText: "Dostępne Style",
         infoFormatText: "Info format",
-        infoFormatEmptyText: "Select a format"
+        infoFormatEmptyText: "Select a format",
+        displayOptionsText: "Display options",
+        queryText: "Limit with filters",
+        scaleText: "Limit by scale",
+        minScaleText: "Min scale",
+        maxScaleText: "Max scale",
+        switchToFilterBuilderText: "Switch back to filter builder",
+        cqlPrefixText: "or ",
+        cqlText: "use CQL filter instead",
+        singleTileText: "Single tile",
+        singleTileFieldText: "Use a single tile"
     },
 
     "gxp.EmbedMapDialog.prototype": {
@@ -337,7 +352,9 @@ GeoExt.Lang.add("pl", {
          styleWindowTitle: "Styl użytkownika: {0}",
          ruleWindowTitle: "Reguła stylu: {0}",
          stylesFieldsetTitle: "Style",
-         rulesFieldsetTitle: "Reguły"
+         rulesFieldsetTitle: "Reguły",
+         classifyStyleText: "Classify",
+         classifyStyleTip: "Classify the layer based on attributes"
     },
 
     "gxp.LayerUploadPanel.prototype": {
@@ -348,6 +365,9 @@ GeoExt.Lang.add("pl", {
         fileLabel: "Dane",
         fieldEmptyText: "Wskaż lokalizację danych...",
         uploadText: "Prześlij",
+        uploadFailedText: "Upload failed",
+        processingUploadText: "Processing upload...",
+        importText: "Importing upload...",
         waitMsgText: "Przesyłanie danych...",
         invalidFileExtensionText: "Typ pliku musi być jednym z poniższych: ",
         optionsText: "Opcje",
@@ -368,6 +388,52 @@ GeoExt.Lang.add("pl", {
 
     "gxp.ScaleOverlay.prototype": { 
         zoomLevelText: "Poziom powiększenia"
+    },
+
+    "gxp.Viewer.prototype": {
+        saveErrorText: "Trouble saving: "
+    },
+
+    "gxp.FeedSourceDialog.prototype": {
+        feedTypeText: "Źródło",
+        addPicasaText: "Picasa zdjęcia",
+        addYouTubeText: "YouTube Videos",
+        addRSSText: "Inne GeoRSS",
+        addFeedText: "Dodaj do mapy",
+        addTitleText: "Tytuł",
+        keywordText: "Słowo",
+        doneText: "Gotowe",
+        titleText: "Dodaj kanały",
+        maxResultsText: "Rzeczy Max"
+    },
+
+    "gxp.ClassificationPanel.prototype": {
+        classNumberText: 'Classes',
+        classifyText: "Classify",
+        rampBlueText: "Blue",
+        rampRedText: "Red",
+        rampOrangeText: "Orange",
+        rampJetText: "Blue-Red",
+        rampGrayText: "Gray",
+        rampRandomText: "Random",
+        rampCustomText: "Custom",
+        selectColorText: "Select colors",
+        colorStartText: "Start Color",
+        colorEndText: "End Color",
+        colorRampText: 'Color Ramp',
+        methodText: "Method",
+        methodUniqueText: "Unique Values",
+        methodQuantileText: "Quantile",
+        methodEqualText: "Equal Intervals",
+        methodJenksText: "Jenks Natural Breaks",
+        selectMethodText: "Select method",
+        standardDeviationText: "Standard Deviations",
+        attributeText: "Attribute",
+        selectAttributeText: "Select attribute",
+        startColor: "#FEE5D9",
+        endColor: "#A50F15",
+        generateRulesText: "Apply",
+        reverseColorsText: "Reverse colors"
     }
 
 });

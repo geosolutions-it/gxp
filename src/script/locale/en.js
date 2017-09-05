@@ -20,7 +20,9 @@ GeoExt.Lang.add("en", {
         panelTitleText: "Title",
         layerSelectionText: "View available data from:",
         doneText: "Done",
-        uploadText: "Upload layers"
+        uploadText: "Upload layers",
+        addFeedActionMenuText: "Add feeds",
+        searchText: "Search for layers"
     },
     
     "gxp.plugins.BingSource.prototype": {
@@ -35,7 +37,9 @@ GeoExt.Lang.add("en", {
         createFeatureActionText: "Create",
         editFeatureActionText: "Modify",
         createFeatureActionTip: "Create a new feature",
-        editFeatureActionTip: "Edit existing feature"
+        editFeatureActionTip: "Edit existing feature",
+        commitTitle: "Commit message",
+        commitText: "Please enter a commit message for this edit:"
     },
     
     "gxp.plugins.FeatureGrid.prototype": {
@@ -71,6 +75,10 @@ GeoExt.Lang.add("en", {
         rootNodeText: "Layers",
         overlayNodeText: "Overlays",
         baseNodeText: "Base Layers"
+    },
+
+    "gxp.plugins.LayerManager.prototype": {
+        baseNodeText: "Base Maps"
     },
 
     "gxp.plugins.Legend.prototype": {
@@ -305,6 +313,7 @@ GeoExt.Lang.add("en", {
     },
     
     "gxp.WMSLayerPanel.prototype": {
+        attributionText: "Attribution",
         aboutText: "About",
         titleText: "Title",
         nameText: "Name",
@@ -315,9 +324,19 @@ GeoExt.Lang.add("en", {
         transparentText: "Transparent",
         cacheText: "Cache",
         cacheFieldText: "Use cached version",
-        stylesText: "Styles",
+        stylesText: "Available Styles",
         infoFormatText: "Info format",
-        infoFormatEmptyText: "Select a format"
+        infoFormatEmptyText: "Select a format",
+        displayOptionsText: "Display options",
+        queryText: "Limit with filters",
+        scaleText: "Limit by scale",
+        minScaleText: "Min scale",
+        maxScaleText: "Max scale",
+        switchToFilterBuilderText: "Switch back to filter builder",
+        cqlPrefixText: "or ",
+        cqlText: "use CQL filter instead",
+        singleTileText: "Single tile",
+        singleTileFieldText: "Use a single tile"
     },
 
     "gxp.EmbedMapDialog.prototype": {
@@ -355,7 +374,9 @@ GeoExt.Lang.add("en", {
          styleWindowTitle: "User Style: {0}",
          ruleWindowTitle: "Style Rule: {0}",
          stylesFieldsetTitle: "Styles",
-         rulesFieldsetTitle: "Rules"
+         rulesFieldsetTitle: "Rules",
+         classifyStyleText: "Classify",
+         classifyStyleTip: "Classify the layer based on attributes"
     },
 
     "gxp.LayerUploadPanel.prototype": {
@@ -366,14 +387,19 @@ GeoExt.Lang.add("en", {
         fileLabel: "Data",
         fieldEmptyText: "Browse for data archive...",
         uploadText: "Upload",
+        uploadFailedText: "Upload failed",
+        processingUploadText: "Processing upload...",
         waitMsgText: "Uploading your data...",
         invalidFileExtensionText: "File extension must be one of: ",
         optionsText: "Options",
         workspaceLabel: "Workspace",
         workspaceEmptyText: "Default workspace",
         dataStoreLabel: "Store",
-        dataStoreEmptyText: "Create new store",
-        defaultDataStoreEmptyText: "Default data store"
+        dataStoreEmptyText: "Choose a store",
+        dataStoreNewText: "Create new store",
+        crsLabel: "CRS",
+        crsEmptyText: "Coordinate Reference System ID",
+        invalidCrsText: "CRS identifier should be an EPSG code (e.g. EPSG:4326)"
     },
     
     "gxp.NewSourceDialog.prototype": {
@@ -386,6 +412,52 @@ GeoExt.Lang.add("en", {
 
     "gxp.ScaleOverlay.prototype": { 
         zoomLevelText: "Zoom level"
+    },
+
+    "gxp.Viewer.prototype": {
+        saveErrorText: "Trouble saving: "
+    },
+
+    "gxp.FeedSourceDialog.prototype": {
+        feedTypeText: "Source",
+        addPicasaText: "Picasa Photos",
+        addYouTubeText: "YouTube Videos",
+        addRSSText: "Other GeoRSS Feed",
+        addFeedText: "Add to Map",
+        addTitleText: "Title",
+        keywordText: "Keyword",
+        doneText: "Done",
+        titleText: "Add Feeds",
+        maxResultsText: "Max Items"
+    },
+
+    "gxp.ClassificationPanel.prototype": {
+        classNumberText: 'Classes',
+        classifyText: "Classify",
+        rampBlueText: "Blue",
+        rampRedText: "Red",
+        rampOrangeText: "Orange",
+        rampJetText: "Blue-Red",
+        rampGrayText: "Gray",
+        rampRandomText: "Random",
+        rampCustomText: "Custom",
+        selectColorText: "Select colors",
+        colorStartText: "Start Color",
+        colorEndText: "End Color",
+        colorRampText: 'Color Ramp',
+        methodText: "Method",
+        methodUniqueText: "Unique Values",
+        methodQuantileText: "Quantile",
+        methodEqualText: "Equal Intervals",
+        methodJenksText: "Jenks Natural Breaks",
+        selectMethodText: "Select method",
+        standardDeviationText: "Standard Deviations",
+        attributeText: "Attribute",
+        selectAttributeText: "Select attribute",
+        startColor: "#FEE5D9",
+        endColor: "#A50F15",
+        generateRulesText: "Apply",
+        reverseColorsText: "Reverse colors"
     }
 
 });

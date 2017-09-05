@@ -109,6 +109,7 @@ gxp.plugins.OLSource = Ext.extend(gxp.plugins.LayerSource, {
                 {name: "selected", type: "boolean"},
                 {name: "type", type: "string"},
                 {name: "attribution", type: "string"},
+                {name: "queryable", type: "boolean"},
                 {name: "args"}
             ]);
             var data = {
@@ -119,6 +120,7 @@ gxp.plugins.OLSource = Ext.extend(gxp.plugins.LayerSource, {
                 group: config.group,
                 fixed: ("fixed" in config) ? config.fixed : false,
                 selected: ("selected" in config) ? config.selected : false,
+                queryable: ("queryable" in config) ? config.queryable : false,
                 type: config.type,
                 args: config.args,
                 attribution: ("attribution" in config) ? config.attribution : undefined,

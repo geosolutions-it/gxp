@@ -17,7 +17,9 @@ GeoExt.Lang.add("el", {
         panelTitleText: "Τίτλος",
         layerSelectionText: "Δείτε διαθέσιμα δεδομένα από:",
         doneText: "Ολοκληρώθηκε",
-        uploadText: "Ανεβάστε Δεδομένα"
+        uploadText: "Ανεβάστε Δεδομένα",
+        addFeedActionMenuText: "Add feeds",
+        searchText: "Search for layers"
     },
     
     "gxp.plugins.BingSource.prototype": {
@@ -32,7 +34,9 @@ GeoExt.Lang.add("el", {
         createFeatureActionText: "Create",
         editFeatureActionText: "Modify",
         createFeatureActionTip: "Δημιουργήστε ένα νέο χαρακτηριστικό",
-        editFeatureActionTip: "Τροποποιήστε υπάρχον χαρακτηριστικό"
+        editFeatureActionTip: "Τροποποιήστε υπάρχον χαρακτηριστικό",
+        commitTitle: "Commit message",
+        commitText: "Please enter a commit message for this edit:"
     },
     
     "gxp.plugins.FeatureGrid.prototype": {
@@ -312,7 +316,19 @@ GeoExt.Lang.add("el", {
         transparentText: "Διαφανές",
         cacheText: "Cache",
         cacheFieldText: "Χρησιμοποίησε την cached έκδοση",
-        stylesText: "Στυλ"
+        stylesText: "Διαθέσιμες Στυλ",
+        infoFormatText: "Info format",
+        infoFormatEmptyText: "Select a format",
+        displayOptionsText: "Display options",
+        queryText: "Limit with filters",
+        scaleText: "Limit by scale",
+        minScaleText: "Min scale",
+        maxScaleText: "Max scale",
+        switchToFilterBuilderText: "Switch back to filter builder",
+        cqlPrefixText: "or ",
+        cqlText: "use CQL filter instead",
+        singleTileText: "Single tile",
+        singleTileFieldText: "Use a single tile"
     },
 
     "gxp.EmbedMapDialog.prototype": {
@@ -350,7 +366,9 @@ GeoExt.Lang.add("el", {
          styleWindowTitle: "Στυλ Χρήστη: {0}",
          ruleWindowTitle: "Κανόνες Στυλ: {0}",
          stylesFieldsetTitle: "Στυλ",
-         rulesFieldsetTitle: "Κανόνες"
+         rulesFieldsetTitle: "Κανόνες",
+         classifyStyleText: "Classify",
+         classifyStyleTip: "Classify the layer based on attributes"
     },
 
     "gxp.LayerUploadPanel.prototype": {
@@ -361,6 +379,8 @@ GeoExt.Lang.add("el", {
         fileLabel: "Δεδομένα",
         fieldEmptyText: "Βρείτε το μονοπάτι για ένα αρχείο δεδομένων...",
         uploadText: "Ανέβασμα",
+        uploadFailedText: "Upload failed",
+        processingUploadText: "Processing upload...",
         waitMsgText: "Τα δεδομένα σας ανεβαίνουν...",
         invalidFileExtensionText: "Ο τύπος αρχείου πρέπει να είναι ένας από τους: ",
         optionsText: "Επιλογές",
@@ -381,6 +401,52 @@ GeoExt.Lang.add("el", {
 
     "gxp.ScaleOverlay.prototype": { 
         zoomLevelText: "Επίπεδο ζουμ"
+    },
+
+    "gxp.Viewer.prototype": {
+        saveErrorText: "Trouble saving: "
+    },
+
+    "gxp.FeedSourceDialog.prototype": {
+        feedTypeText: "Πηγή",
+        addPicasaText: "Φωτογραφίες Picasa",
+        addYouTubeText: "YouTube βίντεο",
+        addRSSText: "Άλλα Feed GeoRSS",
+        addFeedText: "Προσθήκη στο χάρτη",
+        addTitleText: "Τίτλος",
+        keywordText: "Λέξη-κλειδί",
+        doneText: "Done",
+        titleText: "Προσθήκη ροής",
+        maxResultsText: "Max Είδη"
+    },
+
+    "gxp.ClassificationPanel.prototype": {
+        classNumberText: 'Classes',
+        classifyText: "Classify",
+        rampBlueText: "Blue",
+        rampRedText: "Red",
+        rampOrangeText: "Orange",
+        rampJetText: "Blue-Red",
+        rampGrayText: "Gray",
+        rampRandomText: "Random",
+        rampCustomText: "Custom",
+        selectColorText: "Select colors",
+        colorStartText: "Start Color",
+        colorEndText: "End Color",
+        colorRampText: 'Color Ramp',
+        methodText: "Method",
+        methodUniqueText: "Unique Values",
+        methodQuantileText: "Quantile",
+        methodEqualText: "Equal Intervals",
+        methodJenksText: "Jenks Natural Breaks",
+        selectMethodText: "Select method",
+        standardDeviationText: "Standard Deviations",
+        attributeText: "Attribute",
+        selectAttributeText: "Select attribute",
+        startColor: "#FEE5D9",
+        endColor: "#A50F15",
+        generateRulesText: "Apply",
+        reverseColorsText: "Reverse colors"
     }
 
 });

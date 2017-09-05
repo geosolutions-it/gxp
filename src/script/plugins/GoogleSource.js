@@ -38,7 +38,7 @@ Ext.namespace("gxp.plugins");
  *  .. code-block:: javascript
  *
  *    "google": {
- *        ptype: "gxp_google"
+ *        ptype: "gxp_googlesource"
  *    }
  *
  *  A typical configuration for a layer from this source (in the ``layers``
@@ -322,7 +322,7 @@ gxp.plugins.GoogleSource.loader = new (Ext.extend(Ext.util.Observable, {
         };
         
         var script = document.createElement("script");
-        script.src = "http://www.google.com/jsapi?" + Ext.urlEncode(params);
+        script.src = "//www.google.com/jsapi?" + Ext.urlEncode(params);
 
         // cancel loading if monitor is not ready within timeout
         var errback = options.errback || Ext.emptyFn;
