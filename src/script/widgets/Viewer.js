@@ -322,7 +322,7 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
              *  * hash - ``String`` The hash which will be set as
              *    window.location.hash
              */
-            "beforehashchange"
+            "beforehashchange",
 
             /** api: event[delete]
              *  Fires when the map has been deleted.
@@ -748,7 +748,7 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
                 var id = record.get("source");
                 var source = this.layerSources[id];
                 if (!source) {
-                    // Either the layer has no source (id=null) or this layer has a layerSources which isnt defined 
+                    // Either the layer has no source (id=null) or this layer has a layerSources which isnt defined
                     // Provide a plugin source if the layer should be included in getState()
                     if (window.console) {
                         console.warn("Could not find source type (e.g gxp_wmssource) for layer '" + layer.name  + "' and layer id '" + layer.id + "'.");
