@@ -116,7 +116,7 @@ gxp.plugins.GeoServerStyleWriter = Ext.extend(gxp.plugins.StyleWriter, {
             Ext.Ajax.request({
                 method: styleRec.phantom === true ? "POST" : "PUT",
                 url: this.baseUrl + "/styles" + (styleRec.phantom === true ?
-                    "" : "/" + styleName + ".xml"),
+                    "" : "/" + styleName + ".xml?raw=true"),
                 headers: {
                     "Content-Type": "application/vnd.ogc.sld+xml"
                 },
