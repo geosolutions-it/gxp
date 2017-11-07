@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
- * 
+ *
  * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
@@ -50,7 +50,7 @@ Ext.namespace("gxp.plugins");
  *
  */
 gxp.plugins.OSMSource = Ext.extend(gxp.plugins.LayerSource, {
-    
+
     /** api: ptype = gxp_osmsource */
     ptype: "gxp_osmsource",
 
@@ -58,7 +58,7 @@ gxp.plugins.OSMSource = Ext.extend(gxp.plugins.LayerSource, {
      *  ``GeoExt.data.LayerStore``. Will contain records with "mapnik" and
      *  "osmarender" as name field values.
      */
-    
+
     /** api: config[title]
      *  ``String``
      *  A descriptive title for this layer source (i18n).
@@ -82,7 +82,7 @@ gxp.plugins.OSMSource = Ext.extend(gxp.plugins.LayerSource, {
      *  Creates a store of layer records.  Fires "ready" when store is loaded.
      */
     createStore: function() {
-        
+
         var options = {
             projection: "EPSG:900913",
             maxExtent: new OpenLayers.Bounds(
@@ -90,12 +90,12 @@ gxp.plugins.OSMSource = Ext.extend(gxp.plugins.LayerSource, {
                 128 * 156543.0339, 128 * 156543.0339
             ),
             maxResolution: 156543.03390625,
-            numZoomLevels: 19,
+            numZoomLevels: 21,
             units: "m",
             buffer: 1,
             transitionEffect: "resize"
         };
-        
+
         var layers = [
             new OpenLayers.Layer.OSM(
                 "OpenStreetMap",
@@ -104,13 +104,13 @@ gxp.plugins.OSMSource = Ext.extend(gxp.plugins.LayerSource, {
                     "//b.tile.openstreetmap.org/${z}/${x}/${y}.png",
                     "//c.tile.openstreetmap.org/${z}/${x}/${y}.png"
                 ],
-                OpenLayers.Util.applyDefaults({                
+                OpenLayers.Util.applyDefaults({
                     attribution: this.mapnikAttribution,
                     type: "mapnik"
                 }, options)
             )
         ];
-        
+
         this.store = new GeoExt.data.LayerStore({
             layers: layers,
             fields: [
@@ -128,7 +128,7 @@ gxp.plugins.OSMSource = Ext.extend(gxp.plugins.LayerSource, {
         this.fireEvent("ready", this);
 
     },
-    
+
     /** api: method[createLayerRecord]
      *  :arg config:  ``Object``  The application config for this layer.
      *  :returns: ``GeoExt.data.LayerRecord``
@@ -142,7 +142,7 @@ gxp.plugins.OSMSource = Ext.extend(gxp.plugins.LayerSource, {
 
             record = this.store.getAt(index).copy(Ext.data.Record.id({}));
             var layer = record.getLayer().clone();
- 
+
             // set layer title from config
             if (config.title) {
                 /**
@@ -159,7 +159,11 @@ gxp.plugins.OSMSource = Ext.extend(gxp.plugins.LayerSource, {
             if ("visibility" in config) {
                 layer.visibility = config.visibility;
             }
-            
+
+            if ("wrapDateLine" in config) {
+                layer.addOptions({wrapDateLine:config.wrapDateLine, displayOutsideMaxExtent: config.wrapDateLine}, true);
+            }
+
             record.set("selected", config.selected || false);
             record.set("source", config.source);
             record.set("name", config.name);

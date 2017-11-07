@@ -100,6 +100,10 @@ gxp.plugins.OLSource = Ext.extend(gxp.plugins.LayerSource, {
                 layer.attribution = config.attribution;
             }
 
+            if ("wrapDateLine" in config) {
+                layer.addOptions({wrapDateLine:config.wrapDateLine, displayOutsideMaxExtent: config.wrapDateLine}, true);
+            }
+
             // create a layer record for this layer
             var Record = GeoExt.data.LayerRecord.create([
                 {name: "name", type: "string"},
@@ -109,6 +113,7 @@ gxp.plugins.OLSource = Ext.extend(gxp.plugins.LayerSource, {
                 {name: "selected", type: "boolean"},
                 {name: "type", type: "string"},
                 {name: "attribution", type: "string"},
+                {name: "wrapDateLine", type: "boolean"},
                 {name: "queryable", type: "boolean"},
                 {name: "args"}
             ]);
@@ -124,6 +129,7 @@ gxp.plugins.OLSource = Ext.extend(gxp.plugins.LayerSource, {
                 type: config.type,
                 args: config.args,
                 attribution: ("attribution" in config) ? config.attribution : undefined,
+                wrapDateLine: ("wrapDateLine" in config) ? config.wrapDateLine : false,
                 properties: ("properties" in config) ? config.properties : undefined
             };
             record = new Record(data, layer.id);

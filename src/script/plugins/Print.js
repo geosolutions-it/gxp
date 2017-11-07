@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
- * 
+ *
  * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
@@ -30,7 +30,7 @@ Ext.namespace("gxp.plugins");
  *    which is currently mirrored at git://github.com/GeoNode/PrintPreview.git.
  */
 gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
-    
+
     /** api: ptype = gxp_print */
     ptype: "gxp_print",
 
@@ -135,8 +135,16 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                                     if (node.component && !node.component.hidden) {
                                         var cmp = node.component;
                                         var encFn = this.encoders.legends[cmp.getXType()];
-                                        encodedLegends = encodedLegends.concat(
-                                            encFn.call(this, cmp, jsonData.pages[0].scale));
+
+                                        var legendEncoded = encFn.call(this, cmp, jsonData.pages[0].scale);
+                                        try {
+                                            if((!legendEncoded[0].classes[0].icons[0].match(/\bformat/gi))) {
+                                                legendEncoded[0].classes[0].icons[0] += "&format=image/png";
+                                            }
+                                        } catch(err) {
+                                            console.log(legendEncoded);
+                                        }
+                                        encodedLegends = encodedLegends.concat(legendEncoded);
                                     }
                                 }, provider);
                             }
@@ -250,17 +258,34 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                     for (key in this.target.tools) {
                         tool = this.target.tools[key];
                         if (tool.ptype === "gxp_legend") {
-                            legend = tool.getLegendPanel();
+                            try {
+                                legend = tool.getLegendPanel();
+                            } catch(err) {
+                                legend = tool;
+                            }
                             break;
                         }
                     }
+
                     // if not found, look for a layer manager instead
-                    if (legend === null) {
+                    if (!legend || legend === null) {
                         for (key in this.target.tools) {
                             tool = this.target.tools[key];
                             if (tool.ptype === "gxp_layermanager") {
                                 legend = tool;
                                 break;
+                            }
+                        }
+                    }
+
+                    if (!legend || legend === null) {
+                        if (this.target.viewerTools) {
+                            for (key in this.target.viewerTools) {
+                                tool = this.target.viewerTools[key];
+                                if (tool.ptype === "gxp_layermanager") {
+                                    legend = tool;
+                                    break;
+                                }
                             }
                         }
                     }
