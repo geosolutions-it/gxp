@@ -1,9 +1,9 @@
 [submodule "externals/geoext"]
 	path = externals/geoext
-	url = git://github.com/geosolutions-it/geoext.git
+	url = https://github.com/geosolutions-it/geoext.git
 [submodule "externals/openlayers"]
 	path = externals/openlayers
-	url = git://github.com/geosolutions-it/openlayers.git
+	url = https://github.com/geosolutions-it/openlayers.git
 [submodule "externals/ringo"]
 	path = externals/ringo
 	url = git://github.com/ringo/ringojs.git
@@ -15,7 +15,7 @@
 	url = git://github.com/opengeo/PrintPreview.git
 [submodule "externals/DimensionManager"]
 	path = externals/DimensionManager
-	url = git://github.com/geosolutions-it/openlayers.git
+	url = https://github.com/geosolutions-it/openlayers.git
 [submodule "externals/TimeManager"]
     path = externals/TimeManager
 	url = git://github.com/mpriour/TimeManager_OpenLayers-Addin.git
