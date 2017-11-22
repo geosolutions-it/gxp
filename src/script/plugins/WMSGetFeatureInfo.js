@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
- * 
+ *
  * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
@@ -31,12 +31,12 @@ Ext.namespace("gxp.plugins");
  *    This plugins provides an action which, when active, will issue a
  *    GetFeatureInfo request to the WMS of all layers on the map. The output
  *    will be displayed in a popup.
- */   
+ */
 gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
-    
+
     /** api: ptype = gxp_wmsgetfeatureinfo */
     ptype: "gxp_wmsgetfeatureinfo",
-    
+
     /** api: config[outputTarget]
      *  ``String`` Popups created by this tool are added to the map by default.
      */
@@ -58,12 +58,20 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
      *  Title for info popup (i18n).
      */
     popupTitle: "Feature Info",
-    
+
     /** api: config[text]
      *  ``String`` Text for the GetFeatureInfo button (i18n).
      */
     buttonText: "Identify",
-    
+
+    /** api: config[drillDown]
+     * ``Boolean``
+     * Drill down over all WMS layers in the map. When
+     * using drillDown mode, hover is not possible, and an infoFormat that
+     * returns parseable features is required. Default is false.
+     */
+    drillDown: true,
+
     /** api: config[format]
      *  ``String`` Either "html" or "grid". If set to "grid", GML will be
      *  requested from the server and displayed in an Ext.PropertyGrid.
@@ -71,18 +79,18 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
      *  Default is "html".
      */
     format: "html",
-    
+
     /** api: config[vendorParams]
      *  ``Object``
      *  Optional object with properties to be serialized as vendor specific
      *  parameters in the requests (e.g. {buffer: 10}).
      */
-    
+
     /** api: config[layerParams]
      *  ``Array`` List of param names that should be taken from the layer and
      *  added to the GetFeatureInfo request (e.g. ["CQL_FILTER"]).
      */
-     
+
     /** api: config[itemConfig]
      *  ``Object`` A configuration object overriding options for the items that
      *  get added to the popup for each server response or feature. By default,
@@ -107,7 +115,7 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
      */
     addActions: function() {
         this.popupCache = {};
-        
+
         var actions = gxp.plugins.WMSGetFeatureInfo.superclass.addActions.call(this, [{
             tooltip: this.infoActionTip,
             iconCls: "gxp-icon-getfeatureinfo",
@@ -162,6 +170,7 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
                     queryVisible: true,
                     layers: [layer],
                     infoFormat: infoFormat,
+                    drillDown: this.drillDown,
                     vendorParams: vendorParams,
                     eventListeners: {
                         getfeatureinfo: function(evt) {
@@ -193,18 +202,18 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
             }, this);
 
         };
-        
+
         this.target.mapPanel.layers.on("update", updateInfo, this);
         this.target.mapPanel.layers.on("add", updateInfo, this);
         this.target.mapPanel.layers.on("remove", updateInfo, this);
-        
+
         return actions;
     },
 
     /** private: method[displayPopup]
-     * :arg evt: the event object from a 
+     * :arg evt: the event object from a
      *     :class:`OpenLayers.Control.GetFeatureInfo` control
-     * :arg title: a String to use for the title of the results section 
+     * :arg title: a String to use for the title of the results section
      *     reporting the info to the user
      * :arg text: ``String`` Body text.
      */
@@ -231,7 +240,7 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
                     collapsible: true
                 }
             });
-            popup.on({                    
+            popup.on({
                 close: (function(key) {
                     return function(panel){
                         delete this.popupCache[key];
@@ -272,7 +281,7 @@ gxp.plugins.WMSGetFeatureInfo = Ext.extend(gxp.plugins.Tool, {
         popup.add(config);
         popup.doLayout();
     }
-    
+
 });
 
 Ext.preg(gxp.plugins.WMSGetFeatureInfo.prototype.ptype, gxp.plugins.WMSGetFeatureInfo);

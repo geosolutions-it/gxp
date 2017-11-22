@@ -7,7 +7,7 @@ Ext.onReady(function() {
             layout: "border",
             width: 650,
             height: 465,
-            
+
             // by configuring items here, we don't need to configure portalItems
             // and save a wrapping container
             items: [{
@@ -35,7 +35,7 @@ Ext.onReady(function() {
             }],
             bbar: {id: "mybbar"}
         },
-        
+
         // configuration of all tool plugins for this application
         tools: [{
             ptype: "gxp_layertree",
@@ -101,7 +101,7 @@ Ext.onReady(function() {
             actionTarget: "mybbar", // ".bbar" would also work
             actions: [{text: "Click me - I'm a tool on the portal's bbar"}]
         }],
-        
+
         // layer sources
         defaultSourceType: "gxp_wmssource",
         sources: {
@@ -118,7 +118,7 @@ Ext.onReady(function() {
                 title: "pycsw"
             }
         },
-        
+
         // map and layers
         map: {
             id: "mymap", // id needed to reference map in portalConfig above
