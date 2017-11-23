@@ -110,268 +110,268 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
 
     /** api: method[addActions]
      */
-    addActions: function() {
-        // don't add any action if there is no print service configured
-        if (this.printService !== null || this.printCapabilities != null) {
+     addActions: function() {
+         // don't add any action if there is no print service configured
+         if (this.printService !== null || this.printCapabilities != null) {
 
-            var printProvider = new GeoExt.data.PrintProvider({
-                capabilities: this.printCapabilities,
-                url: this.printService,
-                customParams: this.customParams,
-                autoLoad: false,
-                listeners: {
-                    beforedownload: function(provider, url) {
-                        if (this.openInNewWindow === true) {
-                            window.open(url);
-                            return false;
-                        }
-                    },
-                    beforeencodelegend: function(provider, jsonData, legend) {
-                        if (legend && legend.ptype === "gxp_layermanager") {
-                            var encodedLegends = [];
-                            var output = legend.output;
-                            if (output && output[0]) {
-                                output[0].getRootNode().cascade(function(node) {
-                                    if (node.component && !node.component.hidden) {
-                                        var cmp = node.component;
-                                        var encFn = this.encoders.legends[cmp.getXType()];
+             var printProvider = new GeoExt.data.PrintProvider({
+                 capabilities: this.printCapabilities,
+                 url: this.printService,
+                 customParams: this.customParams,
+                 autoLoad: false,
+                 listeners: {
+                     beforedownload: function(provider, url) {
+                         if (this.openInNewWindow === true) {
+                             window.open(url);
+                             return false;
+                         }
+                     },
+                     beforeencodelegend: function(provider, jsonData, legend) {
+                         if (legend && legend.ptype === "gxp_layermanager") {
+                             var encodedLegends = [];
+                             var output = legend.output;
+                             if (output && output[0]) {
+                                 output[0].getRootNode().cascade(function(node) {
+                                     if (node.component && !node.component.hidden) {
+                                         var cmp = node.component;
+                                         var encFn = this.encoders.legends[cmp.getXType()];
 
-                                        var legendEncoded = encFn.call(this, cmp, jsonData.pages[0].scale);
-                                        try {
-                                            if((!legendEncoded[0].classes[0].icons[0].match(/\bformat/gi))) {
-                                                legendEncoded[0].classes[0].icons[0] += "&format=image/png";
-                                            }
-                                        } catch(err) {
-                                            console.log(legendEncoded);
-                                        }
-                                        encodedLegends = encodedLegends.concat(legendEncoded);
-                                    }
-                                }, provider);
-                            }
-                            jsonData.legends = encodedLegends;
-                            // cancel normal encoding of legend
-                            return false;
-                        }
-                    },
-                    beforeprint: function() {
-                        // The print module does not like array params.
-                        // TODO Remove when http://trac.geoext.org/ticket/216 is fixed.
-                        printWindow.items.get(0).printMapPanel.layers.each(function(l) {
-                            var params = l.get("layer").params;
-                            for(var p in params) {
-                                if (params[p] instanceof Array) {
-                                    params[p] = params[p].join(",");
-                                }
-                            }
-                        });
-                    },
-                    loadcapabilities: function() {
-                        if (printButton) {
-                            printButton.initialConfig.disabled = false;
-                            printButton.enable();
-                        }
-                    },
-                    print: function() {
-                        try {
-                            printWindow.close();
-                        } catch (err) {
-                            // TODO: improve destroy
-                        }
-                    },
-                    printException: function(cmp, response) {
-                        this.target.displayXHRTrouble && this.target.displayXHRTrouble(response);
-                    },
-                    scope: this
-                }
-            });
+                                         var legendEncoded = encFn.call(this, cmp, jsonData.pages[0].scale);
+                                         try {
+                                             if((!legendEncoded[0].classes[0].icons[0].match(/\bformat/gi))) {
+                                                 legendEncoded[0].classes[0].icons[0] += "&format=image/png";
+                                             }
+                                         } catch(err) {
+                                             // console.log(legendEncoded);
+                                         }
+                                         encodedLegends = encodedLegends.concat(legendEncoded);
+                                     }
+                                 }, provider);
+                             }
+                             jsonData.legends = encodedLegends;
+                             // cancel normal encoding of legend
+                             return false;
+                         }
+                     },
+                     beforeprint: function() {
+                         // The print module does not like array params.
+                         // TODO Remove when http://trac.geoext.org/ticket/216 is fixed.
+                         printWindow.items.get(0).printMapPanel.layers.each(function(l) {
+                             var params = l.get("layer").params;
+                             for(var p in params) {
+                                 if (params[p] instanceof Array) {
+                                     params[p] = params[p].join(",");
+                                 }
+                             }
+                         });
+                     },
+                     loadcapabilities: function() {
+                         if (printButton) {
+                             printButton.initialConfig.disabled = false;
+                             printButton.enable();
+                         }
+                     },
+                     print: function() {
+                         try {
+                             printWindow.close();
+                         } catch (err) {
+                             // TODO: improve destroy
+                         }
+                     },
+                     printException: function(cmp, response) {
+                         this.target.displayXHRTrouble && this.target.displayXHRTrouble(response);
+                     },
+                     scope: this
+                 }
+             });
 
-            var actions = gxp.plugins.Print.superclass.addActions.call(this, [{
-                menuText: this.menuText,
-                buttonText: this.buttonText,
-                tooltip: this.tooltip,
-                iconCls: "gxp-icon-print",
-                disabled: this.printCapabilities !== null ? false : true,
-                handler: function() {
-                    var supported = getPrintableLayers();
-                    if (supported.length > 0) {
-                        var printWindow = createPrintWindow.call(this);
-                        showPrintWindow.call(this);
-                        return printWindow;
-                    } else {
-                        // no layers supported
-                        Ext.Msg.alert(
-                            this.notAllNotPrintableText,
-                            this.nonePrintableText
-                        );
-                    }
-                },
-                scope: this,
-                listeners: {
-                    render: function() {
-                        // wait to load until render so we can enable on success
-                        printProvider.loadCapabilities();
-                    }
-                }
-            }]);
+             var actions = gxp.plugins.Print.superclass.addActions.call(this, [{
+                 menuText: this.menuText,
+                 buttonText: this.buttonText,
+                 tooltip: this.tooltip,
+                 iconCls: "gxp-icon-print",
+                 disabled: this.printCapabilities !== null ? false : true,
+                 handler: function() {
+                     var supported = getPrintableLayers();
+                     if (supported.length > 0) {
+                         var printWindow = createPrintWindow.call(this);
+                         showPrintWindow.call(this);
+                         return printWindow;
+                     } else {
+                         // no layers supported
+                         Ext.Msg.alert(
+                             this.notAllNotPrintableText,
+                             this.nonePrintableText
+                         );
+                     }
+                 },
+                 scope: this,
+                 listeners: {
+                     render: function() {
+                         // wait to load until render so we can enable on success
+                         printProvider.loadCapabilities();
+                     }
+                 }
+             }]);
 
-            var printButton = actions[0].items[0];
+             var printButton = actions[0].items[0];
 
-            var printWindow;
+             var printWindow;
 
-            function destroyPrintComponents() {
-                if (printWindow) {
-                    // TODO: fix this in GeoExt
-                    try {
-                        var panel = printWindow.items.first();
-                        panel.printMapPanel.printPage.destroy();
-                        //panel.printMapPanel.destroy();
-                    } catch (err) {
-                        // TODO: improve destroy
-                    }
-                    printWindow = null;
-                }
-            }
+             function destroyPrintComponents() {
+                 if (printWindow) {
+                     // TODO: fix this in GeoExt
+                     try {
+                         var panel = printWindow.items.first();
+                         panel.printMapPanel.printPage.destroy();
+                         //panel.printMapPanel.destroy();
+                     } catch (err) {
+                         // TODO: improve destroy
+                     }
+                     printWindow = null;
+                 }
+             }
 
-            var mapPanel = this.target.mapPanel;
-            function getPrintableLayers() {
-                var supported = [];
-                mapPanel.layers.each(function(record) {
-                    var layer = record.getLayer();
-                    if (isPrintable(layer)) {
-                        supported.push(layer);
-                    }
-                });
-                return supported;
-            }
+             var mapPanel = this.target.mapPanel;
+             function getPrintableLayers() {
+                 var supported = [];
+                 mapPanel.layers.each(function(record) {
+                     var layer = record.getLayer();
+                     if (isPrintable(layer)) {
+                         supported.push(layer);
+                     }
+                 });
+                 return supported;
+             }
 
-            function isPrintable(layer) {
-                return layer.getVisibility() === true && (
-                    layer instanceof OpenLayers.Layer.WMS ||
-                    layer instanceof OpenLayers.Layer.OSM ||
-                    layer instanceof OpenLayers.Layer.XYZ
-                );
-            }
+             function isPrintable(layer) {
+                 return layer.getVisibility() === true && (
+                     layer instanceof OpenLayers.Layer.WMS ||
+                     layer instanceof OpenLayers.Layer.OSM ||
+                     layer instanceof OpenLayers.Layer.XYZ
+                 );
+             }
 
-            function createPrintWindow() {
-                var legend = null;
-                if (this.includeLegend === true) {
-                    var key, tool;
-                    for (key in this.target.tools) {
-                        tool = this.target.tools[key];
-                        if (tool.ptype === "gxp_legend") {
-                            try {
-                                legend = tool.getLegendPanel();
-                            } catch(err) {
-                                legend = tool;
-                            }
-                            break;
-                        }
-                    }
+             function createPrintWindow() {
+                 var legend = null;
+                 if (this.includeLegend === true) {
+                     var key, tool;
+                     for (key in this.target.tools) {
+                         tool = this.target.tools[key];
+                         if (tool.ptype === "gxp_legend") {
+                             try {
+                                 legend = tool.getLegendPanel();
+                             } catch(err) {
+                                 legend = tool;
+                             }
+                             break;
+                         }
+                     }
 
-                    // if not found, look for a layer manager instead
-                    if (!legend || legend === null) {
-                        for (key in this.target.tools) {
-                            tool = this.target.tools[key];
-                            if (tool.ptype === "gxp_layermanager") {
-                                legend = tool;
-                                break;
-                            }
-                        }
-                    }
+                     // if not found, look for a layer manager instead
+                     if (!legend || legend === null) {
+                         for (key in this.target.tools) {
+                             tool = this.target.tools[key];
+                             if (tool.ptype === "gxp_layermanager") {
+                                 legend = tool;
+                                 break;
+                             }
+                         }
+                     }
 
-                    if (!legend || legend === null) {
-                        if (this.target.viewerTools) {
-                            for (key in this.target.viewerTools) {
-                                tool = this.target.viewerTools[key];
-                                if (tool.ptype === "gxp_layermanager") {
-                                    legend = tool;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-                printWindow = new Ext.Window({
-                    title: this.previewText,
-                    modal: true,
-                    border: false,
-                    autoHeight: true,
-                    resizable: false,
-                    width: 360,
-                    items: [
-                        new GeoExt.ux.PrintPreview({
-                            minWidth: 336,
-                            mapTitle: this.target.about && this.target.about["title"],
-                            comment: this.target.about && this.target.about["abstract"],
-                            printMapPanel: {
-                                autoWidth: true,
-                                height: Math.min(420, Ext.get(document.body).getHeight()-150),
-                                limitScales: true,
-                                map: Ext.applyIf({
-                                    controls: [
-                                        new OpenLayers.Control.Navigation({
-                                            zoomWheelEnabled: false,
-                                            zoomBoxEnabled: false
-                                        }),
-                                        new OpenLayers.Control.PanPanel(),
-                                        new OpenLayers.Control.ZoomPanel(),
-                                        new OpenLayers.Control.Attribution()
-                                    ],
-                                    eventListeners: {
-                                        preaddlayer: function(evt) {
-                                            return isPrintable(evt.layer);
-                                        }
-                                    }
-                                }, mapPanel.initialConfig.map),
-                                items: [{
-                                    xtype: "gx_zoomslider",
-                                    vertical: true,
-                                    height: 100,
-                                    aggressive: true
-                                }],
-                                listeners: {
-                                    afterlayout: function(evt) {
-                                        printWindow.setWidth(Math.max(360, this.getWidth() + 24));
-                                        printWindow.center();
-                                    }
-                                }
-                            },
-                            printProvider: printProvider,
-                            includeLegend: this.includeLegend,
-                            legend: legend,
-                            sourceMap: mapPanel
-                        })
-                    ],
-                    listeners: {
-                        beforedestroy: destroyPrintComponents
-                    }
-                });
-                return printWindow;
-            }
+                     if (!legend || legend === null) {
+                         if (this.target.viewerTools) {
+                             for (key in this.target.viewerTools) {
+                                 tool = this.target.viewerTools[key];
+                                 if (tool.ptype === "gxp_layermanager") {
+                                     legend = tool;
+                                     break;
+                                 }
+                             }
+                         }
+                     }
+                 }
+                 printWindow = new Ext.Window({
+                     title: this.previewText,
+                     modal: true,
+                     border: false,
+                     autoHeight: true,
+                     resizable: false,
+                     width: 360,
+                     items: [
+                         new GeoExt.ux.PrintPreview({
+                             minWidth: 336,
+                             mapTitle: this.target.about && this.target.about["title"],
+                             comment: this.target.about && this.target.about["abstract"],
+                             printMapPanel: {
+                                 autoWidth: true,
+                                 height: Math.min(420, Ext.get(document.body).getHeight()-150),
+                                 limitScales: true,
+                                 map: Ext.applyIf({
+                                     controls: [
+                                         new OpenLayers.Control.Navigation({
+                                             zoomWheelEnabled: false,
+                                             zoomBoxEnabled: false
+                                         }),
+                                         new OpenLayers.Control.PanPanel(),
+                                         new OpenLayers.Control.ZoomPanel(),
+                                         new OpenLayers.Control.Attribution()
+                                     ],
+                                     eventListeners: {
+                                         preaddlayer: function(evt) {
+                                             return isPrintable(evt.layer);
+                                         }
+                                     }
+                                 }, mapPanel.initialConfig.map),
+                                 items: [{
+                                     xtype: "gx_zoomslider",
+                                     vertical: true,
+                                     height: 100,
+                                     aggressive: true
+                                 }],
+                                 listeners: {
+                                     afterlayout: function(evt) {
+                                         printWindow.setWidth(Math.max(360, this.getWidth() + 24));
+                                         printWindow.center();
+                                     }
+                                 }
+                             },
+                             printProvider: printProvider,
+                             includeLegend: this.includeLegend,
+                             legend: legend,
+                             sourceMap: mapPanel
+                         })
+                     ],
+                     listeners: {
+                         beforedestroy: destroyPrintComponents
+                     }
+                 });
+                 return printWindow;
+             }
 
-            function showPrintWindow() {
-                printWindow.show();
+             function showPrintWindow() {
+                 printWindow.show();
 
-                // measure the window content width by it's toolbar
-                printWindow.setWidth(0);
-                var tb = printWindow.items.get(0).items.get(0);
-                var w = 0;
-                tb.items.each(function(item) {
-                    if(item.getEl()) {
-                        w += item.getWidth();
-                    }
-                });
-                printWindow.setWidth(
-                    Math.max(printWindow.items.get(0).printMapPanel.getWidth(),
-                    w + 20)
-                );
-                printWindow.center();
-            }
+                 // measure the window content width by it's toolbar
+                 printWindow.setWidth(0);
+                 var tb = printWindow.items.get(0).items.get(0);
+                 var w = 0;
+                 tb.items.each(function(item) {
+                     if(item.getEl()) {
+                         w += item.getWidth();
+                     }
+                 });
+                 printWindow.setWidth(
+                     Math.max(printWindow.items.get(0).printMapPanel.getWidth(),
+                     w + 20)
+                 );
+                 printWindow.center();
+             }
 
-            return actions;
-        }
-    }
+             return actions;
+         }
+     }
 
-});
+ });
 
-Ext.preg(gxp.plugins.Print.prototype.ptype, gxp.plugins.Print);
+ Ext.preg(gxp.plugins.Print.prototype.ptype, gxp.plugins.Print);
