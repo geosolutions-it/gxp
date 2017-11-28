@@ -366,7 +366,7 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                              printMapPanel: {
                                  autoWidth: true,
                                  height: Math.min(420, Ext.get(document.body).getHeight()-150),
-                                 limitScales: false,
+                                 limitScales: true,
                                  map: Ext.applyIf({
                                      controls: [
                                          new OpenLayers.Control.Navigation({
