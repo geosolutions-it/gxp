@@ -281,7 +281,6 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                      0.0001457920613757
                  ];
              } */
-
              function getPrintableLayers() {
                  var supported = [];
                  mapPanel.layers.each(function(record) {
@@ -351,6 +350,7 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                          }
                      }
                  }
+
                  printWindow = new Ext.Window({
                      title: this.previewText,
                      modal: true,
@@ -366,7 +366,7 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                              printMapPanel: {
                                  autoWidth: true,
                                  height: Math.min(420, Ext.get(document.body).getHeight()-150),
-                                 limitScales: true,
+                                 limitScales: false,
                                  map: Ext.applyIf({
                                      controls: [
                                          new OpenLayers.Control.Navigation({
