@@ -234,19 +234,19 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
 
              var mapPanel = this.target.mapPanel;
 
-             mapPanel.map.getMaxExtent = function() {
+            mapPanel.map.getMaxExtent = function() {
                 return new OpenLayers.Bounds(
-                    -128 * 156543.0339, -128 * 156543.0339,
-                    128 * 156543.0339, 128 * 156543.0339
+                    -128 * 156543.0339 * 2, -128 * 156543.0339 * 2,
+                    128 * 156543.0339 * 2, 128 * 156543.0339 * 2
                 );
              }
-             mapPanel.map.getMaxResolution = function() {
-                 return 156543.03390625;
-             }
-             mapPanel.map.getNumZoomLevels  = function() {
-                 return 31;
-             }
-             mapPanel.map.getResolutions  = function() {
+            mapPanel.map.getMaxResolution = function() {
+                return 156543.03390625 * 2;
+            }
+            mapPanel.map.getNumZoomLevels  = function() {
+                return 28;
+            }
+            /* mapPanel.map.getResolutions  = function() {
                  return [
                      156543.03390625,
                      78271.516953125,
@@ -280,7 +280,7 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                      0.0002915841227514,
                      0.0001457920613757
                  ];
-             }
+             } */
 
              function getPrintableLayers() {
                  var supported = [];
@@ -292,10 +292,10 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                              displayOutsideMaxExtent: true
                          });
                          layer.addOptions({
-                             maxExtent:mapPanel.map.getMaxExtent(),
+                             // maxExtent:mapPanel.map.getMaxExtent(),
                              restrictedExtent:mapPanel.map.getMaxExtent(),
-                             numZoomLevels:mapPanel.map.getNumZoomLevels(),
-                             resolutions:mapPanel.map.getResolutions()
+                             numZoomLevels:mapPanel.map.getNumZoomLevels()
+                             // resolutions:mapPanel.map.getResolutions()
                           });
 
                          supported.push(layer);
