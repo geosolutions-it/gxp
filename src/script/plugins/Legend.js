@@ -70,7 +70,8 @@ gxp.plugins.Legend = Ext.extend(gxp.plugins.Tool, {
  init: function(target) {
      gxp.plugins.Legend.superclass.init.apply(this, arguments);
      this.target = target;
-     this.addOutput();
+     var output = this.addOutput(this.outputConfig);
+     output.ownerCt.ownerCt.hide();
  },
 
  /** api: method[addActions]
@@ -102,7 +103,7 @@ gxp.plugins.Legend = Ext.extend(gxp.plugins.Tool, {
   *  :arg config: ``Object``
   */
  addOutput: function(config) {
-     return gxp.plugins.Legend.superclass.addOutput.call(this, Ext.apply({
+     var output = gxp.plugins.Legend.superclass.addOutput.call(this, Ext.apply({
          xtype: 'gx_legendpanel',
          ascending: true,
          border: true,
@@ -113,6 +114,8 @@ gxp.plugins.Legend = Ext.extend(gxp.plugins.Tool, {
          layerStore: this.target.mapPanel.layers,
          defaults: {cls: 'gxp-legend-item'}
      }, config));
+
+     return output;
  }
 });
 

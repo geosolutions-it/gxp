@@ -370,8 +370,8 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                                  map: Ext.applyIf({
                                      controls: [
                                          new OpenLayers.Control.Navigation({
-                                             zoomWheelEnabled: false,
-                                             zoomBoxEnabled: false
+                                             zoomWheelEnabled: true,
+                                             zoomBoxEnabled: true
                                          }),
                                          new OpenLayers.Control.PanPanel(),
                                          new OpenLayers.Control.ZoomPanel(),
