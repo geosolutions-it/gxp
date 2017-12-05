@@ -12,10 +12,10 @@
 	url = git://github.com/geosolutions-it/buildkit.git
 [submodule "externals/PrintPreview"]
 	path = externals/PrintPreview
-	url = git://github.com/opengeo/PrintPreview.git
+	url = https://github.com/geosolutions-it/PrintPreview.git
 [submodule "externals/DimensionManager"]
 	path = externals/DimensionManager
-	url = https://github.com/geosolutions-it/openlayers.git
+	url = https://github.com/GeoNode/openlayers.git
 [submodule "externals/TimeManager"]
     path = externals/TimeManager
 	url = git://github.com/mpriour/TimeManager_OpenLayers-Addin.git
