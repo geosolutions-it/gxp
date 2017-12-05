@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
- * 
+ *
  * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
@@ -56,7 +56,7 @@ Ext.override(Ext.Tip, {
         } else {
             this.setPagePosition(position[0], position[1]);
         }
-    }   
+    }
 });
 
 // TODO use from GeoExt eventually
@@ -99,7 +99,7 @@ GeoExt.FeatureTip = Ext.extend(Ext.Tip, {
     beforeDestroy: function() {
         for (var key in this.youtubePlayers) {
             this.youtubePlayers[key].destroy();
-            delete this.youtubePlayers[key]; 
+            delete this.youtubePlayers[key];
         }
         this.map.events.un({
             "move" : this.show,
@@ -172,7 +172,7 @@ window.Timeline && window.SimileAjax && (function() {
 
 /** api: constructor
  *  .. class:: TimelinePanel(config)
- *   
+ *
  *      A panel for displaying a Similie Timeline.
  */
 gxp.TimelinePanel = Ext.extend(Ext.Panel, {
@@ -199,7 +199,7 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
         filterAttr: 'in_timeline',
         mapFilterAttr: 'in_map'
     },
-    
+
     /** api: config[viewer]
      *  ``gxp.Viewer``
      */
@@ -211,11 +211,11 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
     /** private: property[timeline]
      *  ``Timeline``
      */
-    
+
     /** private: property[timelineContainer]
      *  ``Ext.Container``
      */
-    
+
     /** private: property[eventSource]
      *  ``Object``
      *  Timeline event source.
@@ -224,7 +224,7 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
     /** api: property[layerLookup]
      *  ``Object``
      *  Mapping of store/layer names (e.g. "local/foo") to objects storing data
-     *  related to layers.  The values of each member are objects with the 
+     *  related to layers.  The values of each member are objects with the
      *  following properties:
      *
      *   * layer - {OpenLayers.Layer.Vector}
@@ -236,9 +236,9 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
      *   * timeFilter - {OpenLayers.Filter}
      *   * sldFilter - {OpenLayers.Filter}
      *   * clientSideFilter - {OpenLayers.Filter}
-     *  
+     *
      */
-    
+
     layout: "border",
 
     /** private: method[initComponent]
@@ -246,7 +246,7 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
     initComponent: function() {
 
         // handler for clicking on an event in the timeline
-        Timeline.OriginalEventPainter.prototype._showBubble = 
+        Timeline.OriginalEventPainter.prototype._showBubble =
             this.handleEventClick.createDelegate(this);
 
         this.timelineContainer = new Ext.Container({
@@ -257,7 +257,7 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
 
         this.items = [this.timelineContainer];
 
-        // we are binding with viewer to get updates on new layers        
+        // we are binding with viewer to get updates on new layers
         if (this.initialConfig.viewer) {
             delete this.viewer;
             this.bindViewer(this.initialConfig.viewer);
@@ -287,7 +287,7 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
             }, this);
         }
 
-        gxp.TimelinePanel.superclass.initComponent.call(this); 
+        gxp.TimelinePanel.superclass.initComponent.call(this);
     },
 
     /**
@@ -295,7 +295,7 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
      *  :arg x: ``Integer``
      *  :arg y: ``Integer``
      *  :arg evt: ``Object``
-     *  
+     *
      *  Handler for when an event in the timeline gets clicked. Show a popup
      *  for a feature and the feature editor for a note/annotation.
      */
@@ -306,7 +306,7 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
     /**
      * private: method[bindAnnotationsStore]
      *  :arg store: ``GeoExt.data.FeatureStore``
-     *  
+     *
      *  Bind with a feature store to have notes show up in the timeline.
      */
     bindAnnotationsStore: function(store) {
@@ -352,7 +352,7 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
             if (evt.getProperty('key') === key && evt.getProperty('fid') === fid) {
                 eventIds.push(evt.getID());
             }
-        }   
+        }
         for (var i=0, len=eventIds.length; i<len; ++i) {
             this.eventSource.remove(eventIds[i]);
         }
@@ -452,8 +452,8 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
         var d = new Date(range[0] + span/2);
         var bandInfos = [
             Timeline.createBandInfo({
-                width: "80%", 
-                intervalUnit: intervalUnits[0], 
+                width: "80%",
+                intervalUnit: intervalUnits[0],
                 intervalPixels: 200,
                 eventSource: this.eventSource,
                 date: d,
@@ -479,8 +479,8 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
                 ]
             }),
             Timeline.createBandInfo({
-                width: "20%", 
-                intervalUnit: intervalUnits[1], 
+                width: "20%",
+                intervalUnit: intervalUnits[1],
                 intervalPixels: 200,
                 eventSource: this.eventSource,
                 date: d,
@@ -498,8 +498,8 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
             })
         ];
         this.timeline = Timeline.create(
-            this.timelineContainer.el.dom, 
-            bandInfos, 
+            this.timelineContainer.el.dom,
+            bandInfos,
             Timeline.HORIZONTAL
         );
         // since the bands are linked we need to listen to one band only
@@ -507,7 +507,7 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
         this.timeline.getBand(0).addOnScrollListener(
             gxp.util.throttle(this.setPlaybackCenter.createDelegate(this), this.scrollInterval)
         );
-        
+
     },
 
     /** private: method[setPlaybackCenter]
@@ -526,7 +526,7 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
             this.showAnnotations();
         }
     },
-    
+
     /** private: method[bindViewer]
      *  :arg viewer: ``gxp.Viewer``
      *
@@ -541,7 +541,7 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
             this.layerLookup = {};
         }
     },
-    
+
     /** private: method[unbindViewer]
      *
      *  Unbind this timeline from the current viewer.
@@ -603,10 +603,10 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
             url = 'http://www.youtube.com/embed/' + v;
             var fid = record.getFeature().fid;
             var id = 'player_' + fid;
-            return header + '<br/>' + '<iframe id="' + id + 
-                '" type="text/html" width="' + width + '" height="' + 
-                height + '" ' + 'src="' + url + '?enablejsapi=1&origin=' + 
-                window.location.origin + '" frameborder="0"></iframe>' + 
+            return header + '<br/>' + '<iframe id="' + id +
+                '" type="text/html" width="' + width + '" height="' +
+                height + '" ' + 'src="' + url + '?enablejsapi=1&origin=' +
+                window.location.origin + '" frameborder="0"></iframe>' +
                 '<br/>' + footer;
         } else {
             return content;
@@ -634,7 +634,7 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
             },
             'show': function(cmp) {
                 if (youtubeContent === true) {
-                    if (this.youtubePlayers[fid]._ready && 
+                    if (this.youtubePlayers[fid]._ready &&
                         this.playbackTool.playbackToolbar.playing) {
                             this.youtubePlayers[fid].playVideo();
                     }
@@ -654,14 +654,14 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
                             events: {
                                 'onReady': function(evt) {
                                     evt.target._ready = true;
-                                    if (me.playbackTool.playbackToolbar.playing || 
+                                    if (me.playbackTool.playbackToolbar.playing ||
                                         me.playbackTool.playbackToolbar._weStopped) {
                                             evt.target.playVideo();
                                     }
                                 },
                                 'onStateChange': function(evt) {
                                     if (evt.data === YT.PlayerState.PLAYING) {
-                                        if (!me.playbackTool.playbackToolbar._weStopped && 
+                                        if (!me.playbackTool.playbackToolbar._weStopped &&
                                             me.playbackTool.playbackToolbar.playing) {
                                                 me.playbackTool.playbackToolbar._weStopped = true;
                                                 me.playbackTool.playbackToolbar.control.stop();
@@ -783,7 +783,7 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
 
     /** private: method[setCenterDate]
      *  :arg time: ``Date``
-     *      
+     *
      *  Set the center datetime on the bands of this timeline.
      */
     setCenterDate: function(time) {
@@ -803,7 +803,7 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
      *  :arg features: ``Array``
      *
      *  Add some features to the timeline.
-     */    
+     */
     addFeatures: function(key, features) {
         var hasFeature = function(fid) {
             var iterator = this.eventSource.getAllEventIterator();
