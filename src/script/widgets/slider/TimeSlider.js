@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2008-2012 The Open Planning Project
- * 
+ *
  * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
@@ -8,7 +8,7 @@
  * @requires OpenLayers/Dimension/Agent.js
  * @requires OpenLayers/Dimension/Model.js
  */
- 
+
 /** api: (define)
  *  module = gxp.slider
  *  class = TimeSlider
@@ -20,13 +20,13 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
     ref : 'slider',
     cls : 'gx_timeslider',
     indexMap : null,
-    width : 200,
+    width : 110,
     animate : false,
     timeFormat : "l, F d, Y g:i:s A",
     timeManager : null,
     playbackMode : 'track',
     autoPlay : false,
-    aggressive: false,
+    aggressive: true,
     changeBuffer: 10,
     map: null,
     initComponent : function() {
@@ -34,7 +34,7 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
             this.timeManager = new OpenLayers.Control.DimensionManager();
             this.map.addControl(this.timeManager);
         }
-                
+
         if(!this.model){
             this.model = this.timeManager.model;
         }
@@ -48,9 +48,9 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
                     this.timeManager.timeUnits = this.model.timeUnits;
                     this.timeManager.timeStep = this.model.timeStep;
                 }
-                if(this.model.values && this.model.resolution){
+                /* if(this.model.values && this.model.resolution){
                     //this.manageConflict();
-                }
+                } */
             }
             if(this.playbackMode && this.playbackMode != 'track') {
                 if(this.timeManager.timeUnits) {
@@ -58,7 +58,7 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
                 }
             }
         }
-        
+
         var sliderInfo = this.buildSliderValues();
         if(sliderInfo) {
             if(!this.timeManager.snapToList && !this.timeManager.timeUnits){
@@ -105,13 +105,13 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
             Ext.applyIf(this.initialConfig,initialSettings);
             Ext.apply(this,this.initialConfig);
         }
-        
+
         this.timeManager.events.on({
             'rangemodified': this.onRangeModified,
             'tick': this.onTimeTick,
             scope: this
         });
-        
+
         this.plugins = (this.plugins || []).concat(
             [new Ext.slider.Tip({cls: 'gxp-timeslider-tip', getText:this.getThumbText})]);
 
@@ -173,7 +173,7 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
     /** api: method[setPlaybackMode]
      * :arg mode: {String} one of 'track',
      * 'cumulative', or 'ranged'
-     *  
+     *
      *  Set the playback mode of the control.
      */
     setPlaybackMode: function(mode){
@@ -181,20 +181,20 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
         var sliderInfo = this.buildSliderValues();
         this.reconfigureSlider(sliderInfo);
         if (this.playbackMode != 'track') {
-            if(this.timeManager.rangeInterval){ 
-                this.timeManager.incrementTimeValue(this.timeManager.rangeInterval); 
+            if(this.timeManager.rangeInterval){
+                this.timeManager.incrementTimeValue(this.timeManager.rangeInterval);
                 this.setValue(0,this.timeManager.currentValue);
             }
         }
         this.setThumbStyles();
     },
-    
+
     setTimeFormat : function(format){
         if(format){
             this.timeFormat = format;
         }
     },
-    
+
     onRangeModified : function(evt) {
         var ctl = this.timeManager;
         if(!ctl.agents || !ctl.agents.length) {
@@ -228,7 +228,7 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
             }
         }
     },
-    
+
     onTimeTick : function(evt) {
         var currentValue = evt.currentValue;
         if (currentValue) {
@@ -244,12 +244,12 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
             toolbar.fireEvent('timechange', toolbar, currentValue);
         }
     },
-    
+
     updateTimeDisplay: function(){
         this.sliderTip.onSlide(this,null,this.thumbs[0]);
         this.sliderTip.el.alignTo(this.el, 'b-t?', this.offsets);
     },
-    
+
     buildSliderValues : function() {
         var mngr = this.timeManager;
         if(!mngr.step && !mngr.snapToList){
@@ -257,7 +257,7 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
             return false;
         }
         else{
-            var indexMap = ['primary'], 
+            var indexMap = ['primary'],
                 values = [mngr.currentValue],
                 min = mngr.animationRange[0],
                 max = mngr.animationRange[1],
@@ -328,7 +328,7 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
             tailThumb.constrain = false;
             headThumb.constrain = false;
         }
-    },    
+    },
 
     getThumbText: function(thumb) {
         if(thumb.slider.indexMap[thumb.index] != 'tail') {
@@ -351,7 +351,7 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
         switch (slider.indexMap[thumb.index]) {
             case 'primary':
                 //if we have a tail slider, then the range interval should be updated first
-                var tailIndex = slider.indexMap.indexOf('tail'); 
+                var tailIndex = slider.indexMap.indexOf('tail');
                 if (tailIndex>-1){
                     slider.onSliderChangeComplete(slider,slider.thumbs[tailIndex].value,slider.thumbs[tailIndex],true);
                 }
