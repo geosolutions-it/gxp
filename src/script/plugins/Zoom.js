@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
- * 
+ *
  * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
@@ -28,10 +28,10 @@ Ext.namespace("gxp.plugins");
  *    Provides actions for box zooming, zooming in and zooming out.
  */
 gxp.plugins.Zoom = Ext.extend(gxp.plugins.Tool, {
-    
+
     /** api: ptype = gxp_zoom */
     ptype: "gxp_zoom",
-    
+
     /** api: config[zoomMenuText]
      *  ``String``
      *  Text for zoom box menu item (i18n).
@@ -67,11 +67,11 @@ gxp.plugins.Zoom = Ext.extend(gxp.plugins.Tool, {
      *  Text for zoom out action tooltip (i18n).
      */
     zoomOutTooltip: "Zoom out",
-    
+
     /** api: config[toggleGroup]
      *  ``String`` Toggle group for this plugin's Zoom action.
      */
-    
+
     /** api: config[showZoomBoxAction]
      * {Boolean} If true, the tool will have a Zoom Box button as first action.
      * The zoom box will be provided by an OpenLayers.Control.ZoomBox, and
@@ -94,8 +94,11 @@ gxp.plugins.Zoom = Ext.extend(gxp.plugins.Tool, {
             menuText: this.zoomInMenuText,
             iconCls: "gxp-icon-zoom-in",
             tooltip: this.zoomInTooltip,
+            toggleGroup: this.toggleGroup,
+            enableToggle: true,
+            allowDepress: true,
             handler: function() {
-                this.target.mapPanel.map.zoomIn();    
+                this.target.mapPanel.map.zoomIn();
             },
             scope: this
         }, {
@@ -115,13 +118,13 @@ gxp.plugins.Zoom = Ext.extend(gxp.plugins.Tool, {
                 control: new OpenLayers.Control.ZoomBox(this.controlOptions),
                 map: this.target.mapPanel.map,
                 enableToggle: true,
-                allowDepress: false,
+                allowDepress: true,
                 toggleGroup: this.toggleGroup
             }));
         }
         return gxp.plugins.Zoom.superclass.addActions.apply(this, [actions]);
     }
-        
+
 });
 
 Ext.preg(gxp.plugins.Zoom.prototype.ptype, gxp.plugins.Zoom);

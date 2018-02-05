@@ -662,7 +662,7 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
         );
         legend.update();
         // mark the style as modified
-        this.selectedStyle.store.afterEdit(this.selectedStyle);
+        this.stylesStore.afterEdit(this.selectedStyle);
         this.updateRuleRemoveButton();
     },
 
@@ -686,7 +686,7 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
         );
         legend.update();
         // mark the style as modified
-        this.selectedStyle.store.afterEdit(this.selectedStyle);
+        this.stylesStore.afterEdit(this.selectedStyle);
         this.updateRuleRemoveButton();
     },
 
@@ -832,7 +832,7 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
         var legend = this.getComponent("rulesfieldset").items.get(0);
         this.selectedRule = rule;
         // mark the style as modified
-        this.selectedStyle.store.afterEdit(this.selectedStyle);
+        this.stylesStore.afterEdit(this.selectedStyle);
     },
 
     /** private: method[setRulesFieldSetVisible]

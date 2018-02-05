@@ -64,7 +64,7 @@ gxp.plugins.WMSRasterStylesDialog = {
             );
             legend.update();
             // mark the style as modified
-            this.selectedStyle.store.afterEdit(this.selectedStyle);
+            this.stylesStore.afterEdit(this.selectedStyle);
         }
         this.updateRuleRemoveButton();
     },
