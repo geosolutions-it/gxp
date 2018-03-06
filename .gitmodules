@@ -18,4 +18,4 @@
 	url = https://github.com/GeoNode/openlayers.git
 [submodule "externals/TimeManager"]
     path = externals/TimeManager
-	url = git://github.com/mpriour/TimeManager_OpenLayers-Addin.git
+	url = https://github.com/GeoNode/TimeManager_OpenLayers-Addin.git
