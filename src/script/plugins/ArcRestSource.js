@@ -1,4 +1,3 @@
-/** FILE: plugins/ArcRestSource.js **/
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
  *
@@ -78,8 +77,8 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
 
         var processResult = function (response) {
             var json = Ext.decode(response.responseText);
-
-            var layerProjection = source.getArcProjection(json.spatialReference.wkid);
+            wkid = (json.spatialReference ? json.spatialReference.wkid : "3847");
+            var layerProjection = source.getArcProjection();
 
             var layers = [];
             if (layerProjection != null) {
@@ -247,7 +246,15 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
             record.set("queryable", config.queryable || true);
             record.set("source", config.source);
             record.set("name", config.name);
-            record.set("layerid", config.layerid);
+            var layerid = config.layerid;
+            if(!layerid){
+                if(/^([0-9]+-)/.test(config.name)) {
+                    layerid = "show:" + config.name.match(/^([0-9]+)-/)[1];
+                }
+            } else {
+                layerid = "show:0";
+            }
+            record.set("layerid", layerid);
             record.set("properties", "gxp_wmslayerpanel");
             if ("group" in config) {
                 record.set("group", config.group);
@@ -297,10 +304,18 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
         var bbox = config.bbox || this.target.map.maxExtent || OpenLayers.Projection.defaults[srs].maxExtent;
         config.bbox = {};
         config.bbox[srs] = {bbox: bbox};
+        var layerid = config.layerid;
+        if(!layerid){
+            if(/^([0-9]+-)/.test(config.name)) {
+                layerid = "show:" + config.name.match(/^([0-9]+)-/)[1];
+            }
+        } else {
+            layerid = "show:0";
+        }
 
         var  record = new GeoExt.data.LayerRecord(config);
         record.set("name", config.name);
-        record.set("layerid", config.layerid || "show:0");
+        record.set("layerid", layerid);
         record.set("format", config.format || "png");
         record.set("tiled", "tiled" in config ? config.tiled : true);
 
