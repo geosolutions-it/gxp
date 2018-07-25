@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
- * 
+ *
  * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
@@ -27,7 +27,7 @@ Ext.namespace("gxp.plugins");
  *    Plugin for using WMS-C layers with :class:`gxp.Viewer` instances. The
  *    plugin issues a GetCapabilities request to create a store of the WMS's
  *    layers. If tilesets are available, it will use them.
- */   
+ */
 /** api: example
  *  Configuration in the  :class:`gxp.Viewer`:
  *
@@ -53,10 +53,10 @@ Ext.namespace("gxp.plugins");
  *
  */
 gxp.plugins.WMSCSource = Ext.extend(gxp.plugins.WMSSource, {
-    
+
     /** api: ptype = gxp_wmscsource */
     ptype: "gxp_wmscsource",
-    
+
     /** api: config[version]
      *  ``String``
      *  Only WMS 1.1.1 is supported at the moment.
@@ -78,8 +78,8 @@ gxp.plugins.WMSCSource = Ext.extend(gxp.plugins.WMSSource, {
     constructor: function(config) {
         config.baseParams = {
             SERVICE: "WMS",
-            REQUEST: "GetCapabilities",
-            TILED: true
+            REQUEST: "GetCapabilities"
+            // TILED: true
         };
         if (!config.format) {
             this.format = new OpenLayers.Format.WMSCapabilities({
@@ -88,9 +88,9 @@ gxp.plugins.WMSCSource = Ext.extend(gxp.plugins.WMSSource, {
                 allowFallback: true
             });
         }
-        gxp.plugins.WMSCSource.superclass.constructor.apply(this, arguments); 
+        gxp.plugins.WMSCSource.superclass.constructor.apply(this, arguments);
     },
-    
+
     /** private: method[createLayerRecord] */
     createLayerRecord: function(config) {
         var record = gxp.plugins.WMSCSource.superclass.createLayerRecord.apply(this, arguments);
@@ -101,7 +101,7 @@ gxp.plugins.WMSCSource = Ext.extend(gxp.plugins.WMSSource, {
         if (this.store.reader.raw) {
             caps = this.store.reader.raw.capability;
         }
-        var tileSets = (caps && caps.vendorSpecific) ? 
+        var tileSets = (caps && caps.vendorSpecific) ?
             caps.vendorSpecific.tileSets : (config.capability && config.capability.tileSets);
         var layer = record.get("layer");
         if (tileSets) {
@@ -198,7 +198,7 @@ gxp.plugins.WMSCSource = Ext.extend(gxp.plugins.WMSSource, {
             cached: !!layer.params.TILED
         });
     }
-    
+
 });
 
 Ext.preg(gxp.plugins.WMSCSource.prototype.ptype, gxp.plugins.WMSCSource);
